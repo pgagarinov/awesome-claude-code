@@ -1,30 +1,24 @@
 # Part 8: Context Management
 
-## Checking Session Status
+## Checking Context Usage
 
-Use `/status` to see your current session information:
+Use `/context` to see how much of your context window is consumed:
 
 ```
-> /status
-
-## Git Status
-- **Branch:** main
-- **Working tree:** clean (no uncommitted changes)
-
-## Recent Commits
-| Commit | Message |
-|--------|---------|
-| f1e4063 | Add /status example for checking context usage |
-| d20567e | Fix nested code block formatting |
-| 6082c87 | Use native install script instead of npm |
-
-## Session Info
-- **Working directory:** /Users/you/projects/my-app
-- **Platform:** macOS (Darwin 24.4.0)
-- **Model:** Claude Opus 4.5
+> /context
 ```
 
-**Tip:** If you notice Claude's responses degrading or sessions feeling slow, use `/compact` to summarise context, or start a fresh session for unrelated tasks.
+This shows:
+- **Token consumption** by category (prompts, responses, files, tools)
+- **Remaining context window** percentage
+- **MCP tool usage** breakdown
+
+**Tips:**
+- Run `/context` mid-session to understand your token usage
+- A fresh session in a monorepo can use ~20k tokens (10%) as baseline
+- Use `/compact` when context gets high to summarise the conversation
+- Use `/clear` when starting something new to free up tokens
+- Disable unused MCP servers with `/mcp` to free context space
 
 ## Understanding Context
 
