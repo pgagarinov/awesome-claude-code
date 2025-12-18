@@ -43,59 +43,98 @@ claude mcp remove <name>
 claude mcp get <name>
 ```
 
-## Example: Playwright MCP Server
+## Playwright MCP Server
 
 The [Playwright MCP server](https://github.com/microsoft/playwright-mcp) lets Claude Code control a browser - navigate pages, click buttons, fill forms, take screenshots, and more.
 
-### 1. Add the MCP Server
+### Setup
 
 ```bash
+# Add the Playwright MCP server
 claude mcp add playwright --transport stdio -- npx @playwright/mcp@latest
-```
 
-### 2. Verify Connection
-
-```bash
+# Verify connection
 claude mcp list
-
-# Output:
-# playwright: npx @playwright/mcp@latest - ✓ Connected
+# Output: playwright: npx @playwright/mcp@latest - ✓ Connected
 ```
 
-### 3. Use in Claude Code
-
-Once connected, you can control the browser directly:
+### Example 1: Navigate and Analyse a Page
 
 ```
-> Open https://example.com and take a screenshot
-
-> Go to https://news.ycombinator.com and list the top 5 headlines
-
-> Navigate to our staging site, fill in the login form with test credentials,
-  click submit, and tell me if the dashboard loads correctly
-
-> Open localhost:3000, click the "Sign Up" button, and screenshot what you see
+> Open https://example.com and tell me what's on the page
 ```
 
-### Available Playwright Tools
+Claude navigates to the URL and returns an accessibility snapshot showing all elements:
+
+```yaml
+- heading "Example Domain" [level=1]
+- paragraph: This domain is for use in illustrative examples...
+- link "More information..." [cursor=pointer]
+```
+
+### Example 2: Click Links and Navigate
+
+```
+> Click the "More information" link
+```
+
+Claude clicks the element and reports the new page state. It tracks navigation automatically.
+
+### Example 3: Search and Fill Forms
+
+```
+> Go to duckduckgo.com, search for "Claude Code tutorial", and tell me the top results
+```
+
+Claude will:
+1. Navigate to the search engine
+2. Find the search input field
+3. Type the query and submit
+4. Return the search results
+
+### Example 4: Take Screenshots
+
+```
+> Take a screenshot of the current page
+```
+
+Screenshots are saved to `.playwright-mcp/` directory and can be analysed by Claude.
+
+### Example 5: Test a Login Flow
+
+```
+> Navigate to localhost:3000/login, enter "testuser" as username and "password123"
+  as password, click the login button, and screenshot the result
+```
+
+### Example 6: Scrape Data from a Website
+
+```
+> Go to https://news.ycombinator.com and list the top 10 headlines with their URLs
+```
+
+Claude reads the page structure and extracts the requested data.
+
+### Available Tools
 
 | Tool | Description |
 |------|-------------|
 | `browser_navigate` | Navigate to a URL |
-| `browser_click` | Click an element |
-| `browser_type` | Type text into an input |
-| `browser_screenshot` | Capture a screenshot |
+| `browser_click` | Click an element on the page |
+| `browser_type` | Type text into an input field |
+| `browser_take_screenshot` | Capture a screenshot |
 | `browser_snapshot` | Get accessibility tree of the page |
-| `browser_select_option` | Select from dropdowns |
-| `browser_press_key` | Press keyboard keys |
-| `browser_tab_list` | List open tabs |
-| `browser_tab_new` | Open new tab |
-| `browser_console_messages` | Get console output |
+| `browser_select_option` | Select from dropdown menus |
+| `browser_press_key` | Press keyboard keys (Enter, Tab, etc.) |
+| `browser_tabs` | List, create, close, or select tabs |
+| `browser_console_messages` | Get browser console output |
+| `browser_navigate_back` | Go back to previous page |
+| `browser_close` | Close the browser |
 
 ### Configuration Options
 
 ```bash
-# Run in headless mode (no visible browser)
+# Run in headless mode (no visible browser window)
 claude mcp add playwright --transport stdio -- npx @playwright/mcp@latest --headless
 
 # Use a specific browser
@@ -107,7 +146,7 @@ docker run -i --rm --init mcr.microsoft.com/playwright/mcp
 
 ## Configuration File
 
-MCP servers are stored in `~/.claude.json` or project-local config:
+MCP servers are stored in `~/.claude.json` or project-local `.claude.json`:
 
 ```json
 {
@@ -120,24 +159,6 @@ MCP servers are stored in `~/.claude.json` or project-local config:
 }
 ```
 
-## Other MCP Servers
-
-```bash
-# PostgreSQL database
-claude mcp add postgres --transport stdio -- \
-  npx -y @modelcontextprotocol/server-postgres \
-  "postgresql://user:pass@localhost:5432/mydb"
-
-# GitHub
-claude mcp add github --transport stdio \
-  --env GITHUB_TOKEN=your_token -- \
-  npx -y @modelcontextprotocol/server-github
-
-# Filesystem (read-only access to directories)
-claude mcp add files --transport stdio -- \
-  npx -y @modelcontextprotocol/server-filesystem /path/to/dir
-```
-
 ## Checking MCP Status
 
 Use `/mcp` in a Claude Code session to see connected servers and available tools:
@@ -147,5 +168,11 @@ Use `/mcp` in a Claude Code session to see connected servers and available tools
 
 MCP Servers:
   playwright (connected)
-  └── Tools: browser_navigate, browser_click, browser_screenshot, ...
+  └── Tools: browser_navigate, browser_click, browser_take_screenshot, ...
 ```
+
+## Finding More MCP Servers
+
+Browse available MCP servers at:
+- [Anthropic MCP Servers](https://github.com/anthropics/mcp-servers)
+- [Awesome MCP Servers](https://github.com/punkpeye/awesome-mcp-servers)
