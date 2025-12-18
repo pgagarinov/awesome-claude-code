@@ -10,16 +10,17 @@ MCP (Model Context Protocol) extends Claude Code with additional tools by connec
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
 │  ┌─────────────┐         ┌─────────────┐         ┌─────────────┐               │
-│  │             │         │             │         │             │               │
-│  │ Claude Code │ ◄─────► │ MCP Server  │ ◄─────► │  Database   │               │
+│  │             │         │ Playwright  │         │             │               │
+│  │ Claude Code │ ◄─────► │ MCP Server  │ ◄─────► │   Browser   │               │
 │  │             │         │             │         │             │               │
 │  └─────────────┘         └─────────────┘         └─────────────┘               │
 │                                                                                 │
-│  MCP servers provide Claude Code with:                                          │
-│  • Database access (query, understand schema)                                   │
-│  • External API integration                                                     │
-│  • Custom tools specific to your workflow                                       │
-│  • Access to internal systems                                                   │
+│  Example: "Navigate to staging and screenshot the dashboard"                    │
+│                                                                                 │
+│  1. Claude Code sends request to Playwright MCP                                 │
+│  2. Playwright opens browser, navigates to URL                                  │
+│  3. Playwright takes screenshot, returns to Claude                              │
+│  4. Claude analyses the image and responds                                      │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
