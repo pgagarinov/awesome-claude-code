@@ -21,6 +21,9 @@ test = "pytest tests/ -v"
 test-unit = "pytest tests/ -v -m 'not integration'"
 test-integration = "pytest tests/ -v -m integration"
 
+[tool.pixi.dependencies]
+pip = ">=25.3,<26"
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
