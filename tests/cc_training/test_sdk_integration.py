@@ -96,6 +96,21 @@ async def test_code_generation():
     assert "return" in result
 
 
+def extract_text(content) -> str:
+    """Extract text from message content (handles TextBlock objects)."""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        texts = []
+        for item in content:
+            if hasattr(item, 'text'):
+                texts.append(item.text)
+            else:
+                texts.append(str(item))
+        return "".join(texts)
+    return str(content)
+
+
 @pytest.mark.asyncio
 async def test_json_output():
     """Test structured JSON output."""
@@ -107,7 +122,7 @@ async def test_json_output():
         prompt='Output exactly this JSON: {"status": "ok", "count": 42}'
     ):
         if hasattr(message, 'content'):
-            responses.append(str(message.content))
+            responses.append(extract_text(message.content))
 
     result = "".join(responses).strip()
 

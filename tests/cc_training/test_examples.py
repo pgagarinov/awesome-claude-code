@@ -9,8 +9,8 @@ EXAMPLES_DIR = Path(__file__).parent.parent.parent / "src" / "cc_training" / "ex
 
 
 def get_example_files():
-    """Get all example Python files."""
-    return sorted(EXAMPLES_DIR.glob("*.py"))
+    """Get all example Python files, excluding __init__.py."""
+    return sorted(f for f in EXAMPLES_DIR.glob("*.py") if f.name != "__init__.py")
 
 
 def test_examples_directory_exists():
@@ -29,9 +29,6 @@ def test_example_files_exist():
 @pytest.mark.parametrize("example_file", get_example_files())
 def test_example_has_docstring(example_file):
     """Test that each example file has a module docstring."""
-    if example_file.name == "__init__.py":
-        pytest.skip("Init file")
-
     content = example_file.read_text()
     tree = ast.parse(content)
 
@@ -43,9 +40,6 @@ def test_example_has_docstring(example_file):
 @pytest.mark.parametrize("example_file", get_example_files())
 def test_example_has_main_function(example_file):
     """Test that each example has a main() function."""
-    if example_file.name == "__init__.py":
-        pytest.skip("Init file")
-
     content = example_file.read_text()
     tree = ast.parse(content)
 
@@ -60,9 +54,6 @@ def test_example_has_main_function(example_file):
 @pytest.mark.parametrize("example_file", get_example_files())
 def test_example_has_main_guard(example_file):
     """Test that each example has if __name__ == '__main__' guard."""
-    if example_file.name == "__init__.py":
-        pytest.skip("Init file")
-
     content = example_file.read_text()
     assert 'if __name__ == "__main__"' in content or "if __name__ == '__main__'" in content, \
         f"{example_file.name} missing __main__ guard"
@@ -71,9 +62,6 @@ def test_example_has_main_guard(example_file):
 @pytest.mark.parametrize("example_file", get_example_files())
 def test_example_imports_sdk(example_file):
     """Test that each example imports from claude_agent_sdk."""
-    if example_file.name == "__init__.py":
-        pytest.skip("Init file")
-
     content = example_file.read_text()
     assert "claude_agent_sdk" in content, f"{example_file.name} doesn't import SDK"
 
@@ -91,9 +79,6 @@ def test_example_syntax_valid(example_file):
 @pytest.mark.parametrize("example_file", get_example_files())
 def test_example_uses_asyncio(example_file):
     """Test that examples use asyncio for async code."""
-    if example_file.name == "__init__.py":
-        pytest.skip("Init file")
-
     content = example_file.read_text()
     # Examples should use asyncio.run() to run async code
     assert "asyncio" in content, f"{example_file.name} doesn't import asyncio"
