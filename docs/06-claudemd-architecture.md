@@ -154,7 +154,7 @@ Use `.claude/` only for Claude Code configuration:
 
 ## Example CLAUDE.md
 
-```markdown
+````markdown
 # MyApp - E-commerce API
 
 ## Overview
@@ -228,4 +228,4 @@ if not item:
 ## Known Issues
 - Rate limiting not implemented yet (TODO)
 - Image upload limited to 5MB (server constraint)
-```
+````
