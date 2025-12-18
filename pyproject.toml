@@ -3,7 +3,7 @@ authors = [{name = "Peter Gagarinov", email = "4868370+pgagarinov@users.noreply.
 name = "cc-training"
 requires-python = ">= 3.11"
 version = "0.1.0"
-dependencies = ["claude-agent-sdk>=0.1.18,<0.2"]
+dependencies = ["claude-agent-sdk>=0.1.18,<0.2", "pytest>=9.0.2,<10", "pytest-asyncio>=1.3.0,<2"]
 
 [build-system]
 build-backend = "hatchling.build"
@@ -17,3 +17,14 @@ platforms = ["osx-arm64"]
 cc_training = { path = ".", editable = true }
 
 [tool.pixi.tasks]
+test = "pytest tests/ -v"
+test-unit = "pytest tests/ -v -m 'not integration'"
+test-integration = "pytest tests/ -v -m integration"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "integration: marks tests as integration tests (require Claude Code auth)",
+]
+testpaths = ["tests"]
