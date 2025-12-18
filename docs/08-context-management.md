@@ -1,28 +1,30 @@
 # Part 8: Context Management
 
-## Checking Context Usage
+## Checking Session Status
 
-Use `/status` to see how full your context window is:
+Use `/status` to see your current session information:
 
 ```
 > /status
 
-╭─ Session Status ────────────────────────────────────────────────────────────────╮
-│                                                                                 │
-│  Model:           claude-opus-4-20250514                                        │
-│  Session ID:      ses_abc123def456                                              │
-│  Duration:        12m 34s                                                       │
-│                                                                                 │
-│  Context Usage:                                                                 │
-│  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░  32% (64,000 / 200,000 tokens)       │
-│                                                                                 │
-│  Files in Context: 8                                                            │
-│  Messages:         24                                                           │
-│                                                                                 │
-╰─────────────────────────────────────────────────────────────────────────────────╯
+## Git Status
+- **Branch:** main
+- **Working tree:** clean (no uncommitted changes)
+
+## Recent Commits
+| Commit | Message |
+|--------|---------|
+| f1e4063 | Add /status example for checking context usage |
+| d20567e | Fix nested code block formatting |
+| 6082c87 | Use native install script instead of npm |
+
+## Session Info
+- **Working directory:** /Users/you/projects/my-app
+- **Platform:** macOS (Darwin 24.4.0)
+- **Model:** Claude Opus 4.5
 ```
 
-**Rule of thumb:** Use `/compact` when context exceeds 50%, or start a fresh session for unrelated tasks.
+**Tip:** If you notice Claude's responses degrading or sessions feeling slow, use `/compact` to summarise context, or start a fresh session for unrelated tasks.
 
 ## Understanding Context
 
