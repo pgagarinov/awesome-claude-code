@@ -12,11 +12,10 @@ Both approaches work. MCP servers provide **real-time interactive tools**, while
 
 | Aspect | MCP Server | Python Library |
 |--------|------------|----------------|
-| **Interaction model** | Conversational, real-time | Script-based, batch |
+| **State persistence** | Browser stays open between commands | Each script starts fresh (unless designed otherwise) |
 | **Setup** | One-time `claude mcp add` | Install library, write code |
 | **Usage** | Natural language commands | Claude writes/runs scripts |
-| **State management** | Server maintains browser state | Script manages own state |
-| **Iteration speed** | Immediate feedback loop | Write → Run → Review → Repeat |
+| **Overhead per action** | Minimal (send command to existing session) | Script startup, browser launch, teardown |
 | **Reproducibility** | Commands in chat history | Scripts saved to files |
 | **CI/CD integration** | Requires Claude session | Runs independently |
 
