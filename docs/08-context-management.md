@@ -40,32 +40,25 @@ The colored grid visualizes context usage:
 
 ## Understanding Context
 
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│                         THE CONTEXT WINDOW                                      │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                 │
-│  Everything in your session consumes context:                                   │
-│                                                                                 │
-│  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │                                                                         │   │
-│  │   Your Prompts                    ████░░░░░░░░░░░░░░░░  ~10%            │   │
-│  │   Claude's Responses              ████████░░░░░░░░░░░░  ~25%            │   │
-│  │   File Contents Read              ████████████████░░░░  ~50%            │   │
-│  │   Tool Outputs                    ███░░░░░░░░░░░░░░░░░  ~10%            │   │
-│  │   System Context                  ██░░░░░░░░░░░░░░░░░░  ~5%             │   │
-│  │                                                                         │   │
-│  └─────────────────────────────────────────────────────────────────────────┘   │
-│                                                                                 │
-│  Context Window: 200,000 tokens (Opus)                                          │
-│                                                                                 │
-│  When context fills up:                                                         │
-│  • Older messages may be summarised                                             │
-│  • Performance may degrade                                                      │
-│  • You should use /compact or start fresh                                       │
-│                                                                                 │
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
+Everything in your session consumes tokens from the context window:
+
+| Category | Typical Usage | Description |
+|----------|---------------|-------------|
+| **System prompt** | ~1-2% | Claude Code's base instructions |
+| **System tools** | ~7-8% | Built-in tools (Read, Edit, Bash, etc.) |
+| **MCP tools** | Varies | Configured MCP server tools |
+| **Messages** | 50-80% | Your prompts + Claude's responses + file contents |
+| **Autocompact buffer** | ~22% | Reserved for summarization when context fills |
+| **Free space** | Remainder | Available for new content |
+
+**Context window sizes:**
+- Opus 4.5: 200,000 tokens
+- Sonnet: 200,000 tokens (or 1M with extended context)
+
+**When context fills up:**
+- Claude automatically summarises older messages (autocompact)
+- You can manually run `/compact` to summarise sooner
+- Start a fresh session with `claude` for unrelated tasks
 
 ## Context Economy Strategies
 
