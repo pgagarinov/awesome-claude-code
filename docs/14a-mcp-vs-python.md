@@ -83,6 +83,35 @@ MCP servers aren't "for non-programmers." Even experienced developers benefit fr
 
 The choice is about **workflow**, not capability.
 
+## Not All MCP Servers Are Equal
+
+The MCP advantage varies significantly by tool type:
+
+**High advantage (browsers, GUIs):**
+- Complex visual state that persists between interactions
+- Slow startup (browser launch takes seconds)
+- Navigation sequences matter - you build up state
+- You need to "see" what's happening
+
+**Low advantage (databases, APIs, filesystems):**
+- State lives in the database/filesystem, not the connection
+- Connections are fast (milliseconds)
+- No visual state to maintain
+- Stateless request/response pattern
+
+For PostgreSQL, the choice is mostly preference:
+```
+# MCP approach
+> Show me all users created in the last week
+
+# Python approach
+> Write a query to show all users created in the last week
+```
+
+Both result in the same SQL being executed. The Python version gives you a saveable script; the MCP version is slightly more direct. Neither has significant overhead advantages.
+
+**Rule of thumb:** MCP shines when the tool has persistent, complex state (browsers, long-running processes). For stateless request/response tools (databases, REST APIs), Python libraries work equally well.
+
 ## Example: Same Task, Both Ways
 
 **Task:** Check if the login page shows an error for invalid credentials
