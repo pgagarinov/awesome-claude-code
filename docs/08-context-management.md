@@ -6,17 +6,35 @@ Use `/context` to see how much of your context window is consumed:
 
 ```
 > /context
+
+Context Usage
+⛁ ⛀ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛀   claude-opus-4-5-20251101 · 182k/200k tokens (91%)
+⛀ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁
+⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   ⛁ System prompt: 3.1k tokens (1.6%)
+⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   ⛁ System tools: 15.2k tokens (7.6%)
+⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   ⛁ MCP tools: 769 tokens (0.4%)
+⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   ⛁ Messages: 117.6k tokens (58.8%)
+⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁ ⛁   ⛶ Free space: 18k (9.1%)
+⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛶ ⛝ ⛝ ⛝   ⛝ Autocompact buffer: 45.0k tokens (22.5%)
+⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝
+⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝ ⛝
+
+MCP tools · /mcp
+└ mcp__applescript__applescript_execute (applescript): 769 tokens
+
+SlashCommand Tool · 0 commands
+└ Total: 877 tokens
 ```
 
-This shows:
-- **Token consumption** by category (prompts, responses, files, tools)
-- **Remaining context window** percentage
-- **MCP tool usage** breakdown
+The colored grid visualizes context usage:
+- **System prompt/tools** - Base overhead (~9%)
+- **MCP tools** - Configured MCP servers
+- **Messages** - Your conversation history
+- **Free space** - Available for new content
+- **Autocompact buffer** - Reserved for summarization when context fills up
 
 **Tips:**
-- Run `/context` mid-session to understand your token usage
-- A fresh session in a monorepo can use ~20k tokens (10%) as baseline
-- Use `/compact` when context gets high to summarise the conversation
+- Use `/compact` when free space gets low to summarise the conversation
 - Use `/clear` when starting something new to free up tokens
 - Disable unused MCP servers with `/mcp` to free context space
 
