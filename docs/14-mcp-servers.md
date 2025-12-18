@@ -42,52 +42,67 @@ claude mcp remove <name>
 claude mcp get <name>
 ```
 
-## Example: PostgreSQL MCP Server
+## Example: Playwright MCP Server
 
-### 1. Start a PostgreSQL Database
+The [Playwright MCP server](https://github.com/microsoft/playwright-mcp) lets Claude Code control a browser - navigate pages, click buttons, fill forms, take screenshots, and more.
 
-```bash
-# Start postgres in Docker
-docker run -d --name postgres_test \
-  -e POSTGRES_USER=testuser \
-  -e POSTGRES_PASSWORD=testpass \
-  -e POSTGRES_DB=testdb \
-  -p 5433:5432 \
-  postgres:16
-```
-
-### 2. Add the MCP Server
+### 1. Add the MCP Server
 
 ```bash
-claude mcp add postgres --transport stdio -- \
-  npx -y @modelcontextprotocol/server-postgres \
-  "postgresql://testuser:testpass@localhost:5433/testdb"
+claude mcp add playwright --transport stdio -- npx @playwright/mcp@latest
 ```
 
-### 3. Verify Connection
+### 2. Verify Connection
 
 ```bash
 claude mcp list
 
 # Output:
-# postgres: npx -y @modelcontextprotocol/server-postgres ... - ✓ Connected
+# playwright: npx @playwright/mcp@latest - ✓ Connected
 ```
 
-### 4. Use in Claude Code
+### 3. Use in Claude Code
 
-Once connected, you can query the database directly:
+Once connected, you can control the browser directly:
 
 ```
-> What tables are in the database?
+> Open https://example.com and take a screenshot
 
-> Show me the schema for the users table
+> Go to https://news.ycombinator.com and list the top 5 headlines
 
-> Find all orders with status 'pending'
+> Navigate to our staging site, fill in the login form with test credentials,
+  click submit, and tell me if the dashboard loads correctly
 
-> How many users signed up this month?
+> Open localhost:3000, click the "Sign Up" button, and screenshot what you see
 ```
 
-Claude Code will use the MCP server to execute queries and return results.
+### Available Playwright Tools
+
+| Tool | Description |
+|------|-------------|
+| `browser_navigate` | Navigate to a URL |
+| `browser_click` | Click an element |
+| `browser_type` | Type text into an input |
+| `browser_screenshot` | Capture a screenshot |
+| `browser_snapshot` | Get accessibility tree of the page |
+| `browser_select_option` | Select from dropdowns |
+| `browser_press_key` | Press keyboard keys |
+| `browser_tab_list` | List open tabs |
+| `browser_tab_new` | Open new tab |
+| `browser_console_messages` | Get console output |
+
+### Configuration Options
+
+```bash
+# Run in headless mode (no visible browser)
+claude mcp add playwright --transport stdio -- npx @playwright/mcp@latest --headless
+
+# Use a specific browser
+claude mcp add playwright --transport stdio -- npx @playwright/mcp@latest --browser firefox
+
+# Run in Docker
+docker run -i --rm --init mcr.microsoft.com/playwright/mcp
+```
 
 ## Configuration File
 
@@ -96,13 +111,9 @@ MCP servers are stored in `~/.claude.json` or project-local config:
 ```json
 {
   "mcpServers": {
-    "postgres": {
+    "playwright": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres",
-        "postgresql://user:pass@localhost:5432/mydb"
-      ]
+      "args": ["@playwright/mcp@latest"]
     }
   }
 }
@@ -111,6 +122,11 @@ MCP servers are stored in `~/.claude.json` or project-local config:
 ## Other MCP Servers
 
 ```bash
+# PostgreSQL database
+claude mcp add postgres --transport stdio -- \
+  npx -y @modelcontextprotocol/server-postgres \
+  "postgresql://user:pass@localhost:5432/mydb"
+
 # GitHub
 claude mcp add github --transport stdio \
   --env GITHUB_TOKEN=your_token -- \
@@ -119,11 +135,6 @@ claude mcp add github --transport stdio \
 # Filesystem (read-only access to directories)
 claude mcp add files --transport stdio -- \
   npx -y @modelcontextprotocol/server-filesystem /path/to/dir
-
-# Slack
-claude mcp add slack --transport stdio \
-  --env SLACK_TOKEN=your_token -- \
-  npx -y @anthropic-ai/mcp-server-slack
 ```
 
 ## Checking MCP Status
@@ -134,6 +145,6 @@ Use `/mcp` in a Claude Code session to see connected servers and available tools
 > /mcp
 
 MCP Servers:
-  postgres (connected)
-  └── Tools: query, list_tables, describe_table
+  playwright (connected)
+  └── Tools: browser_navigate, browser_click, browser_screenshot, ...
 ```
