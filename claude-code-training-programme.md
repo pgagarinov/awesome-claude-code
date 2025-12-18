@@ -94,10 +94,10 @@ When you run `claude`, you enter an interactive terminal session:
 │                                                                                │
 │  ┌───────────────────────────────────────────────────────────────────────────┐ │
 │  │ Type your message, or use:                                                │ │
-│  │   /help     - Show available commands                                     │ │
-│  │   /status   - Show session info                                           │ │
-│  │   Ctrl+C    - Cancel current operation                                    │ │
-│  │   Ctrl+D    - Exit Claude Code                                            │ │
+│  │   /help          - Show available commands                                │ │
+│  │   /status        - Show session info                                      │ │
+│  │   Ctrl+C (⌃C)    - Cancel current operation                               │ │
+│  │   Ctrl+D (⌃D)    - Exit Claude Code                                       │ │
 │  └───────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                │
 ╰────────────────────────────────────────────────────────────────────────────────╯
@@ -1996,9 +1996,10 @@ claude -p "list all API endpoints" | grep POST
 
 ### 4. Use Keyboard Shortcuts
 
-- `Ctrl+C` to interrupt long operations
-- `↑` to recall previous prompts
+- `Ctrl+C` / `⌃C` to interrupt long operations
+- `↑` / `↓` to recall previous prompts
 - `Tab` to autocomplete paths
+- `Ctrl+L` / `⌘K` to clear screen
 
 ### 5. Regular Context Maintenance
 
@@ -2029,11 +2030,11 @@ $ claude  # (not --continue)
 │  claude -p "prompt" (print)        /clear        - Clear history                │
 │  claude --compact                  /plan         - Enter plan mode              │
 │                                                                                 │
-│  KEYBOARD                          PROMPTING                                    │
-│  Ctrl+C    - Cancel                Be specific, not vague                       │
-│  Ctrl+D    - Exit                  Use /plan for complex tasks                  │
-│  ↑/↓       - History               Add constraints explicitly                   │
-│  Tab       - Autocomplete          Reference existing patterns                  │
+│  KEYBOARD (PC / Mac)               PROMPTING                                    │
+│  Ctrl+C / ⌃C   - Cancel            Be specific, not vague                       │
+│  Ctrl+D / ⌃D   - Exit              Use /plan for complex tasks                  │
+│  ↑/↓           - History           Add constraints explicitly                   │
+│  Tab           - Autocomplete      Reference existing patterns                  │
 │                                                                                 │
 │  CONTEXT TIPS                      FILES                                        │
 │  Fresh session = new task          Use CLAUDE.md for project context            │
