@@ -46,43 +46,6 @@ cd your-project
 claude
 ```
 
-## SDK Examples
-
-Runnable Python examples demonstrating the Claude Agent SDK:
-
-| Example | Description |
-|---------|-------------|
-| [01_basic_query.py](src/cc_training/examples/01_basic_query.py) | Simple query to Claude Code |
-| [02_with_options.py](src/cc_training/examples/02_with_options.py) | Configuring options and parameters |
-| [03_file_analysis.py](src/cc_training/examples/03_file_analysis.py) | Analyzing files in a project |
-| [04_batch_processing.py](src/cc_training/examples/04_batch_processing.py) | Processing multiple items |
-| [05_message_handling.py](src/cc_training/examples/05_message_handling.py) | Working with message streams |
-| [06_code_reviewer.py](src/cc_training/examples/06_code_reviewer.py) | Building a code review tool |
-
-### Running Examples
-
-```bash
-# Install dependencies
-pixi install
-
-# Run an example
-pixi run python src/cc_training/examples/01_basic_query.py
-
-# Run tests
-pixi run pytest
-```
-
-## Project Structure
-
-```
-cc-training/
-├── README.md                          # This file
-├── docs/                              # Training documentation (17 parts)
-├── src/cc_training/examples/          # SDK code examples
-├── tests/                             # Test suite
-└── pyproject.toml                     # Python project config
-```
-
 ## Official Resources
 
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code/overview)
