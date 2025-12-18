@@ -49,6 +49,8 @@ The [Playwright MCP server](https://github.com/microsoft/playwright-mcp) lets Cl
 
 ### Setup
 
+**Prerequisites:** A browser must be installed on your system. Playwright can use Chrome, Chromium, Firefox, or WebKit.
+
 ```bash
 # Add the Playwright MCP server
 claude mcp add playwright --transport stdio -- npx @playwright/mcp@latest
@@ -56,6 +58,17 @@ claude mcp add playwright --transport stdio -- npx @playwright/mcp@latest
 # Verify connection
 claude mcp list
 # Output: playwright: npx @playwright/mcp@latest - ✓ Connected
+```
+
+If the browser isn't found automatically, specify the path:
+
+```bash
+# Point to a specific browser executable
+claude mcp add playwright --transport stdio -- \
+  npx @playwright/mcp@latest --executable-path /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome
+
+# Or install Playwright's bundled browsers
+npx playwright install chromium
 ```
 
 ### Example 1: Navigate and Analyse a Page
@@ -143,6 +156,26 @@ claude mcp add playwright --transport stdio -- npx @playwright/mcp@latest --brow
 # Run in Docker
 docker run -i --rm --init mcr.microsoft.com/playwright/mcp
 ```
+
+### Alternative: Playwright Python Library
+
+You can achieve the same browser automation by asking Claude to write Python scripts using the Playwright library directly:
+
+```
+> Write a Python script using playwright to navigate to example.com,
+  click the "More information" link, and take a screenshot
+```
+
+**MCP vs Python library:**
+
+| Aspect | MCP Server | Python Library |
+|--------|------------|----------------|
+| Setup | One-time `claude mcp add` | `pip install playwright` |
+| Usage | Natural language commands | Claude writes/runs scripts |
+| Interactivity | Real-time browser control | Script-based automation |
+| Best for | Quick inspections, debugging | Complex automation, CI/CD |
+
+Both approaches work well - MCP is more conversational, while Python scripts are more reproducible and can be saved for reuse.
 
 ## Configuration File
 
