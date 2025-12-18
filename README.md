@@ -38,8 +38,8 @@ A comprehensive guide to mastering Claude Code - from first launch to advanced a
 ## Quick Start
 
 ```bash
-# Install Claude Code
-npm install -g @anthropic-ai/claude-code
+# Install Claude Code (macOS/Linux)
+curl -fsSL https://claude.ai/install.sh | bash
 
 # Start Claude Code in any project
 cd your-project

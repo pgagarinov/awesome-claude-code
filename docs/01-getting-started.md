@@ -3,8 +3,8 @@
 ## Installation
 
 ```bash
-# Install Claude Code globally
-npm install -g @anthropic-ai/claude-code
+# Install Claude Code (macOS/Linux)
+curl -fsSL https://claude.ai/install.sh | bash
 ```
 
 ## First Launch
