@@ -11,7 +11,7 @@ This training programme is designed to take developers from Claude Code beginner
 **Prerequisites:**
 - Basic command line familiarity
 - Git fundamentals
-- An Anthropic API key or Claude subscription (for API mode)
+- Claude Code installed and authenticated (run `claude` and follow login prompts)
 
 **Programme Structure:**
 - **Module 1-2:** Foundations (Day 1)
@@ -77,8 +77,8 @@ claude --compact
 ```
 
 ### Configuration Basics
+- **Authentication**: Claude Code handles login automatically via browser OAuth - no API keys needed
 - **Permission levels**: Understand what Claude Code can and cannot do by default
-- **API configuration**: Setting up your Anthropic API key
 - **Session management**: How context is maintained across sessions
 
 ### Practical Exercise
@@ -816,33 +816,32 @@ Analyse the screenshot and fix the component."
 
 ---
 
-## Module 9: Claude Code SDK - Local & Custom Usage
+## Module 9: Claude Code SDK - Programmatic Access
 
 ### Learning Objectives
 - Understand the Claude Code SDK architecture
-- Run Claude Code locally without per-token API costs
-- Build custom integrations and workflows
+- Use the SDK with your existing Claude Code authentication (no separate API key needed)
+- Build custom integrations and automated workflows
 - Create specialised agents for your needs
 
-### SDK vs CLI vs API
+### SDK vs CLI
 
-| Aspect | Claude Code CLI | Claude API | Claude Code SDK |
-|--------|-----------------|------------|-----------------|
-| Interface | Terminal | HTTP/REST | Programmatic |
-| Billing | Subscription or API | Per token | Depends on setup |
-| Customisation | Limited | Full | Full |
-| Local models | No | No | Possible* |
-| Best for | Interactive use | Custom apps | Automation, integration |
+| Aspect | Claude Code CLI | Claude Code SDK |
+|--------|-----------------|-----------------|
+| Interface | Interactive terminal | Programmatic (Node.js/Python) |
+| Authentication | Your existing Claude login | Uses same login - no API key needed |
+| Best for | Interactive development | Automation, scripts, CI/CD |
+| Customisation | Slash commands, CLAUDE.md | Full programmatic control, custom tools |
 
-*With compatible local model providers
+**Key Point**: The SDK leverages your existing Claude Code installation and authentication. If you can run `claude` in your terminal, the SDK will work without any additional setup or API keys.
 
 ### Claude Code SDK Overview
 
 The Claude Code SDK (also called Claude Agent SDK) allows you to:
-- Build autonomous agents programmatically
+- Automate Claude Code tasks from scripts
+- Build custom agents programmatically
 - Integrate Claude Code capabilities into your applications
-- Create custom tools and workflows
-- Run in CI/CD pipelines
+- Run in CI/CD pipelines (with appropriate authentication)
 
 ### Installation
 ```bash
@@ -856,12 +855,10 @@ pip install claude-code-sdk
 ```javascript
 import { ClaudeCode } from '@anthropic-ai/claude-code-sdk';
 
-const claude = new ClaudeCode({
-  // Uses existing Claude Code authentication
-  // No separate API key needed if logged in
-});
+// No API key needed - uses your existing Claude Code authentication
+const claude = new ClaudeCode();
 
-// Run a task
+// Run a task - same as typing in the terminal, but programmatic
 const result = await claude.run({
   prompt: "Explain the main function in src/index.ts",
   cwd: "/path/to/project"
@@ -984,24 +981,15 @@ jobs:
             });
 ```
 
-### Local Model Integration (Advanced)
+### Why Use the SDK?
 
-For organisations wanting to avoid per-token costs entirely:
+The SDK is ideal when you want to:
+- **Automate repetitive tasks**: Run the same analysis across many files
+- **Integrate into existing tools**: Add Claude Code to your build scripts, linters, or custom tools
+- **Create reusable workflows**: Build scripts your whole team can use
+- **CI/CD pipelines**: Automate code review, documentation generation, or security checks
 
-```javascript
-import { Agent } from '@anthropic-ai/claude-code-sdk';
-
-// Configure to use a local/self-hosted model
-const agent = new Agent({
-  provider: 'local',
-  modelEndpoint: 'http://localhost:8080/v1',
-  model: 'your-local-model',
-  // Falls back to Anthropic API if local unavailable
-  fallback: true
-});
-```
-
-**Note**: Local model support depends on the specific SDK version and model compatibility. Check documentation for supported configurations.
+All without managing API keys or per-token billing - it uses your existing Claude Code subscription.
 
 ### Practical Exercise
 1. Install the Claude Code SDK
