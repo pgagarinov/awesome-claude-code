@@ -34,7 +34,28 @@ Large files (500+ lines) consume significant context. Reading them entirely is o
   me just that function with 10 lines of context
 ```
 
-### 4. Use Subagents for Analysis
+### 4. Write a Script to Analyse
+
+Instead of reading a large file into context, ask Claude to write a script that processes it:
+
+```
+# BAD: Reading a 500-page PDF directly
+> Read reports/annual-report-2024.pdf and summarise it
+
+# GOOD: Write a script to extract what you need
+> Write a Python script that extracts all tables from
+  reports/annual-report-2024.pdf and saves them as CSVs
+
+> Write a script to count word frequency in docs/specification.pdf
+  and output the top 50 terms
+```
+
+This approach:
+- Keeps the large file out of context entirely
+- Produces reusable tooling
+- Works especially well for PDFs, spreadsheets, and log files
+
+### 5. Use Subagents for Analysis
 
 ```
 > Analyse src/legacy/monolith.py and create a summary of:
@@ -44,7 +65,7 @@ Large files (500+ lines) consume significant context. Reading them entirely is o
   Don't show me the full file, just the analysis.
 ```
 
-### 5. Chunked Refactoring
+### 6. Chunked Refactoring
 
 ```
 # Step 1: Understand structure
