@@ -157,25 +157,9 @@ claude mcp add playwright --transport stdio -- npx @playwright/mcp@latest --brow
 docker run -i --rm --init mcr.microsoft.com/playwright/mcp
 ```
 
-### Alternative: Playwright Python Library
+### Alternative: Python Libraries
 
-You can achieve the same browser automation by asking Claude to write Python scripts using the Playwright library directly:
-
-```
-> Write a Python script using playwright to navigate to example.com,
-  click the "More information" link, and take a screenshot
-```
-
-**MCP vs Python library:**
-
-| Aspect | MCP Server | Python Library |
-|--------|------------|----------------|
-| Setup | One-time `claude mcp add` | `pip install playwright` |
-| Usage | Natural language commands | Claude writes/runs scripts |
-| Interactivity | Real-time browser control | Script-based automation |
-| Best for | Quick inspections, debugging | Complex automation, CI/CD |
-
-Both approaches work well - MCP is more conversational, while Python scripts are more reproducible and can be saved for reuse.
+You can achieve similar browser automation by asking Claude to write Python scripts using Playwright directly. See [MCP Servers vs Python Libraries](14a-mcp-vs-python.md) for a detailed comparison of when to use each approach.
 
 ## Configuration File
 

@@ -29,6 +29,7 @@ A comprehensive guide to mastering Claude Code - from first launch to advanced a
 12. [Custom Slash Commands](docs/12-custom-commands.md)
 13. [Skills](docs/13-skills.md)
 14. [MCP Servers](docs/14-mcp-servers.md)
+    - [MCP vs Python Libraries](docs/14a-mcp-vs-python.md)
 15. [Claude Agent SDK (Python)](docs/15-agent-sdk.md)
 16. [GitHub Actions Integration](docs/16-github-actions.md)
 17. [Best Practices & Tips](docs/17-best-practices.md)
