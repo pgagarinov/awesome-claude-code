@@ -1,5 +1,29 @@
 # Part 8: Context Management
 
+## Checking Context Usage
+
+Use `/status` to see how full your context window is:
+
+```
+> /status
+
+╭─ Session Status ────────────────────────────────────────────────────────────────╮
+│                                                                                 │
+│  Model:           claude-opus-4-20250514                                        │
+│  Session ID:      ses_abc123def456                                              │
+│  Duration:        12m 34s                                                       │
+│                                                                                 │
+│  Context Usage:                                                                 │
+│  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░  32% (64,000 / 200,000 tokens)       │
+│                                                                                 │
+│  Files in Context: 8                                                            │
+│  Messages:         24                                                           │
+│                                                                                 │
+╰─────────────────────────────────────────────────────────────────────────────────╯
+```
+
+**Rule of thumb:** Use `/compact` when context exceeds 50%, or start a fresh session for unrelated tasks.
+
 ## Understanding Context
 
 ```
