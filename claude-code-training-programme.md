@@ -29,7 +29,7 @@ A comprehensive guide to mastering Claude Code - from first launch to advanced a
 12. [Custom Slash Commands](#part-12-custom-slash-commands)
 13. [Skills](#part-13-skills)
 14. [MCP Servers](#part-14-mcp-servers)
-15. [Claude Code SDK (Python)](#part-15-claude-code-sdk-python)
+15. [Claude Agent SDK (Python)](#part-15-claude-agent-sdk-python)
 16. [GitHub Actions Integration](#part-16-github-actions-integration)
 17. [Best Practices & Tips](#part-17-best-practices--tips)
 
@@ -519,6 +519,11 @@ For specific topics, refer to:
 ```
 project/
 ├── CLAUDE.md                    # High-level overview, routing
+├── .claude/
+│   ├── commands/                # Custom slash commands
+│   │   ├── review.md
+│   │   └── deploy.md
+│   └── settings.json            # Claude Code settings
 ├── docs/
 │   ├── api-design.md            # Detailed API documentation
 │   ├── database-schema.md       # Schema details, migrations
@@ -535,6 +540,70 @@ project/
 └── tests/
     └── CLAUDE.md                # Testing conventions
 ```
+
+## `.claude/` vs `docs/` - Where to Put Documentation
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│              WHERE TO STORE CLAUDE-RELATED DOCUMENTATION                        │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  .claude/                              docs/                                    │
+│  ──────────────────────────────────    ───────────────────────────────────────  │
+│                                                                                 │
+│  Claude Code-SPECIFIC files:           GENERAL project documentation:          │
+│  • Custom slash commands               • API design docs                        │
+│  • settings.json (Claude config)       • Architecture documentation             │
+│  • Hooks configuration                 • Database schema docs                   │
+│  • MCP server configs                  • Deployment guides                      │
+│                                        • User guides                            │
+│                                        • Changelog                              │
+│                                                                                 │
+│  NOT automatically loaded              Referenced FROM CLAUDE.md               │
+│  (except settings.json)                when needed                              │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Key Differences
+
+| Aspect | `.claude/` | `docs/` |
+|--------|------------|---------|
+| **Purpose** | Claude Code tool configuration | General project documentation |
+| **Auto-loaded** | Only `settings.json` | No (referenced from CLAUDE.md) |
+| **Git** | Usually in `.gitignore` (local settings) | Always committed |
+| **Shared with team** | Commands yes, settings maybe | Yes, always |
+| **Contains** | Commands, hooks, MCP configs | Human & AI-readable docs |
+
+### Best Practice
+
+Use `docs/` for documentation that Claude should read when referenced:
+
+```markdown
+# CLAUDE.md
+
+## Documentation
+When working on the API, first read `docs/api-design.md`.
+When working on the database, consult `docs/database-schema.md`.
+```
+
+Use `.claude/` only for Claude Code configuration:
+
+```
+.claude/
+├── commands/           # Slash commands (shared with team)
+│   ├── review.md
+│   └── test.md
+├── settings.json       # Local settings (often .gitignore'd)
+└── settings.local.json # Personal overrides (always .gitignore'd)
+```
+
+### Why Not Put Docs in `.claude/`?
+
+1. **Visibility**: `docs/` is a standard, discoverable location
+2. **Tooling**: Many tools expect docs in `docs/` (GitHub, MkDocs, etc.)
+3. **Separation**: Keep config (`.claude/`) separate from content (`docs/`)
+4. **Git**: `.claude/` often has local-only files; `docs/` is always shared
 
 ## Example CLAUDE.md
 
@@ -1342,11 +1411,11 @@ Once configured, MCP tools appear alongside built-in tools:
 
 ---
 
-# Part 15: Claude Code SDK (Python)
+# Part 15: Claude Agent SDK (Python)
 
 ## Overview
 
-The Claude Code SDK allows you to control Claude Code programmatically - perfect for automation, CI/CD integration, and building custom tools.
+The Claude Agent SDK allows you to control Claude Code programmatically - perfect for automation, CI/CD integration, and building custom tools.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -1355,7 +1424,7 @@ The Claude Code SDK allows you to control Claude Code programmatically - perfect
 │                                                                                 │
 │  Aspect              │ CLI                    │ SDK                             │
 │  ────────────────────┼────────────────────────┼──────────────────────────────── │
-│  Interface           │ Interactive terminal   │ Python code                     │
+│  Interface           │ Interactive terminal   │ Python code (async)             │
 │  Authentication      │ Browser OAuth          │ Uses existing CLI auth          │
 │  Best for            │ Interactive work       │ Automation, scripts             │
 │  Customisation       │ Slash commands         │ Full programmatic control       │
@@ -1370,24 +1439,61 @@ The Claude Code SDK allows you to control Claude Code programmatically - perfect
 ## Installation
 
 ```bash
-pip install claude-code-sdk
+# Using pip
+pip install claude-agent-sdk
+
+# Using pixi (recommended)
+pixi add --pypi claude-agent-sdk
 ```
+
+## SDK Components
+
+| Component | Use Case |
+|-----------|----------|
+| `query()` | One-shot queries, batch processing, CI/CD |
+| `ClaudeSDKClient` | Interactive sessions, conversations with follow-ups |
+| `ClaudeAgentOptions` | Configuration (cwd, model, permissions, etc.) |
 
 ## Basic Usage
 
+The SDK uses **async/await** - all queries are asynchronous.
+
+### Simple Query
+
 ```python
-from claude_code_sdk import ClaudeCode
+import asyncio
+from claude_agent_sdk import query, ClaudeAgentOptions
 
-# No API key needed - uses your existing Claude Code authentication
-claude = ClaudeCode()
+async def main():
+    # Simple one-shot query
+    async for message in query(prompt="What is 2 + 2?"):
+        if hasattr(message, 'content'):
+            print(message.content)
 
-# Run a simple task
-result = claude.run(
-    prompt="Explain the main function in src/main.py",
-    cwd="/path/to/project"
-)
+asyncio.run(main())
+```
 
-print(result.response)
+### Query with Options
+
+```python
+import asyncio
+from claude_agent_sdk import query, ClaudeAgentOptions
+
+async def explain_code():
+    options = ClaudeAgentOptions(
+        cwd="/path/to/project",           # Working directory
+        model="claude-sonnet-4-20250514", # Model to use
+        # permission_mode="bypassPermissions",  # For automation (use with caution)
+    )
+
+    async for message in query(
+        prompt="Explain the main function in src/main.py",
+        options=options
+    ):
+        if hasattr(message, 'content'):
+            print(message.content)
+
+asyncio.run(explain_code())
 ```
 
 ## Practical Examples
@@ -1395,56 +1501,71 @@ print(result.response)
 ### Batch Code Review
 
 ```python
-from claude_code_sdk import ClaudeCode
+import asyncio
 from pathlib import Path
+from claude_agent_sdk import query, ClaudeAgentOptions
 
-claude = ClaudeCode()
+async def review_file(py_file: Path, directory: str) -> tuple[str, str]:
+    """Review a single Python file."""
+    options = ClaudeAgentOptions(cwd=directory)
 
-def review_python_files(directory: str) -> dict:
+    response_parts = []
+    async for message in query(
+        prompt=f"""Review {py_file} for:
+        - Code quality issues
+        - Potential bugs
+        - Security vulnerabilities
+
+        Be concise. List issues with line numbers.""",
+        options=options
+    ):
+        if hasattr(message, 'content'):
+            response_parts.append(str(message.content))
+
+    return str(py_file), "".join(response_parts)
+
+
+async def review_python_files(directory: str) -> dict[str, str]:
     """Review all Python files in a directory."""
+    py_files = list(Path(directory).glob("**/*.py"))
+
+    # Process files sequentially (or use asyncio.gather for parallel)
     results = {}
-
-    for py_file in Path(directory).glob("**/*.py"):
+    for py_file in py_files:
         print(f"Reviewing {py_file}...")
-
-        result = claude.run(
-            prompt=f"""Review {py_file} for:
-            - Code quality issues
-            - Potential bugs
-            - Security vulnerabilities
-
-            Be concise. List issues with line numbers.""",
-            cwd=directory
-        )
-
-        results[str(py_file)] = result.response
+        file_path, review = await review_file(py_file, directory)
+        results[file_path] = review
 
     return results
 
 
-if __name__ == "__main__":
-    reviews = review_python_files("./src")
+async def main():
+    reviews = await review_python_files("./src")
 
     for file, review in reviews.items():
         print(f"\n{'='*60}")
         print(f"FILE: {file}")
         print('='*60)
         print(review)
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Automated Documentation Generator
 
 ```python
-from claude_code_sdk import ClaudeCode
+import asyncio
 from pathlib import Path
+from claude_agent_sdk import query, ClaudeAgentOptions
 
-claude = ClaudeCode()
-
-def generate_module_docs(module_path: str) -> str:
+async def generate_module_docs(module_path: str) -> str:
     """Generate documentation for a Python module."""
+    options = ClaudeAgentOptions(cwd=".")
 
-    result = claude.run(
-        prompt=f"""Analyse {module_path} and generate documentation in Markdown format:
+    response_parts = []
+    async for message in query(
+        prompt=f"""Analyse {module_path} and generate documentation in Markdown:
 
         1. Module overview (2-3 sentences)
         2. List of classes with brief descriptions
@@ -1452,15 +1573,16 @@ def generate_module_docs(module_path: str) -> str:
         4. Usage examples
 
         Output only the Markdown, no explanations.""",
-        cwd="."
-    )
+        options=options
+    ):
+        if hasattr(message, 'content'):
+            response_parts.append(str(message.content))
 
-    return result.response
+    return "".join(response_parts)
 
 
-def document_project(src_dir: str, output_dir: str):
+async def document_project(src_dir: str, output_dir: str):
     """Generate documentation for all modules in a project."""
-
     Path(output_dir).mkdir(exist_ok=True)
 
     for py_file in Path(src_dir).glob("**/*.py"):
@@ -1469,7 +1591,7 @@ def document_project(src_dir: str, output_dir: str):
 
         print(f"Documenting {py_file}...")
 
-        docs = generate_module_docs(str(py_file))
+        docs = await generate_module_docs(str(py_file))
 
         # Create output path
         relative = py_file.relative_to(src_dir)
@@ -1481,21 +1603,22 @@ def document_project(src_dir: str, output_dir: str):
 
 
 if __name__ == "__main__":
-    document_project("./src", "./docs/api")
+    asyncio.run(document_project("./src", "./docs/api"))
 ```
 
 ### Test Generator
 
 ```python
-from claude_code_sdk import ClaudeCode
+import asyncio
 from pathlib import Path
+from claude_agent_sdk import query, ClaudeAgentOptions
 
-claude = ClaudeCode()
-
-def generate_tests(source_file: str) -> str:
+async def generate_tests(source_file: str) -> str:
     """Generate pytest tests for a source file."""
+    options = ClaudeAgentOptions(cwd=".")
 
-    result = claude.run(
+    response_parts = []
+    async for message in query(
         prompt=f"""Generate comprehensive pytest tests for {source_file}.
 
         Requirements:
@@ -1506,13 +1629,15 @@ def generate_tests(source_file: str) -> str:
         - Add docstrings explaining each test
 
         Output only the Python code, no explanations.""",
-        cwd="."
-    )
+        options=options
+    ):
+        if hasattr(message, 'content'):
+            response_parts.append(str(message.content))
 
-    return result.response
+    return "".join(response_parts)
 
 
-def generate_missing_tests(src_dir: str, test_dir: str):
+async def generate_missing_tests(src_dir: str, test_dir: str):
     """Generate tests for source files that don't have them."""
 
     for src_file in Path(src_dir).glob("**/*.py"):
@@ -1529,7 +1654,7 @@ def generate_missing_tests(src_dir: str, test_dir: str):
 
         print(f"Generating tests for {src_file}...")
 
-        tests = generate_tests(str(src_file))
+        tests = await generate_tests(str(src_file))
 
         test_file.parent.mkdir(parents=True, exist_ok=True)
         test_file.write_text(tests)
@@ -1537,18 +1662,17 @@ def generate_missing_tests(src_dir: str, test_dir: str):
 
 
 if __name__ == "__main__":
-    generate_missing_tests("./src", "./tests")
+    asyncio.run(generate_missing_tests("./src", "./tests"))
 ```
 
 ### Custom Code Analysis Tool
 
 ```python
-from claude_code_sdk import ClaudeCode
+import asyncio
+import json
 from dataclasses import dataclass
 from pathlib import Path
-import json
-
-claude = ClaudeCode()
+from claude_agent_sdk import query, ClaudeAgentOptions
 
 @dataclass
 class SecurityIssue:
@@ -1559,10 +1683,12 @@ class SecurityIssue:
     recommendation: str
 
 
-def security_scan(directory: str) -> list[SecurityIssue]:
+async def security_scan(directory: str) -> list[SecurityIssue]:
     """Scan a directory for security issues."""
+    options = ClaudeAgentOptions(cwd=directory)
 
-    result = claude.run(
+    response_parts = []
+    async for message in query(
         prompt=f"""Perform a security audit of the Python code in {directory}.
 
         Look for:
@@ -1583,11 +1709,14 @@ def security_scan(directory: str) -> list[SecurityIssue]:
         }}]
 
         Output ONLY the JSON, no other text.""",
-        cwd=directory
-    )
+        options=options
+    ):
+        if hasattr(message, 'content'):
+            response_parts.append(str(message.content))
 
     # Parse the JSON response
-    issues_data = json.loads(result.response)
+    response_text = "".join(response_parts)
+    issues_data = json.loads(response_text)
 
     return [SecurityIssue(**issue) for issue in issues_data]
 
@@ -1618,22 +1747,25 @@ def print_security_report(issues: list[SecurityIssue]):
     print("="*70)
 
 
-if __name__ == "__main__":
-    issues = security_scan("./src")
+async def main():
+    issues = await security_scan("./src")
     print_security_report(issues)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Integration with Pre-commit Hook
 
 ```python
 #!/usr/bin/env python3
-"""Pre-commit hook using Claude Code SDK."""
+"""Pre-commit hook using Claude Agent SDK."""
 
-from claude_code_sdk import ClaudeCode
+import asyncio
 import subprocess
 import sys
-
-claude = ClaudeCode()
+from claude_agent_sdk import query, ClaudeAgentOptions
 
 def get_staged_files() -> list[str]:
     """Get list of staged Python files."""
@@ -1645,14 +1777,17 @@ def get_staged_files() -> list[str]:
     return [f for f in result.stdout.strip().split("\n") if f.endswith(".py")]
 
 
-def review_changes() -> tuple[bool, str]:
+async def review_changes() -> tuple[bool, str]:
     """Review staged changes for issues."""
 
     files = get_staged_files()
     if not files:
         return True, "No Python files to review"
 
-    result = claude.run(
+    options = ClaudeAgentOptions(cwd=".")
+
+    response_parts = []
+    async for message in query(
         prompt=f"""Review the staged changes (git diff --cached) for critical issues only:
 
         Files changed: {', '.join(files)}
@@ -1666,10 +1801,12 @@ def review_changes() -> tuple[bool, str]:
         If no critical issues, just say "LGTM".
 
         Be concise.""",
-        cwd="."
-    )
+        options=options
+    ):
+        if hasattr(message, 'content'):
+            response_parts.append(str(message.content))
 
-    response = result.response.strip()
+    response = "".join(response_parts).strip()
 
     if "LGTM" in response:
         return True, response
@@ -1678,28 +1815,24 @@ def review_changes() -> tuple[bool, str]:
 
 
 if __name__ == "__main__":
-    passed, message = review_changes()
+    passed, message = asyncio.run(review_changes())
     print(message)
     sys.exit(0 if passed else 1)
 ```
 
-## SDK Configuration
+## SDK Configuration Options
 
 ```python
-from claude_code_sdk import ClaudeCode
+from claude_agent_sdk import ClaudeAgentOptions
 
-# Basic configuration
-claude = ClaudeCode(
-    cwd="/path/to/default/project",  # Default working directory
-    model="opus",                     # Default model
-    compact=True,                     # Use compact mode
-)
-
-# Run with overrides
-result = claude.run(
-    prompt="Analyse this code",
-    cwd="/different/project",  # Override for this call
-    model="haiku",             # Use faster model for simple task
+# All available options
+options = ClaudeAgentOptions(
+    cwd="/path/to/project",              # Working directory
+    model="claude-sonnet-4-20250514",    # Model to use
+    system_prompt="You are a code expert", # Custom system prompt
+    permission_mode="default",           # "default", "acceptEdits", "bypassPermissions"
+    max_turns=10,                        # Limit conversation turns
+    continue_conversation=False,         # Resume previous session
 )
 ```
 
