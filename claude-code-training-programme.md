@@ -1,160 +1,505 @@
 # Claude Code Training Programme
 
-A structured learning path for mastering Claude Code, from fundamentals to advanced workflows.
+```
+   ██████╗██╗      █████╗ ██╗   ██╗██████╗ ███████╗     ██████╗ ██████╗ ██████╗ ███████╗
+  ██╔════╝██║     ██╔══██╗██║   ██║██╔══██╗██╔════╝    ██╔════╝██╔═══██╗██╔══██╗██╔════╝
+  ██║     ██║     ███████║██║   ██║██║  ██║█████╗      ██║     ██║   ██║██║  ██║█████╗
+  ██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══╝      ██║     ██║   ██║██║  ██║██╔══╝
+  ╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝███████╗    ╚██████╗╚██████╔╝██████╔╝███████╗
+   ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝     ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
+```
+
+A comprehensive guide to mastering Claude Code - from first launch to advanced automation.
 
 ---
 
-## Programme Overview
+## Table of Contents
 
-This training programme is designed to take developers from Claude Code beginners to power users. It covers installation, core concepts, best practices, and advanced integrations.
-
-**Prerequisites:**
-- Basic command line familiarity
-- Git fundamentals
-- Claude Code installed and authenticated (run `claude` and follow login prompts)
-
-**Programme Structure:**
-- **Module 1-2:** Foundations (Day 1)
-- **Module 3-4:** Information Architecture & Context Management (Day 2)
-- **Module 5-6:** Advanced Prompting & Workflows (Day 3)
-- **Module 7-9:** Subagents, Multi-modality & Large Files (Day 4)
-- **Module 10-12:** SDK, Automation & Enterprise (Day 5)
-
----
-
-## Module 1: Introduction to Agentic Coding
-
-### Learning Objectives
-- Understand what agentic coding is and how it differs from traditional AI coding tools
-- Recognise the paradigm shift from autocomplete to autonomous task execution
-- Identify use cases where Claude Code excels
-
-### Core Reading
-- [Introduction to Agentic Coding](https://claude.com/blog/introduction-to-agentic-coding)
-- [Claude Code Landing Page](https://www.anthropic.com/claude-code)
-
-### Key Concepts
-1. **Autocomplete vs Agentic**: Traditional tools suggest line-by-line; agentic tools execute multi-step tasks autonomously
-2. **Context-Aware Execution**: Claude Code reads your codebase, understands patterns, and makes informed decisions
-3. **Human-in-the-Loop**: You maintain control while delegating complex tasks
-
-### Practical Exercise
-1. Install Claude Code: `npm install -g @anthropic-ai/claude-code`
-2. Navigate to a project directory
-3. Run `claude` and explore the help menu
-4. Ask Claude Code to explain the structure of your codebase
+1. [Getting Started](#part-1-getting-started)
+2. [The Claude Code Interface](#part-2-the-claude-code-interface)
+3. [CLI Commands & Flags](#part-3-cli-commands--flags)
+4. [In-Session Commands](#part-4-in-session-commands)
+5. [Keyboard Shortcuts](#part-5-keyboard-shortcuts)
+6. [CLAUDE.md & Information Architecture](#part-6-claudemd--information-architecture)
+7. [Effective Prompting](#part-7-effective-prompting)
+8. [Context Management](#part-8-context-management)
+9. [Working with Large Files](#part-9-working-with-large-files)
+10. [Subagents](#part-10-subagents)
+11. [Multi-Modal: Screenshots & Images](#part-11-multi-modal-screenshots--images)
+12. [Custom Slash Commands](#part-12-custom-slash-commands)
+13. [Skills](#part-13-skills)
+14. [MCP Servers](#part-14-mcp-servers)
+15. [Claude Code SDK (Python)](#part-15-claude-code-sdk-python)
+16. [GitHub Actions Integration](#part-16-github-actions-integration)
+17. [Best Practices & Tips](#part-17-best-practices--tips)
 
 ---
 
-## Module 2: Getting Started with Claude Code
+# Part 1: Getting Started
 
-### Learning Objectives
-- Install and configure Claude Code
-- Navigate the CLI interface
-- Execute basic commands and understand outputs
-- Configure permissions and settings
+## Installation
 
-### Core Reading
-- [Claude Code Overview](https://docs.anthropic.com/en/docs/claude-code/overview)
-- [Claude Code Settings](https://docs.claude.com/en/docs/claude-code/settings)
-
-### Key Commands
 ```bash
-# Start a session
+# Install Claude Code globally
+npm install -g @anthropic-ai/claude-code
+```
+
+## First Launch
+
+```bash
+# Navigate to your project
+cd your-project
+
+# Start Claude Code
+claude
+```
+
+On first run, Claude Code will open your browser for authentication. No API keys needed - just log in with your Anthropic account.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│   Welcome to Claude Code!                                       │
+│                                                                 │
+│   Opening browser for authentication...                         │
+│   Once authenticated, return here to continue.                  │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Official Documentation
+
+- [Claude Code Overview](https://docs.anthropic.com/en/docs/claude-code/overview)
+- [Getting Started Guide](https://docs.anthropic.com/en/docs/claude-code/getting-started)
+- [Claude Code Best Practices](https://www.anthropic.com/engineering/claude-code-best-practices)
+
+---
+
+# Part 2: The Claude Code Interface
+
+When you run `claude`, you enter an interactive terminal session:
+
+```
+╭────────────────────────────────────────────────────────────────────────────────╮
+│ Claude Code                                                    v1.0.0 (Opus)   │
+├────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                │
+│  ~/projects/my-app                                                             │
+│                                                                                │
+│  ┌─ Context ─────────────────────────────────────────────────────────────────┐ │
+│  │ Files: 42  │  Tokens: 12,450 / 200,000  │  Session: 5m 32s               │ │
+│  └───────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                │
+│  > What would you like to do?                                                  │
+│                                                                                │
+│  ┌───────────────────────────────────────────────────────────────────────────┐ │
+│  │ Type your message, or use:                                                │ │
+│  │   /help     - Show available commands                                     │ │
+│  │   /status   - Show session info                                           │ │
+│  │   Ctrl+C    - Cancel current operation                                    │ │
+│  │   Ctrl+D    - Exit Claude Code                                            │ │
+│  └───────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                │
+╰────────────────────────────────────────────────────────────────────────────────╯
+```
+
+## Interface Elements
+
+| Element | Description |
+|---------|-------------|
+| **Status Bar** | Shows version, model, and connection status |
+| **Working Directory** | Current project path |
+| **Context Indicator** | Files loaded, tokens used, session duration |
+| **Input Area** | Where you type prompts and commands |
+| **Output Area** | Claude's responses, tool outputs, and status messages |
+
+---
+
+# Part 3: CLI Commands & Flags
+
+## Starting Claude Code
+
+### Basic Usage
+
+```bash
+# Start interactive session in current directory
 claude
 
-# Start with a specific prompt
+# Start with an initial prompt
 claude "explain this codebase"
 
-# Resume previous session
-claude --continue
-
-# Run in non-interactive mode
-claude -p "list all TODO comments"
-
-# Compact mode for reduced context usage
-claude --compact
+# Start in a specific directory
+claude --cwd /path/to/project
 ```
 
-### Configuration Basics
-- **Authentication**: Claude Code handles login automatically via browser OAuth - no API keys needed
-- **Permission levels**: Understand what Claude Code can and cannot do by default
-- **Session management**: How context is maintained across sessions
+### Session Management
 
-### Practical Exercise
-1. Start a Claude Code session in a project
-2. Ask it to find all files of a specific type
-3. Request an explanation of a complex function
-4. Exit and resume the session with `--continue`
+```bash
+# Resume the most recent session
+claude --continue
+claude -c
+
+# Resume a specific session by ID
+claude --resume <session-id>
+
+# Start fresh (ignore previous session)
+claude --no-continue
+```
+
+### Output Modes
+
+```bash
+# Print-only mode (non-interactive, outputs and exits)
+claude -p "list all Python files"
+claude --print "count lines of code"
+
+# Output as JSON (useful for scripts)
+claude -p "list functions" --output-format json
+
+# Stream output in real-time
+claude -p "explain main.py" --stream
+```
+
+### Model Selection
+
+```bash
+# Use a specific model
+claude --model claude-sonnet-4-20250514
+claude --model opus
+
+# Use Haiku for quick, simple tasks
+claude --model haiku
+```
+
+### Context Control
+
+```bash
+# Start in compact mode (reduced context usage)
+claude --compact
+
+# Limit context window
+claude --max-tokens 100000
+
+# Add specific files to initial context
+claude --add-file src/main.py --add-file README.md
+```
+
+### Permission Modes
+
+```bash
+# Allow all tool operations without prompting
+claude --dangerously-skip-permissions
+
+# Run with specific permission profile
+claude --permission-mode default
+claude --permission-mode trusted
+```
+
+## Complete Flag Reference
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         CLAUDE CODE CLI FLAGS                                   │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  SESSION                                                                        │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  -c, --continue          Resume most recent session                             │
+│  --resume <id>           Resume specific session                                │
+│  --no-continue           Start fresh session                                    │
+│                                                                                 │
+│  INPUT/OUTPUT                                                                   │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  -p, --print             Non-interactive mode, print response and exit          │
+│  --output-format <fmt>   Output format: text, json, markdown                    │
+│  --stream                Stream response in real-time                           │
+│  --verbose               Show detailed operation logs                           │
+│  --quiet                 Suppress non-essential output                          │
+│                                                                                 │
+│  CONTEXT                                                                        │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  --cwd <path>            Set working directory                                  │
+│  --add-file <file>       Add file to initial context (can repeat)               │
+│  --compact               Start in compact mode                                  │
+│  --max-tokens <n>        Limit context window size                              │
+│                                                                                 │
+│  MODEL                                                                          │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  --model <name>          Select model (opus, sonnet, haiku)                     │
+│                                                                                 │
+│  PERMISSIONS                                                                    │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  --dangerously-skip-permissions   Skip all permission prompts                   │
+│  --permission-mode <mode>         Set permission level                          │
+│                                                                                 │
+│  OTHER                                                                          │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  --version               Show version                                           │
+│  --help                  Show help                                              │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Practical Examples
+
+```bash
+# Quick code review (non-interactive)
+claude -p "review src/auth.py for security issues"
+
+# Generate tests and save to file
+claude -p "write pytest tests for utils.py" > tests/test_utils.py
+
+# Explain codebase structure as JSON
+claude -p "list all modules and their purposes" --output-format json
+
+# Resume yesterday's debugging session
+claude --continue
+
+# Start fresh session with specific files pre-loaded
+claude --add-file pyproject.toml --add-file src/main.py "help me add a new dependency"
+```
 
 ---
 
-## Module 3: CLAUDE.md & Information Routing Architecture
+# Part 4: In-Session Commands
 
-### Learning Objectives
-- Understand the CLAUDE.md hierarchy and file locations
-- Design effective information routing using document references
-- Create modular documentation structures
-- Optimise context loading through strategic file placement
+Once inside Claude Code, you have access to slash commands and special operations.
 
-### Core Reading
-- [Using CLAUDE.md Files: Customizing Claude Code for Your Codebase](https://claude.com/blog/using-claude-md-files)
-- [Claude Code: Best Practices for Agentic Coding](https://www.anthropic.com/engineering/claude-code-best-practices)
-
-### CLAUDE.md Hierarchy
-
-Claude Code reads CLAUDE.md files from multiple locations in priority order:
+## Essential Commands
 
 ```
-~/.claude/CLAUDE.md              # Global (all projects)
-├── Personal preferences
-├── Common patterns you use
-└── Global tool configurations
-
-./CLAUDE.md                       # Project root (this project)
-├── Project overview
-├── Architecture decisions
-├── Build/test commands
-└── References to detailed docs
-
-./src/CLAUDE.md                   # Directory-specific
-├── Module-specific patterns
-├── Local conventions
-└── Component documentation
-
-./.claude/settings.json           # Claude Code settings
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         SLASH COMMANDS                                          │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  HELP & INFO                                                                    │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  /help              Show all available commands                                 │
+│  /status            Show session status, context usage, model info              │
+│  /version           Show Claude Code version                                    │
+│                                                                                 │
+│  SESSION CONTROL                                                                │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  /clear             Clear conversation history                                  │
+│  /compact           Summarise context to save tokens                            │
+│  /exit or /quit     Exit Claude Code                                            │
+│                                                                                 │
+│  CONTEXT MANAGEMENT                                                             │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  /add-file <path>   Add file to context                                         │
+│  /init              Generate CLAUDE.md for current project                      │
+│                                                                                 │
+│  WORKFLOW                                                                       │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  /plan              Enter plan mode for complex tasks                           │
+│  /review            Review current changes                                      │
+│  /security-review   Run security analysis                                       │
+│                                                                                 │
+│  CONFIGURATION                                                                  │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  /config            Show current configuration                                  │
+│  /model <name>      Switch model mid-session                                    │
+│  /permissions       Show/modify permission settings                             │
+│                                                                                 │
+│  TOOLS                                                                          │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  /tools             List available tools                                        │
+│  /mcp               Show MCP server status                                      │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Information Routing with References
+## Command Examples
 
-Instead of putting everything in one massive CLAUDE.md, use **references** to route Claude to relevant documentation:
+### /status - View Session Information
+
+```
+> /status
+
+╭─ Session Status ────────────────────────────────────────────────────────────────╮
+│                                                                                 │
+│  Model:           claude-opus-4-20250514                                        │
+│  Session ID:      ses_abc123def456                                              │
+│  Duration:        12m 34s                                                       │
+│                                                                                 │
+│  Context Usage:                                                                 │
+│  ████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░  32% (64,000 / 200,000 tokens)       │
+│                                                                                 │
+│  Files in Context: 8                                                            │
+│  Messages:         24                                                           │
+│                                                                                 │
+│  Working Directory: ~/projects/my-app                                           │
+│                                                                                 │
+╰─────────────────────────────────────────────────────────────────────────────────╯
+```
+
+### /compact - Reduce Context Usage
+
+```
+> /compact
+
+╭─ Compacting Context ────────────────────────────────────────────────────────────╮
+│                                                                                 │
+│  Before: 64,000 tokens                                                          │
+│  After:  28,500 tokens                                                          │
+│  Saved:  35,500 tokens (55%)                                                    │
+│                                                                                 │
+│  Summary preserved:                                                             │
+│  • Project structure and architecture                                           │
+│  • Key decisions made in this session                                           │
+│  • Current task context                                                         │
+│                                                                                 │
+╰─────────────────────────────────────────────────────────────────────────────────╯
+```
+
+### /init - Generate CLAUDE.md
+
+```
+> /init
+
+╭─ Generating CLAUDE.md ──────────────────────────────────────────────────────────╮
+│                                                                                 │
+│  Analysing project structure...                                                 │
+│                                                                                 │
+│  Detected:                                                                      │
+│  • Language: Python                                                             │
+│  • Framework: FastAPI                                                           │
+│  • Package Manager: Poetry                                                      │
+│  • Test Framework: pytest                                                       │
+│                                                                                 │
+│  Created: ./CLAUDE.md                                                           │
+│                                                                                 │
+│  Review and customise the generated file to improve Claude's                    │
+│  understanding of your project.                                                 │
+│                                                                                 │
+╰─────────────────────────────────────────────────────────────────────────────────╯
+```
+
+### /plan - Enter Plan Mode
+
+```
+> /plan Refactor the authentication system to use JWT
+
+╭─ Plan Mode ─────────────────────────────────────────────────────────────────────╮
+│                                                                                 │
+│  Planning: Refactor authentication system to use JWT                            │
+│                                                                                 │
+│  I'll analyse the codebase and create a detailed implementation plan            │
+│  before making any changes.                                                     │
+│                                                                                 │
+│  [Exploring codebase...]                                                        │
+│                                                                                 │
+╰─────────────────────────────────────────────────────────────────────────────────╯
+```
+
+---
+
+# Part 5: Keyboard Shortcuts
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         KEYBOARD SHORTCUTS                                      │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ESSENTIAL                                                                      │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  Ctrl + C          Cancel current operation / Interrupt Claude                  │
+│  Ctrl + D          Exit Claude Code                                             │
+│  Ctrl + L          Clear screen                                                 │
+│                                                                                 │
+│  NAVIGATION                                                                     │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  ↑ / ↓             Navigate through prompt history                              │
+│  Ctrl + R          Search prompt history                                        │
+│  Tab               Autocomplete file paths and commands                         │
+│                                                                                 │
+│  EDITING                                                                        │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  Ctrl + A          Move cursor to beginning of line                             │
+│  Ctrl + E          Move cursor to end of line                                   │
+│  Ctrl + W          Delete word before cursor                                    │
+│  Ctrl + U          Delete entire line                                           │
+│                                                                                 │
+│  MULTI-LINE INPUT                                                               │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  Shift + Enter     New line (continue input)                                    │
+│  Enter             Submit prompt                                                │
+│                                                                                 │
+│  PERMISSIONS                                                                    │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  y                 Accept permission request                                    │
+│  n                 Deny permission request                                      │
+│  a                 Accept all similar requests this session                     │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+# Part 6: CLAUDE.md & Information Architecture
+
+## What is CLAUDE.md?
+
+CLAUDE.md is a special markdown file that provides Claude Code with persistent context about your project. It's like giving Claude a briefing document before starting work.
+
+## File Hierarchy
+
+Claude Code reads CLAUDE.md files from multiple locations:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         CLAUDE.MD HIERARCHY                                     │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  LOADING ORDER (all are loaded and combined):                                   │
+│                                                                                 │
+│  1. ~/.claude/CLAUDE.md                    ← Global (all projects)              │
+│     │                                                                           │
+│     │   Your personal preferences, common patterns, global settings             │
+│     │                                                                           │
+│  2. ./CLAUDE.md                            ← Project root                       │
+│     │                                                                           │
+│     │   Project overview, architecture, build commands                          │
+│     │                                                                           │
+│  3. ./src/CLAUDE.md                        ← Subdirectory                       │
+│     │                                                                           │
+│     │   Module-specific patterns, local conventions                             │
+│     │                                                                           │
+│  4. ./src/components/CLAUDE.md             ← Deeper subdirectory                │
+│                                                                                 │
+│        Component-specific guidelines                                            │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Information Routing
+
+Instead of putting everything in one massive file, use **references** to route Claude to relevant documentation:
 
 ```markdown
 # CLAUDE.md (Project Root)
 
 ## Project Overview
-E-commerce platform built with Next.js and PostgreSQL.
+E-commerce API built with FastAPI and PostgreSQL.
 
-## Quick Reference
-- Build: `npm run build`
-- Test: `npm test`
-- Dev: `npm run dev`
+## Quick Commands
+- Run server: `uvicorn main:app --reload`
+- Run tests: `pytest`
+- Format code: `black . && isort .`
 
 ## Detailed Documentation
 For specific topics, refer to:
 - API Design: See `docs/api-design.md`
 - Database Schema: See `docs/database-schema.md`
 - Authentication: See `docs/auth-flow.md`
-- Component Patterns: See `src/components/CLAUDE.md`
-- Testing Strategy: See `tests/CLAUDE.md`
 
 ## When Working On...
 - **API endpoints**: Read `docs/api-design.md` first
 - **Database changes**: Consult `docs/database-schema.md`
-- **New components**: Follow patterns in `src/components/CLAUDE.md`
+- **Authentication**: Check `docs/auth-flow.md`
 ```
 
-### Strategic Document Placement
+## Recommended Project Structure
 
 ```
 project/
@@ -166,372 +511,196 @@ project/
 │   └── deployment.md            # Deployment procedures
 ├── src/
 │   ├── CLAUDE.md                # Source code conventions
-│   ├── components/
-│   │   └── CLAUDE.md            # Component patterns
-│   ├── services/
-│   │   └── CLAUDE.md            # Service layer patterns
-│   └── utils/
-│       └── CLAUDE.md            # Utility conventions
+│   ├── api/
+│   │   └── CLAUDE.md            # API module patterns
+│   ├── models/
+│   │   └── CLAUDE.md            # Model conventions
+│   └── services/
+│       └── CLAUDE.md            # Service layer patterns
 └── tests/
     └── CLAUDE.md                # Testing conventions
 ```
 
-### Benefits of Information Routing
-1. **Reduced Token Usage**: Claude only loads what's needed
-2. **Maintainability**: Update docs independently
-3. **Clarity**: Each doc has a single responsibility
-4. **Scalability**: Works for large codebases
+## Example CLAUDE.md
 
-### Conditional Loading Pattern
 ```markdown
-# CLAUDE.md
+# MyApp - E-commerce API
 
-## Context-Specific Documentation
+## Overview
+FastAPI-based REST API for e-commerce platform. Uses PostgreSQL with SQLAlchemy ORM.
 
-When working on authentication:
-1. First read `docs/auth-flow.md`
-2. Check `src/middleware/auth/CLAUDE.md` for implementation details
+## Architecture
+- **API Layer**: FastAPI routers in `src/api/`
+- **Service Layer**: Business logic in `src/services/`
+- **Data Layer**: SQLAlchemy models in `src/models/`
+- **Schemas**: Pydantic models in `src/schemas/`
 
-When working on the API:
-1. Read `docs/api-design.md` for conventions
-2. See `src/routes/CLAUDE.md` for route patterns
+## Development Commands
+```bash
+# Start development server
+uvicorn src.main:app --reload --port 8000
 
-When debugging:
-1. Check `docs/troubleshooting.md`
-2. Review `logs/README.md` for log locations
+# Run tests
+pytest -v
+
+# Run tests with coverage
+pytest --cov=src --cov-report=html
+
+# Database migrations
+alembic upgrade head
+alembic revision --autogenerate -m "description"
+
+# Code formatting
+black src tests
+isort src tests
 ```
 
-### Practical Exercise
-1. Audit your current project documentation
-2. Create a CLAUDE.md hierarchy with routing
-3. Split monolithic docs into focused files
-4. Test by asking Claude about different areas
-5. Measure context usage before/after
+## Code Style
+- Use type hints everywhere
+- Docstrings for all public functions (Google style)
+- Keep functions under 30 lines
+- Prefer composition over inheritance
+
+## Important Patterns
+
+### API Endpoints
+All endpoints follow this pattern:
+```python
+@router.get("/{id}", response_model=schemas.ItemResponse)
+async def get_item(
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> schemas.ItemResponse:
+    """Get item by ID."""
+    item = await services.item.get(db, id=id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return item
+```
+
+### Error Handling
+Use custom exceptions from `src/exceptions.py`:
+```python
+from src.exceptions import NotFoundError, ValidationError
+
+if not item:
+    raise NotFoundError("Item", id)
+```
+
+## Testing
+- Unit tests in `tests/unit/`
+- Integration tests in `tests/integration/`
+- Use fixtures from `tests/conftest.py`
+- Mock external services, never hit real APIs in tests
+
+## Known Issues
+- Rate limiting not implemented yet (TODO)
+- Image upload limited to 5MB (server constraint)
+```
 
 ---
 
-## Module 4: Context Management & Economy
+# Part 7: Effective Prompting
 
-### Learning Objectives
-- Understand how context windows work in Claude Code
-- Implement strategies to minimise token usage
-- Work effectively within context limitations
-- Use compaction and summarisation effectively
+## Prompting Regimes
 
-### Key Concepts
-
-#### The Context Window
-- Claude has a finite context window (tokens it can "remember")
-- Everything counts: your prompts, file contents, tool outputs, Claude's responses
-- When context fills up, older information may be summarised or dropped
-
-#### Context Costs by Activity
-| Activity | Context Cost | Notes |
-|----------|--------------|-------|
-| Reading small file | Low | Hundreds of tokens |
-| Reading large file | High | Can be thousands of tokens |
-| Codebase search | Medium | Results add to context |
-| Long conversation | Cumulative | Builds over time |
-| Subagent spawning | Isolated | Separate context window |
-
-### Strategies for Context Economy
-
-#### 1. Start Fresh for New Tasks
-```bash
-# Don't continue when switching tasks
-claude                    # Fresh start
-
-# Only continue for related follow-ups
-claude --continue         # Same task continuation
-```
-
-#### 2. Use Compact Mode
-```bash
-# Reduced verbosity, smaller context footprint
-claude --compact
-
-# Or mid-session
-/compact
-```
-
-#### 3. Be Specific in Requests
-```
-# BAD: Vague, leads to broad exploration
-"Help me understand this codebase"
-
-# GOOD: Focused, minimal context needed
-"Explain how user authentication works in src/auth/"
-```
-
-#### 4. Use Subagents for Exploration
-```
-# Instead of exploring yourself (adds to YOUR context)
-# Let a subagent explore (uses SEPARATE context)
-"Search the codebase for all error handling patterns"
-# Claude spawns subagent, only summary returns to main context
-```
-
-#### 5. Clear Context When Needed
-```bash
-/clear                    # Clear conversation history
-/compact                  # Summarise and compress context
-```
-
-#### 6. Structured Queries Save Tokens
-```
-# BAD: Multiple back-and-forths
-"What files handle auth?"
-"Now show me the login function"
-"What about the logout?"
-
-# GOOD: Single comprehensive request
-"Show me the login and logout functions in the auth module"
-```
-
-### Working Around Context Limitations
-
-#### Chunked Processing
-For large tasks, break them into independent chunks:
-```
-"Review files in src/components/ for accessibility issues"
-# Complete, then fresh session:
-"Review files in src/pages/ for accessibility issues"
-```
-
-#### Summary Checkpoints
-Ask Claude to summarise progress before context fills:
-```
-"Summarise what we've found so far about the API structure"
-# Save this summary externally
-# Start fresh session with summary as starting context
-```
-
-#### External Memory
-Use CLAUDE.md as external memory:
-```markdown
-# CLAUDE.md - Session Notes
-
-## Recent Findings (Updated: 2025-01-15)
-- Auth uses JWT tokens stored in httpOnly cookies
-- Rate limiting implemented in middleware/rateLimit.ts
-- Database connections pooled via pg-pool
-```
-
-### Practical Exercise
-1. Start a session and check context usage with `/status`
-2. Perform various operations and observe context growth
-3. Practice using `/compact` to reduce context
-4. Compare context usage: direct exploration vs subagent delegation
-5. Design a workflow for a task that exceeds context limits
-
----
-
-## Module 5: Working with Large Files
-
-### Learning Objectives
-- Strategies for handling files too large to read entirely
-- Chunked reading and targeted extraction
-- Refactoring large files with Claude's help
-- Avoiding context overflow with big files
-
-### The Large File Problem
-- Large files (1000+ lines) can consume significant context
-- Reading entire files may not be necessary
-- Strategic partial reads are more effective
-
-### Strategies for Large Files
-
-#### 1. Targeted Reading
-```
-# BAD: Read entire file
-"Read src/legacy/monolith.js"
-
-# GOOD: Read specific sections
-"Read lines 1-50 of src/legacy/monolith.js to see the imports"
-"Read the UserService class in src/legacy/monolith.js"
-"Find and show me the handlePayment function in src/legacy/monolith.js"
-```
-
-#### 2. Structural Overview First
-```
-"Give me an outline of src/legacy/monolith.js - list all classes,
-functions, and their line numbers without reading the full content"
-```
-
-#### 3. Search Before Reading
-```
-"Search for 'validateUser' in src/legacy/monolith.js and show
-me just that function with 10 lines of context"
-```
-
-#### 4. Chunked Processing
-```
-"Read src/large-file.ts in chunks:
-1. First, show me lines 1-200
-2. I'll ask for more sections as needed"
-```
-
-#### 5. Use Subagents for Large File Analysis
-```
-"Analyse src/legacy/monolith.js and create a summary of:
-- All exported functions and their purposes
-- Dependencies and imports
-- Potential issues or code smells
-Don't show me the full file, just the analysis."
-```
-
-### Refactoring Large Files
-```
-# Step 1: Understand structure
-"Outline the structure of src/legacy/giant-component.tsx"
-
-# Step 2: Identify extraction candidates
-"Identify functions in src/legacy/giant-component.tsx that could
-be extracted into separate modules"
-
-# Step 3: Extract incrementally
-"Extract the validation logic (lines 150-220) from
-src/legacy/giant-component.tsx into a new src/utils/validation.ts"
-```
-
-### Large File Patterns
-
-#### Configuration Files
-```
-"Find the database configuration section in config/app-config.json"
-"Show me only the 'authentication' key from config/settings.yaml"
-```
-
-#### Log Files
-```
-"Search for ERROR entries in logs/app.log from the last section"
-"Find the most recent stack trace in logs/error.log"
-```
-
-#### Data Files
-```
-"Show me the schema/structure of data/users.json (first few entries)"
-"Count the number of entries in data/products.csv"
-```
-
-### Practical Exercise
-1. Find a large file (500+ lines) in your project
-2. Practice getting a structural overview without reading it all
-3. Use search to find specific functions
-4. Extract a section into a new file
-5. Compare context usage: full read vs targeted approach
-
----
-
-## Module 6: Advanced Prompting Techniques
-
-### Learning Objectives
-- Master different prompting regimes (plan mode, direct execution)
-- Write effective prompts for complex tasks
-- Use extended thinking appropriately
-- Chain prompts for multi-step workflows
-
-### Prompting Regimes
-
-#### 1. Direct Execution Mode (Default)
+### 1. Direct Execution (Default)
 For straightforward tasks where you trust Claude's approach:
+
 ```
-"Add input validation to the signup form"
-"Fix the null pointer exception in UserService.getUser()"
-"Write unit tests for the calculateTotal function"
+> Add input validation to the create_user endpoint
+
+> Fix the TypeError in services/payment.py line 45
+
+> Write pytest tests for the UserService class
 ```
 
-#### 2. Plan Mode
+### 2. Plan Mode
 For complex tasks where you want to review the approach first:
-```
-"I want to add a caching layer to the API. Enter plan mode and
-design an approach before implementing."
 
-# Or explicitly:
-/plan "Refactor the authentication system to use OAuth2"
+```
+> /plan Refactor the authentication system to use OAuth2
+
+> I want to add caching. Enter plan mode and design the approach before implementing.
 ```
 
 **When to use Plan Mode:**
 - Architectural changes
 - Multi-file refactoring
 - Unfamiliar codebases
-- Irreversible operations
 - When multiple valid approaches exist
 
-#### 3. Exploration Mode
-When you need information before deciding on action:
+### 3. Exploration Mode
+When you need information before acting:
+
 ```
-"Before making any changes, explore how error handling currently
-works across the codebase and summarise the patterns used."
+> Before making any changes, explore how error handling currently
+  works across the codebase and summarise the patterns used.
+
+> Don't modify anything yet - just explain how the payment flow works.
 ```
 
-#### 4. Extended Thinking Mode
+### 4. Extended Thinking
 For complex reasoning tasks:
-```
-"Think deeply about how to optimise this database query.
-Consider indexes, query structure, and caching strategies."
 
-# Triggers deeper analysis before responding
+```
+> Think deeply about how to optimise this database query.
+  Consider indexes, query structure, and caching strategies.
 ```
 
-### Prompt Patterns for Common Scenarios
+## Prompt Patterns
 
-#### The Context-Setting Pattern
+### The Context-Setting Pattern
+
 ```
-"Context: We're building a REST API for a mobile app.
+Context: We're building a REST API for a mobile app.
 Constraint: Must support offline-first architecture.
 Task: Design the sync mechanism for user data.
-Output: Implementation plan with code examples."
+Output: Implementation plan with code examples.
 ```
 
-#### The Step-by-Step Pattern
+### The Step-by-Step Pattern
+
 ```
-"Implement user authentication:
+Implement user authentication:
 1. First, show me your planned approach
 2. Wait for my approval
 3. Then implement step by step
-4. Test each component before moving on"
+4. Test each component before moving on
 ```
 
-#### The Constraint Pattern
+### The Constraint Pattern
+
 ```
-"Refactor this function with these constraints:
+Refactor this function with these constraints:
 - No external dependencies
 - Must remain backwards compatible
 - Keep under 50 lines
-- Include error handling"
+- Include error handling
 ```
 
-#### The Example-Driven Pattern
+### The Example-Driven Pattern
+
 ```
-"Add a new API endpoint following the exact pattern used in
-src/routes/users.ts - same structure, error handling, and response format"
+Add a new API endpoint following the exact pattern used in
+src/api/users.py - same structure, error handling, and response format
 ```
 
-#### The Negative Pattern (What NOT to do)
+### The Negative Pattern
+
 ```
-"Update the database schema.
+Update the database schema.
 Do NOT:
 - Drop any existing columns
 - Change column types
-- Modify indexes on production tables"
+- Modify indexes on production tables
 ```
 
-### Iterative Refinement
-```
-# Round 1: Broad request
-"Improve the performance of the search feature"
+## Multi-Phase Workflows
 
-# Round 2: Focus based on findings
-"Focus on the database query - add appropriate indexes"
-
-# Round 3: Polish
-"Now add caching for repeated searches"
 ```
-
-### Multi-Step Workflow Prompts
-```
-"Let's refactor the payment module:
+Let's refactor the payment module:
 
 Phase 1 - Analysis:
 - Map all payment-related files
@@ -548,70 +717,222 @@ Phase 3 - Implementation:
 - Update tests after each change
 - Verify no regressions
 
-Start with Phase 1 and wait for my go-ahead before each phase."
+Start with Phase 1 and wait for my go-ahead before each phase.
 ```
-
-### Practical Exercise
-1. Take a complex task and write it as a direct execution prompt
-2. Rewrite the same task for plan mode
-3. Practice the context-setting pattern
-4. Use extended thinking on an algorithmic problem
-5. Design a multi-phase prompt for a refactoring task
 
 ---
 
-## Module 7: Subagents - Distributed Task Execution
+# Part 8: Context Management
 
-### Learning Objectives
-- Understand how Claude Code spawns and manages subagents
-- Know when to use subagents vs direct execution
-- Configure subagent behaviour
-- Design effective subagent workflows
-
-### What Are Subagents?
-
-Subagents are separate Claude instances that Claude Code spawns to handle specific tasks. They:
-- Have their **own context window** (isolated from main conversation)
-- Can run in **parallel** for independent tasks
-- Return **summarised results** to the main agent
-- Are ideal for **exploration** and **research** tasks
-
-### How Subagents Work
+## Understanding Context
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Main Claude Session                   │
-│                    (Your conversation)                   │
-│                                                          │
-│  "Find all security vulnerabilities in the codebase"    │
-│                          │                               │
-│                          ▼                               │
-│              ┌──────────────────────┐                   │
-│              │   Spawns Subagent    │                   │
-│              └──────────────────────┘                   │
-│                          │                               │
-└──────────────────────────┼───────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│                    Subagent Context                      │
-│                 (Separate, isolated)                     │
-│                                                          │
-│  - Reads multiple files                                  │
-│  - Searches codebase                                     │
-│  - Analyses patterns                                     │
-│  - Builds comprehensive understanding                    │
-│                                                          │
-│              All this stays HERE                         │
-│              (doesn't fill main context)                 │
-└─────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-                    Summary returned
-                    to main session
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         THE CONTEXT WINDOW                                      │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  Everything in your session consumes context:                                   │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                                                                         │   │
+│  │   Your Prompts                    ████░░░░░░░░░░░░░░░░  ~10%            │   │
+│  │   Claude's Responses              ████████░░░░░░░░░░░░  ~25%            │   │
+│  │   File Contents Read              ████████████████░░░░  ~50%            │   │
+│  │   Tool Outputs                    ███░░░░░░░░░░░░░░░░░  ~10%            │   │
+│  │   System Context                  ██░░░░░░░░░░░░░░░░░░  ~5%             │   │
+│  │                                                                         │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  Context Window: 200,000 tokens (Opus)                                          │
+│                                                                                 │
+│  When context fills up:                                                         │
+│  • Older messages may be summarised                                             │
+│  • Performance may degrade                                                      │
+│  • You should use /compact or start fresh                                       │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### When to Use Subagents
+## Context Economy Strategies
+
+### 1. Start Fresh for New Tasks
+
+```bash
+# New task? Fresh session
+claude
+
+# Only continue for related follow-ups
+claude --continue
+```
+
+### 2. Use Compact Mode
+
+```bash
+# Start in compact mode
+claude --compact
+
+# Or mid-session
+> /compact
+```
+
+### 3. Be Specific
+
+```
+# BAD: Vague, leads to broad exploration
+> Help me understand this codebase
+
+# GOOD: Focused, minimal context needed
+> Explain how user authentication works in src/auth/
+```
+
+### 4. Use Subagents for Exploration
+
+```
+# Instead of exploring yourself (fills YOUR context),
+# let a subagent explore (uses SEPARATE context)
+
+> Search the codebase for all error handling patterns and summarise them
+```
+
+### 5. Structured Queries
+
+```
+# BAD: Multiple back-and-forths
+> What files handle auth?
+> Now show me the login function
+> What about the logout?
+
+# GOOD: Single comprehensive request
+> Show me the login and logout functions in the auth module
+```
+
+## Context Cheatsheet
+
+| Technique | Savings | When to Use |
+|-----------|---------|-------------|
+| Subagents for exploration | High | Research, understanding code |
+| Targeted file reading | Medium | Working with specific functions |
+| `/compact` | Medium | Long sessions |
+| Fresh sessions | High | Switching tasks |
+| Avoiding full file reads | High | Large files (500+ lines) |
+
+---
+
+# Part 9: Working with Large Files
+
+## The Problem
+
+Large files (500+ lines) consume significant context. Reading them entirely is often unnecessary.
+
+## Strategies
+
+### 1. Targeted Reading
+
+```
+# BAD: Read entire file
+> Read src/legacy/monolith.py
+
+# GOOD: Read specific sections
+> Show me lines 1-50 of src/legacy/monolith.py (the imports)
+
+> Read the UserService class in src/legacy/monolith.py
+
+> Find and show me the process_payment function in src/legacy/monolith.py
+```
+
+### 2. Structural Overview First
+
+```
+> Give me an outline of src/legacy/monolith.py - list all classes,
+  functions, and their line numbers without reading the full content
+```
+
+### 3. Search Before Reading
+
+```
+> Search for 'validate_user' in src/legacy/monolith.py and show
+  me just that function with 10 lines of context
+```
+
+### 4. Use Subagents for Analysis
+
+```
+> Analyse src/legacy/monolith.py and create a summary of:
+  - All exported functions and their purposes
+  - Dependencies and imports
+  - Potential issues or code smells
+  Don't show me the full file, just the analysis.
+```
+
+### 5. Chunked Refactoring
+
+```
+# Step 1: Understand structure
+> Outline the structure of src/legacy/giant_module.py
+
+# Step 2: Identify extraction candidates
+> Identify functions that could be extracted into separate modules
+
+# Step 3: Extract incrementally
+> Extract the validation logic (lines 150-220) into src/utils/validation.py
+```
+
+---
+
+# Part 10: Subagents
+
+## What Are Subagents?
+
+Subagents are separate Claude instances that handle specific tasks with their **own isolated context**.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         HOW SUBAGENTS WORK                                      │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                      MAIN SESSION (Your Context)                        │   │
+│  │                                                                         │   │
+│  │  You: "Find all security vulnerabilities in the codebase"               │   │
+│  │                              │                                          │   │
+│  │                              ▼                                          │   │
+│  │                    [Spawns Subagent]                                    │   │
+│  └──────────────────────────────┼──────────────────────────────────────────┘   │
+│                                 │                                               │
+│                                 ▼                                               │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                    SUBAGENT (Separate Context)                          │   │
+│  │                                                                         │   │
+│  │  • Reads 20+ files                                                      │   │
+│  │  • Searches patterns                                                    │   │
+│  │  • Analyses code                                                        │   │
+│  │  • Builds understanding                                                 │   │
+│  │                                                                         │   │
+│  │  All this work stays HERE (doesn't fill your main context)              │   │
+│  └──────────────────────────────┼──────────────────────────────────────────┘   │
+│                                 │                                               │
+│                                 ▼                                               │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                      MAIN SESSION (Your Context)                        │   │
+│  │                                                                         │   │
+│  │  Summary returned: "Found 3 SQL injection risks in api/users.py,        │   │
+│  │  api/orders.py, and api/products.py. Also found hardcoded secrets..."   │   │
+│  │                                                                         │   │
+│  │  Your context only grew by ~200 tokens (the summary)                    │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Subagent Types
+
+| Type | Use Case | Tools Available |
+|------|----------|-----------------|
+| `Explore` | Codebase exploration | Read, Glob, Grep |
+| `Plan` | Architecture planning | All tools |
+| `general-purpose` | Complex multi-step tasks | All tools |
+
+## When to Use Subagents
 
 **Good for Subagents:**
 - Codebase exploration ("How does X work?")
@@ -626,398 +947,117 @@ Subagents are separate Claude instances that Claude Code spawns to handle specif
 - Tasks requiring conversation context
 - Sequential dependent operations
 
-### Subagent Types
+## Triggering Subagents
 
-Claude Code uses different subagent types for different tasks:
-
-| Type | Use Case | Tools Available |
-|------|----------|-----------------|
-| `Explore` | Codebase exploration | Read, Glob, Grep |
-| `Plan` | Architecture planning | All tools |
-| `general-purpose` | Complex multi-step tasks | All tools |
-
-### Triggering Subagents
-
-Subagents are triggered automatically when appropriate, but you can encourage their use:
+Subagents are triggered automatically for appropriate tasks:
 
 ```
-"Search the entire codebase for deprecated API usage"
-# Claude will likely spawn a subagent
+> Search the entire codebase for deprecated API usage
+  # Claude will spawn an Explore subagent
 
-"Explore how the caching layer works across all services"
-# Good candidate for subagent exploration
+> Explore how the caching layer works across all services
+  # Good candidate for subagent
 
-"In parallel, analyse both the frontend and backend for
-performance bottlenecks"
-# May spawn multiple subagents
+> Analyse these three areas in parallel:
+  1. Authentication security
+  2. API rate limiting
+  3. Data validation
+  # May spawn multiple parallel subagents
 ```
-
-### Parallel Subagents
-```
-"Analyse these three areas in parallel:
-1. Authentication security
-2. API rate limiting
-3. Data validation
-
-Give me a summary of findings from each."
-# Claude may spawn 3 parallel subagents
-```
-
-### Subagent Results
-Subagents return summaries, not full context:
-```
-Main Session: "How does the payment system work?"
-
-[Subagent explores: reads 15 files, traces code paths]
-
-Subagent Summary returned:
-"The payment system uses Stripe. Entry point is
-src/payments/processor.ts. Flow: validateCart() →
-createPaymentIntent() → confirmPayment() → updateOrder()"
-
-# Main session gets summary, not all 15 files
-```
-
-### Practical Exercise
-1. Ask Claude to explore a complex part of your codebase
-2. Observe when subagents are spawned (check output)
-3. Compare context usage: direct exploration vs subagent
-4. Practice requesting parallel subagent tasks
-5. Design a task that benefits from multiple subagents
 
 ---
 
-## Module 8: Multi-Modal Capabilities - Screenshots & Images
+# Part 11: Multi-Modal: Screenshots & Images
 
-### Learning Objectives
-- Understand Claude's vision capabilities in Claude Code
-- Analyse screenshots for debugging and design review
-- Work with UI mockups and diagrams
-- Extract information from images
+## Claude's Vision Capabilities
 
-### Claude's Vision Capabilities
-
-Claude Code can analyse images including:
+Claude Code can analyse:
 - Screenshots of UI/applications
 - Error message screenshots
 - Design mockups and wireframes
 - Architecture diagrams
 - Charts and graphs
 - Photos of whiteboards
-- Documentation images
 
-### Providing Images to Claude Code
+## Providing Images
 
-#### Method 1: File Path
+### Method 1: File Path
+
 ```
-"Analyse the screenshot at ./screenshots/error.png"
-"Review the UI mockup at ./designs/homepage-v2.png"
-```
+> Analyse the screenshot at ./screenshots/error.png
 
-#### Method 2: Drag and Drop
-In terminal emulators that support it, drag an image into the session.
-
-#### Method 3: Clipboard (where supported)
-```
-"Analyse the image I just copied to clipboard"
+> Review the UI mockup at ./designs/homepage-v2.png
 ```
 
-### Use Cases for Screenshot Analysis
+### Method 2: Drag and Drop
 
-#### 1. Debugging Visual Issues
-```
-"Here's a screenshot of the bug: ./screenshots/layout-broken.png
-The sidebar should be on the left but it's overlapping the content.
-Find and fix the CSS issue."
-```
+In terminal emulators that support it, drag an image directly into the session.
 
-#### 2. UI Review
-```
-"Compare this screenshot ./screenshots/current.png with the design
-mockup ./designs/expected.png. List all differences."
-```
+## Use Cases
 
-#### 3. Error Analysis
+### Debugging Visual Issues
+
 ```
-"This screenshot shows the error in my browser console:
-./screenshots/console-error.png
-Help me debug this issue."
+> Here's a screenshot of the bug: ./screenshots/layout-broken.png
+  The sidebar should be on the left but it's overlapping the content.
+  Find and fix the CSS issue.
 ```
 
-#### 4. Design Implementation
-```
-"Implement this UI component based on the mockup at
-./designs/card-component.png using our existing design system."
-```
+### Error Analysis
 
-#### 5. Architecture Understanding
 ```
-"Here's a diagram of our system architecture: ./docs/architecture.png
-Explain how data flows from the user request to the database."
+> This screenshot shows the error in my browser console:
+  ./screenshots/console-error.png
+  Help me debug this issue.
 ```
 
-#### 6. Documentation Extraction
-```
-"Extract the configuration options from this documentation
-screenshot: ./screenshots/api-docs.png"
-```
+### Design Implementation
 
-### Best Practices for Image Analysis
-
-1. **Provide Context**
 ```
-# BAD
-"What's wrong here?" + image
-
-# GOOD
-"This screenshot shows our checkout page. Users report the
-'Submit' button is unresponsive. What might cause this?" + image
+> Implement this UI component based on the mockup at
+  ./designs/card-component.png using our existing design system.
 ```
 
-2. **Be Specific About What to Look For**
-```
-"In this screenshot, focus on:
-- The error message in the red banner
-- The network request that failed
-- The console errors at the bottom"
-```
+### Architecture Understanding
 
-3. **Combine with Code Context**
 ```
-"The screenshot shows a rendering bug in our ProductCard component.
-The component is at src/components/ProductCard.tsx.
-Analyse the screenshot and fix the component."
+> Here's a diagram of our system architecture: ./docs/architecture.png
+  Explain how data flows from the user request to the database.
 ```
 
-### Image Analysis for Different Roles
+## Best Practices
 
-#### For Developers
-- Debug visual regressions
-- Implement designs from mockups
-- Understand error screenshots from users
-- Review console/DevTools output
+```
+# BAD: No context
+> What's wrong here? [image]
 
-#### For Designers
-- Compare implementation to designs
-- Document UI inconsistencies
-- Analyse competitor interfaces
-
-#### For QA
-- Document bugs with screenshots
-- Verify visual requirements
-- Track UI changes over time
-
-### Practical Exercise
-1. Take a screenshot of a UI bug in your application
-2. Ask Claude to analyse and suggest fixes
-3. Provide a design mockup and ask for implementation
-4. Screenshot an error and ask for debugging help
-5. Use a whiteboard photo of architecture for documentation
+# GOOD: Context + specific focus
+> This screenshot shows our checkout page. Users report the 'Submit'
+  button is unresponsive. What might cause this? [image]
+```
 
 ---
 
-## Module 9: Claude Code SDK - Programmatic Access
+# Part 12: Custom Slash Commands
 
-### Learning Objectives
-- Understand the Claude Code SDK architecture
-- Use the SDK with your existing Claude Code authentication (no separate API key needed)
-- Build custom integrations and automated workflows
-- Create specialised agents for your needs
+## Creating Custom Commands
 
-### SDK vs CLI
+Create `.claude/commands/` directory in your project with markdown files:
 
-| Aspect | Claude Code CLI | Claude Code SDK |
-|--------|-----------------|-----------------|
-| Interface | Interactive terminal | Programmatic (Node.js/Python) |
-| Authentication | Your existing Claude login | Uses same login - no API key needed |
-| Best for | Interactive development | Automation, scripts, CI/CD |
-| Customisation | Slash commands, CLAUDE.md | Full programmatic control, custom tools |
-
-**Key Point**: The SDK leverages your existing Claude Code installation and authentication. If you can run `claude` in your terminal, the SDK will work without any additional setup or API keys.
-
-### Claude Code SDK Overview
-
-The Claude Code SDK (also called Claude Agent SDK) allows you to:
-- Automate Claude Code tasks from scripts
-- Build custom agents programmatically
-- Integrate Claude Code capabilities into your applications
-- Run in CI/CD pipelines (with appropriate authentication)
-
-### Installation
-```bash
-npm install @anthropic-ai/claude-code-sdk
-# or
-pip install claude-code-sdk
+```
+project/
+└── .claude/
+    └── commands/
+        ├── review.md
+        ├── test.md
+        └── deploy-check.md
 ```
 
-### Basic SDK Usage
-
-```javascript
-import { ClaudeCode } from '@anthropic-ai/claude-code-sdk';
-
-// No API key needed - uses your existing Claude Code authentication
-const claude = new ClaudeCode();
-
-// Run a task - same as typing in the terminal, but programmatic
-const result = await claude.run({
-  prompt: "Explain the main function in src/index.ts",
-  cwd: "/path/to/project"
-});
-
-console.log(result.response);
-```
-
-### Building Custom Agents
-
-```javascript
-import { Agent, Tool } from '@anthropic-ai/claude-code-sdk';
-
-// Define custom tools
-const databaseTool = new Tool({
-  name: "query_database",
-  description: "Run a read-only SQL query",
-  parameters: {
-    query: { type: "string", description: "SQL query to run" }
-  },
-  execute: async ({ query }) => {
-    // Your database query logic
-    return await db.query(query);
-  }
-});
-
-// Create agent with custom tools
-const agent = new Agent({
-  tools: [databaseTool],
-  systemPrompt: `You are a database analyst assistant.
-    You can query the database to answer questions.
-    Always explain your queries before running them.`
-});
-
-// Run the agent
-const response = await agent.run(
-  "What are the top 10 customers by order value?"
-);
-```
-
-### Cost-Efficient SDK Patterns
-
-#### 1. Batch Processing
-```javascript
-// Process multiple files without interactive overhead
-const files = await glob("src/**/*.ts");
-
-for (const file of files) {
-  const result = await claude.run({
-    prompt: `Add JSDoc comments to ${file}`,
-    cwd: projectRoot
-  });
-  // Results cached, minimal token usage
-}
-```
-
-#### 2. Template-Based Workflows
-```javascript
-// Reusable prompts reduce token usage
-const reviewTemplate = `
-Review this code for:
-- Security issues
-- Performance problems
-- Code style violations
-
-File: {file}
-Focus areas: {focusAreas}
-`;
-
-async function reviewFile(file, focusAreas) {
-  return claude.run({
-    prompt: reviewTemplate
-      .replace('{file}', file)
-      .replace('{focusAreas}', focusAreas.join(', '))
-  });
-}
-```
-
-#### 3. Cached Context
-```javascript
-// Load context once, reuse across queries
-const agent = new Agent({
-  contextFiles: [
-    'CLAUDE.md',
-    'docs/architecture.md'
-  ],
-  // Context loaded once, not per-request
-});
-```
-
-### SDK for CI/CD Integration
-
-```yaml
-# .github/workflows/code-review.yml
-name: Automated Code Review
-on: [pull_request]
-
-jobs:
-  review:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Run Claude Code Review
-        run: |
-          npx claude-code-sdk review \
-            --files "$(git diff --name-only origin/main)" \
-            --output review-results.md
-
-      - name: Post Review Comment
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const review = fs.readFileSync('review-results.md');
-            github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: review
-            });
-```
-
-### Why Use the SDK?
-
-The SDK is ideal when you want to:
-- **Automate repetitive tasks**: Run the same analysis across many files
-- **Integrate into existing tools**: Add Claude Code to your build scripts, linters, or custom tools
-- **Create reusable workflows**: Build scripts your whole team can use
-- **CI/CD pipelines**: Automate code review, documentation generation, or security checks
-
-All without managing API keys or per-token billing - it uses your existing Claude Code subscription.
-
-### Practical Exercise
-1. Install the Claude Code SDK
-2. Write a script that analyses multiple files
-3. Create a custom tool for your specific workflow
-4. Build an agent with a specialised system prompt
-5. Integrate with your CI/CD pipeline
-
----
-
-## Module 10: Custom Slash Commands & MCP Integration
-
-### Learning Objectives
-- Create custom slash commands for repetitive tasks
-- Understand the Model Context Protocol (MCP)
-- Configure MCP servers for extended capabilities
-- Build project-specific automation
-
-### Core Reading
-- [Claude Code: Best Practices for Agentic Coding](https://www.anthropic.com/engineering/claude-code-best-practices)
-- [Claude Code Settings](https://docs.claude.com/en/docs/claude-code/settings)
-
-### Custom Slash Commands
-
-Create `.claude/commands/` directory with markdown files:
+## Command Structure
 
 ```markdown
 # .claude/commands/review.md
+
 Review the current changes for:
 - Code quality issues
 - Potential bugs
@@ -1027,100 +1067,637 @@ Review the current changes for:
 Provide specific, actionable feedback.
 ```
 
-Usage: `/project:review`
+**Usage:** `/project:review`
 
-### Advanced Command Examples
+## Examples
+
+### Code Review Command
 
 ```markdown
-# .claude/commands/new-component.md
-Create a new React component with:
-- TypeScript types
-- Unit tests
-- Storybook story
-- Following patterns in src/components/Button/
+# .claude/commands/review.md
 
-Component name: $ARGUMENTS
+Review the staged changes (git diff --cached) for:
+
+1. **Code Quality**
+   - Naming conventions
+   - Function length and complexity
+   - DRY violations
+
+2. **Potential Bugs**
+   - Edge cases
+   - Null/None handling
+   - Error handling
+
+3. **Security**
+   - Input validation
+   - SQL injection
+   - Sensitive data exposure
+
+4. **Testing**
+   - Are new functions tested?
+   - Are edge cases covered?
+
+Provide specific line-by-line feedback.
 ```
+
+### New Feature Command
+
+```markdown
+# .claude/commands/new-feature.md
+
+Create a new feature following our project patterns:
+
+Feature: $ARGUMENTS
+
+Steps:
+1. Create model in src/models/
+2. Create schema in src/schemas/
+3. Create service in src/services/
+4. Create API routes in src/api/
+5. Add tests in tests/
+6. Update API documentation
+
+Follow patterns from existing features. Ask clarifying questions if needed.
+```
+
+**Usage:** `/project:new-feature user preferences`
+
+### Debug Command
 
 ```markdown
 # .claude/commands/debug.md
+
 Debug the following issue:
 
-1. First, identify relevant files
-2. Trace the code path
-3. Identify the root cause
-4. Propose a fix
-5. Wait for approval before implementing
-
 Issue: $ARGUMENTS
+
+Process:
+1. Identify relevant files
+2. Trace the code path
+3. Identify root cause
+4. Propose fix
+5. Wait for approval before implementing
 ```
 
-### MCP Integration
-MCP (Model Context Protocol) extends Claude Code's capabilities:
-- **Database access**: Query and understand your database schema
-- **External APIs**: Integrate with third-party services
-- **Custom tools**: Build specialised tools for your workflow
-
-### Practical Exercise
-1. Create a custom slash command for your common workflow
-2. Set up an MCP server (e.g., filesystem or database)
-3. Test the integration with real queries
-4. Share useful commands with your team
+**Usage:** `/project:debug users can't log in after password reset`
 
 ---
 
-## Module 11: Security Reviews & Code Quality
+# Part 13: Skills
 
-### Learning Objectives
-- Use Claude Code for automated security analysis
-- Implement security review workflows
-- Integrate security checks into development process
-- Understand common vulnerability patterns
+## What Are Skills?
 
-### Core Reading
-- [Automate Security Reviews with Claude Code](https://www.anthropic.com/news/automate-security-reviews-with-claude-code)
+Skills are pre-packaged capabilities that extend Claude Code for specific file types or tasks. They provide specialised handling that goes beyond default file reading.
 
-### Security Review Command
 ```
-/security-review
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         SKILLS                                                  │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  Skills enhance Claude Code's ability to work with specific file types          │
+│  or perform specialised tasks.                                                  │
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────┐   │
+│  │                                                                         │   │
+│  │  Without Skill:                                                         │   │
+│  │  PDF → Raw binary / basic text extraction                               │   │
+│  │                                                                         │   │
+│  │  With PDF Skill:                                                        │   │
+│  │  PDF → Structured content + tables + images + metadata                  │   │
+│  │                                                                         │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  Available Skills:                                                              │
+│                                                                                 │
+│  • pdf        - Enhanced PDF reading and analysis                               │
+│  • xlsx       - Excel spreadsheet handling                                      │
+│  • docx       - Word document processing                                        │
+│  • images     - Advanced image analysis                                         │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-This command analyses your codebase for:
-- OWASP Top 10 vulnerabilities
-- Injection risks (SQL, command, XSS)
-- Authentication/authorisation issues
-- Sensitive data exposure
-- Security misconfigurations
+## Using Skills
 
-### Security Workflow
-1. **Pre-commit**: Review changes before committing
-2. **PR Review**: Automated security checks on pull requests
-3. **Periodic Audits**: Regular full-codebase security scans
-4. **Dependency Review**: Check for vulnerable dependencies
+Skills are invoked automatically when relevant, or you can invoke them explicitly:
 
-### Practical Exercise
-1. Run `/security-review` on your project
-2. Address any identified vulnerabilities
-3. Create a custom security-focused slash command
-4. Set up a pre-commit hook for security checks
+```
+> Analyse the quarterly report at ./reports/Q4-2024.pdf
+
+  [PDF skill activated - extracting structured content...]
+```
+
+```
+> Extract all tables from ./data/financial-data.xlsx and summarise the trends
+
+  [XLSX skill activated - parsing spreadsheet...]
+```
+
+## Skill Capabilities
+
+### PDF Skill
+- Extract text with formatting preserved
+- Parse tables into structured data
+- Extract embedded images
+- Read metadata (author, creation date, etc.)
+- Handle multi-page documents
+
+### XLSX Skill
+- Read multiple sheets
+- Parse formulas and values
+- Handle merged cells
+- Extract charts as data
+- Process large spreadsheets efficiently
+
+### DOCX Skill
+- Extract formatted text
+- Parse tables and lists
+- Handle images and diagrams
+- Read comments and track changes
+- Extract document metadata
+
+## When Skills Activate
+
+Skills activate automatically based on:
+1. File extension (.pdf, .xlsx, .docx)
+2. File content type
+3. Explicit invocation
+
+```
+> Read ./docs/specification.pdf
+  # PDF skill auto-activates
+
+> What does the spreadsheet at ./data/metrics.xlsx show?
+  # XLSX skill auto-activates
+```
 
 ---
 
-## Module 12: GitHub Actions & CI/CD Integration
+# Part 14: MCP Servers
 
-### Learning Objectives
-- Set up Claude Code GitHub Action
-- Automate code review on pull requests
-- Implement automated issue triage
-- Build CI/CD pipelines with Claude Code
+## What is MCP?
 
-### Core Reading
-- [Claude Code GitHub Actions](https://code.claude.com/docs/en/github-actions)
-- [anthropics/claude-code-action](https://github.com/anthropics/claude-code-action)
+MCP (Model Context Protocol) extends Claude Code with additional tools by connecting to external servers.
 
-### Basic GitHub Action Setup
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         MCP ARCHITECTURE                                        │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────┐         ┌─────────────┐         ┌─────────────┐               │
+│  │             │         │             │         │             │               │
+│  │ Claude Code │ ◄─────► │ MCP Server  │ ◄─────► │  Database   │               │
+│  │             │         │             │         │             │               │
+│  └─────────────┘         └─────────────┘         └─────────────┘               │
+│                                                                                 │
+│  ┌─────────────┐         ┌─────────────┐         ┌─────────────┐               │
+│  │             │         │             │         │             │               │
+│  │ Claude Code │ ◄─────► │ MCP Server  │ ◄─────► │  External   │               │
+│  │             │         │             │         │    API      │               │
+│  └─────────────┘         └─────────────┘         └─────────────┘               │
+│                                                                                 │
+│  MCP servers provide Claude Code with:                                          │
+│  • Database access (query, understand schema)                                   │
+│  • External API integration                                                     │
+│  • Custom tools specific to your workflow                                       │
+│  • Access to internal systems                                                   │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Configuring MCP Servers
+
+Add to `.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "database": {
+      "command": "python",
+      "args": ["-m", "mcp_server_postgres"],
+      "env": {
+        "DATABASE_URL": "postgresql://localhost/mydb"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+## Using MCP Tools
+
+Once configured, MCP tools appear alongside built-in tools:
+
+```
+> /mcp
+
+╭─ MCP Servers ───────────────────────────────────────────────────────────────────╮
+│                                                                                 │
+│  database (connected)                                                           │
+│  ├── query          - Execute SQL query                                         │
+│  ├── schema         - Get database schema                                       │
+│  └── tables         - List all tables                                           │
+│                                                                                 │
+│  github (connected)                                                             │
+│  ├── list_prs       - List pull requests                                        │
+│  ├── get_issue      - Get issue details                                         │
+│  └── create_pr      - Create pull request                                       │
+│                                                                                 │
+╰─────────────────────────────────────────────────────────────────────────────────╯
+```
+
+```
+> Show me the database schema for the users table
+
+  [Using MCP: database.schema]
+
+  Table: users
+  ├── id (integer, primary key)
+  ├── email (varchar(255), unique)
+  ├── password_hash (varchar(255))
+  ├── created_at (timestamp)
+  └── updated_at (timestamp)
+```
+
+---
+
+# Part 15: Claude Code SDK (Python)
+
+## Overview
+
+The Claude Code SDK allows you to control Claude Code programmatically - perfect for automation, CI/CD integration, and building custom tools.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         SDK vs CLI                                              │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  Aspect              │ CLI                    │ SDK                             │
+│  ────────────────────┼────────────────────────┼──────────────────────────────── │
+│  Interface           │ Interactive terminal   │ Python code                     │
+│  Authentication      │ Browser OAuth          │ Uses existing CLI auth          │
+│  Best for            │ Interactive work       │ Automation, scripts             │
+│  Customisation       │ Slash commands         │ Full programmatic control       │
+│                                                                                 │
+│  KEY POINT: The SDK uses your existing Claude Code authentication.              │
+│  If `claude` works in your terminal, the SDK works too.                         │
+│  No API keys needed.                                                            │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Installation
+
+```bash
+pip install claude-code-sdk
+```
+
+## Basic Usage
+
+```python
+from claude_code_sdk import ClaudeCode
+
+# No API key needed - uses your existing Claude Code authentication
+claude = ClaudeCode()
+
+# Run a simple task
+result = claude.run(
+    prompt="Explain the main function in src/main.py",
+    cwd="/path/to/project"
+)
+
+print(result.response)
+```
+
+## Practical Examples
+
+### Batch Code Review
+
+```python
+from claude_code_sdk import ClaudeCode
+from pathlib import Path
+
+claude = ClaudeCode()
+
+def review_python_files(directory: str) -> dict:
+    """Review all Python files in a directory."""
+    results = {}
+
+    for py_file in Path(directory).glob("**/*.py"):
+        print(f"Reviewing {py_file}...")
+
+        result = claude.run(
+            prompt=f"""Review {py_file} for:
+            - Code quality issues
+            - Potential bugs
+            - Security vulnerabilities
+
+            Be concise. List issues with line numbers.""",
+            cwd=directory
+        )
+
+        results[str(py_file)] = result.response
+
+    return results
+
+
+if __name__ == "__main__":
+    reviews = review_python_files("./src")
+
+    for file, review in reviews.items():
+        print(f"\n{'='*60}")
+        print(f"FILE: {file}")
+        print('='*60)
+        print(review)
+```
+
+### Automated Documentation Generator
+
+```python
+from claude_code_sdk import ClaudeCode
+from pathlib import Path
+
+claude = ClaudeCode()
+
+def generate_module_docs(module_path: str) -> str:
+    """Generate documentation for a Python module."""
+
+    result = claude.run(
+        prompt=f"""Analyse {module_path} and generate documentation in Markdown format:
+
+        1. Module overview (2-3 sentences)
+        2. List of classes with brief descriptions
+        3. List of functions with signatures and descriptions
+        4. Usage examples
+
+        Output only the Markdown, no explanations.""",
+        cwd="."
+    )
+
+    return result.response
+
+
+def document_project(src_dir: str, output_dir: str):
+    """Generate documentation for all modules in a project."""
+
+    Path(output_dir).mkdir(exist_ok=True)
+
+    for py_file in Path(src_dir).glob("**/*.py"):
+        if py_file.name.startswith("_"):
+            continue
+
+        print(f"Documenting {py_file}...")
+
+        docs = generate_module_docs(str(py_file))
+
+        # Create output path
+        relative = py_file.relative_to(src_dir)
+        output_path = Path(output_dir) / relative.with_suffix(".md")
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        output_path.write_text(docs)
+        print(f"  → {output_path}")
+
+
+if __name__ == "__main__":
+    document_project("./src", "./docs/api")
+```
+
+### Test Generator
+
+```python
+from claude_code_sdk import ClaudeCode
+from pathlib import Path
+
+claude = ClaudeCode()
+
+def generate_tests(source_file: str) -> str:
+    """Generate pytest tests for a source file."""
+
+    result = claude.run(
+        prompt=f"""Generate comprehensive pytest tests for {source_file}.
+
+        Requirements:
+        - Use pytest fixtures where appropriate
+        - Include edge cases
+        - Mock external dependencies
+        - Follow AAA pattern (Arrange, Act, Assert)
+        - Add docstrings explaining each test
+
+        Output only the Python code, no explanations.""",
+        cwd="."
+    )
+
+    return result.response
+
+
+def generate_missing_tests(src_dir: str, test_dir: str):
+    """Generate tests for source files that don't have them."""
+
+    for src_file in Path(src_dir).glob("**/*.py"):
+        if src_file.name.startswith("_"):
+            continue
+
+        # Determine expected test file path
+        relative = src_file.relative_to(src_dir)
+        test_file = Path(test_dir) / f"test_{relative}"
+
+        if test_file.exists():
+            print(f"Tests exist for {src_file}, skipping")
+            continue
+
+        print(f"Generating tests for {src_file}...")
+
+        tests = generate_tests(str(src_file))
+
+        test_file.parent.mkdir(parents=True, exist_ok=True)
+        test_file.write_text(tests)
+        print(f"  → {test_file}")
+
+
+if __name__ == "__main__":
+    generate_missing_tests("./src", "./tests")
+```
+
+### Custom Code Analysis Tool
+
+```python
+from claude_code_sdk import ClaudeCode
+from dataclasses import dataclass
+from pathlib import Path
+import json
+
+claude = ClaudeCode()
+
+@dataclass
+class SecurityIssue:
+    file: str
+    line: int
+    severity: str
+    description: str
+    recommendation: str
+
+
+def security_scan(directory: str) -> list[SecurityIssue]:
+    """Scan a directory for security issues."""
+
+    result = claude.run(
+        prompt=f"""Perform a security audit of the Python code in {directory}.
+
+        Look for:
+        - SQL injection vulnerabilities
+        - Command injection
+        - Hardcoded secrets
+        - Insecure deserialization
+        - Path traversal
+        - XSS vulnerabilities
+
+        Output as JSON array with this structure:
+        [{{
+            "file": "path/to/file.py",
+            "line": 42,
+            "severity": "high|medium|low",
+            "description": "What the issue is",
+            "recommendation": "How to fix it"
+        }}]
+
+        Output ONLY the JSON, no other text.""",
+        cwd=directory
+    )
+
+    # Parse the JSON response
+    issues_data = json.loads(result.response)
+
+    return [SecurityIssue(**issue) for issue in issues_data]
+
+
+def print_security_report(issues: list[SecurityIssue]):
+    """Print a formatted security report."""
+
+    print("\n" + "="*70)
+    print("SECURITY SCAN REPORT")
+    print("="*70)
+
+    # Group by severity
+    high = [i for i in issues if i.severity == "high"]
+    medium = [i for i in issues if i.severity == "medium"]
+    low = [i for i in issues if i.severity == "low"]
+
+    for severity, items in [("HIGH", high), ("MEDIUM", medium), ("LOW", low)]:
+        if items:
+            print(f"\n{severity} SEVERITY ({len(items)} issues)")
+            print("-"*40)
+            for issue in items:
+                print(f"\n  File: {issue.file}:{issue.line}")
+                print(f"  Issue: {issue.description}")
+                print(f"  Fix: {issue.recommendation}")
+
+    print("\n" + "="*70)
+    print(f"Total: {len(high)} high, {len(medium)} medium, {len(low)} low")
+    print("="*70)
+
+
+if __name__ == "__main__":
+    issues = security_scan("./src")
+    print_security_report(issues)
+```
+
+### Integration with Pre-commit Hook
+
+```python
+#!/usr/bin/env python3
+"""Pre-commit hook using Claude Code SDK."""
+
+from claude_code_sdk import ClaudeCode
+import subprocess
+import sys
+
+claude = ClaudeCode()
+
+def get_staged_files() -> list[str]:
+    """Get list of staged Python files."""
+    result = subprocess.run(
+        ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
+        capture_output=True,
+        text=True
+    )
+    return [f for f in result.stdout.strip().split("\n") if f.endswith(".py")]
+
+
+def review_changes() -> tuple[bool, str]:
+    """Review staged changes for issues."""
+
+    files = get_staged_files()
+    if not files:
+        return True, "No Python files to review"
+
+    result = claude.run(
+        prompt=f"""Review the staged changes (git diff --cached) for critical issues only:
+
+        Files changed: {', '.join(files)}
+
+        Check for:
+        1. Obvious bugs (null references, infinite loops, etc.)
+        2. Security vulnerabilities
+        3. Syntax errors
+
+        If there are critical issues, output them clearly.
+        If no critical issues, just say "LGTM".
+
+        Be concise.""",
+        cwd="."
+    )
+
+    response = result.response.strip()
+
+    if "LGTM" in response:
+        return True, response
+    else:
+        return False, response
+
+
+if __name__ == "__main__":
+    passed, message = review_changes()
+    print(message)
+    sys.exit(0 if passed else 1)
+```
+
+## SDK Configuration
+
+```python
+from claude_code_sdk import ClaudeCode
+
+# Basic configuration
+claude = ClaudeCode(
+    cwd="/path/to/default/project",  # Default working directory
+    model="opus",                     # Default model
+    compact=True,                     # Use compact mode
+)
+
+# Run with overrides
+result = claude.run(
+    prompt="Analyse this code",
+    cwd="/different/project",  # Override for this call
+    model="haiku",             # Use faster model for simple task
+)
+```
+
+---
+
+# Part 16: GitHub Actions Integration
+
+## Automated PR Reviews
+
 ```yaml
+# .github/workflows/claude-review.yml
 name: Claude Code Review
+
 on:
   pull_request:
     types: [opened, synchronize]
@@ -1130,193 +1707,193 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           mode: review
 ```
 
-### Use Cases
-1. **Automated Code Review**: Get AI feedback on every PR
-2. **Issue Triage**: Automatically label and prioritise issues
-3. **Documentation Updates**: Auto-generate docs for code changes
-4. **Security Scanning**: Run security reviews on PRs
+## Issue Triage
 
-### Practical Exercise
-1. Add the Claude Code Action to a repository
-2. Configure it for automated PR reviews
-3. Create a workflow for issue triage
-4. Set up security review automation
+```yaml
+# .github/workflows/issue-triage.yml
+name: Issue Triage
 
----
+on:
+  issues:
+    types: [opened]
 
-## Module 13: Real-World Case Studies
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-### Learning Objectives
-- Learn from Anthropic's internal usage patterns
-- Understand cross-functional applications
-- Identify opportunities in your own work
-
-### Core Reading
-- [How Anthropic Teams Use Claude Code](https://www.anthropic.com/news/how-anthropic-teams-use-claude-code)
-
-### Case Study Highlights
-
-**Engineering Teams**
-- Rapid prototyping and iteration
-- Legacy code modernisation
-- Cross-language migrations
-
-**Legal/Compliance**
-- Contract review automation
-- Policy compliance checking
-- Documentation analysis
-
-**Marketing/Content**
-- Content generation workflows
-- Data-driven insights
-- Campaign analysis
-
-**Data Science**
-- Visualisation generation
-- Data pipeline development
-- Analysis automation
-
-### Reflection Exercise
-1. Identify three tasks in your role that Claude Code could help with
-2. Design a workflow for each task
-3. Implement and test the most impactful one
-4. Share learnings with your team
-
----
-
-## Module 14: Claude Code on the Web
-
-### Learning Objectives
-- Access Claude Code through browser interface
-- Understand when to use web vs CLI
-- Collaborate using web-based sessions
-
-### Core Reading
-- [Claude Code on the Web](https://www.anthropic.com/news/claude-code-on-the-web)
-
-### Web vs CLI
-| Feature | Web | CLI |
-|---------|-----|-----|
-| File system access | Limited/sandboxed | Full access |
-| Terminal commands | Sandboxed | Full access |
-| Collaboration | Easier sharing | Local only |
-| Setup required | None | Installation |
-| Best for | Quick tasks, sharing | Full development |
-
-### When to Use Web
-- Quick explorations without local setup
-- Sharing sessions with team members
-- Working on unfamiliar machines
-- Demonstrating Claude Code capabilities
-
-### Practical Exercise
-1. Access Claude Code on the web
-2. Complete a simple coding task
-3. Compare the experience with CLI
-4. Identify scenarios where each excels
-
----
-
-## Quick Reference: Context Economy Cheatsheet
-
-### Token-Saving Techniques
-
-| Technique | Savings | When to Use |
-|-----------|---------|-------------|
-| Subagents for exploration | High | Research, codebase understanding |
-| Targeted file reading | Medium | Working with specific functions |
-| `/compact` mode | Medium | Long sessions |
-| Fresh sessions | High | Switching tasks |
-| Strategic CLAUDE.md routing | Medium | Large projects |
-| Avoiding full file reads | High | Large files (500+ lines) |
-
-### Prompting Efficiency
-
-```
-# Inefficient (multiple rounds)
-"What files handle auth?" → "Show me login" → "Show me logout"
-
-# Efficient (single comprehensive request)
-"Show me the login and logout implementations in the auth module"
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          mode: triage
+          issue_number: ${{ github.event.issue.number }}
 ```
 
-### Context Red Flags
-- Reading entire large files unnecessarily
-- Long exploratory conversations without clear goals
-- Not using subagents for research tasks
-- Continuing sessions across unrelated tasks
+## Security Review on PRs
 
----
+```yaml
+# .github/workflows/security-review.yml
+name: Security Review
 
-## Quick Reference: Prompting Patterns
+on:
+  pull_request:
+    types: [opened, synchronize]
 
-### Task Patterns
-| Pattern | Example | Use Case |
-|---------|---------|----------|
-| Direct | "Add validation to form" | Simple, clear tasks |
-| Plan | "/plan Refactor auth system" | Complex changes |
-| Explore | "How does caching work here?" | Understanding code |
-| Extended | "Think deeply about optimising..." | Complex reasoning |
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-### Constraint Patterns
-```
-"Do X with these constraints: ..."
-"Do X but do NOT: ..."
-"Do X following the pattern in Y"
-```
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Perform a security review of the changes in this PR.
+            Focus on:
+            - Authentication/authorization issues
+            - Input validation
+            - SQL injection
+            - XSS vulnerabilities
+            - Sensitive data exposure
 
-### Multi-Phase Pattern
-```
-"Phase 1: Analyse... [wait for approval]
- Phase 2: Plan... [wait for approval]
- Phase 3: Implement..."
+            Report findings as comments on specific lines.
 ```
 
 ---
 
-## Assessment & Certification
+# Part 17: Best Practices & Tips
 
-### Knowledge Check
-Complete these tasks to demonstrate proficiency:
+## Do's and Don'ts
 
-1. **Foundation** (Modules 1-2)
-   - [ ] Successfully install and configure Claude Code
-   - [ ] Complete a basic codebase exploration
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         BEST PRACTICES                                          │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  DO ✓                                                                           │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  • Create a CLAUDE.md for every project                                         │
+│  • Be specific in your requests                                                 │
+│  • Use /plan for complex changes                                                │
+│  • Start fresh sessions for new tasks                                           │
+│  • Let subagents handle exploration                                             │
+│  • Review generated code before committing                                      │
+│  • Use custom commands for repetitive workflows                                 │
+│                                                                                 │
+│  DON'T ✗                                                                        │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  • Don't read entire large files unnecessarily                                  │
+│  • Don't continue sessions across unrelated tasks                               │
+│  • Don't give vague prompts ("fix this", "improve this")                        │
+│  • Don't skip reviewing generated code                                          │
+│  • Don't forget to use /compact in long sessions                                │
+│  • Don't ignore permission prompts - understand what's being done               │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
 
-2. **Information Architecture** (Modules 3-4)
-   - [ ] Create a CLAUDE.md hierarchy with routing
-   - [ ] Demonstrate context-efficient workflows
-   - [ ] Work with a large file using targeted approaches
+## Productivity Tips
 
-3. **Advanced Prompting** (Modules 5-6)
-   - [ ] Use plan mode for a complex task
-   - [ ] Write multi-phase workflow prompts
-   - [ ] Use extended thinking effectively
+### 1. Create Project-Specific Commands
 
-4. **Subagents & Multi-Modal** (Modules 7-8)
-   - [ ] Trigger and utilise subagents appropriately
-   - [ ] Analyse screenshots for debugging
-   - [ ] Design parallel subagent workflows
+```markdown
+# .claude/commands/pr.md
+Create a pull request for the current branch:
+1. Summarise all commits since branching from main
+2. Generate a clear PR title and description
+3. Create the PR using gh cli
+```
 
-5. **SDK & Automation** (Modules 9-12)
-   - [ ] Build a custom workflow with the SDK
-   - [ ] Set up GitHub Actions integration
-   - [ ] Create custom slash commands
+### 2. Use Templates in CLAUDE.md
 
-### Final Project
-Create a complete Claude Code setup for a project including:
-- Optimised CLAUDE.md hierarchy with document routing
-- Custom slash commands for team workflows
-- SDK scripts for automation
-- GitHub Actions integration
-- Context management strategy documentation
-- Documentation for team onboarding
+```markdown
+## Code Patterns
+
+When creating new endpoints, follow this template:
+\```python
+@router.post("/", response_model=schemas.Response)
+async def create_item(
+    data: schemas.CreateRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> schemas.Response:
+    """Create a new item."""
+    return await services.item.create(db, data=data, user=user)
+\```
+```
+
+### 3. Leverage Non-Interactive Mode for Scripts
+
+```bash
+# Quick checks
+claude -p "are there any TODO comments in src/?"
+
+# Generate and save
+claude -p "write a README for this project" > README.md
+
+# Chain with other tools
+claude -p "list all API endpoints" | grep POST
+```
+
+### 4. Use Keyboard Shortcuts
+
+- `Ctrl+C` to interrupt long operations
+- `↑` to recall previous prompts
+- `Tab` to autocomplete paths
+
+### 5. Regular Context Maintenance
+
+```
+# Check context usage periodically
+> /status
+
+# Compact when above 50%
+> /compact
+
+# Start fresh for unrelated tasks
+$ claude  # (not --continue)
+```
+
+---
+
+## Quick Reference Card
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                     CLAUDE CODE QUICK REFERENCE                                 │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  STARTING                          SESSION COMMANDS                             │
+│  claude                            /help         - Show help                    │
+│  claude "prompt"                   /status       - Session info                 │
+│  claude -c (continue)              /compact      - Reduce context               │
+│  claude -p "prompt" (print)        /clear        - Clear history                │
+│  claude --compact                  /plan         - Enter plan mode              │
+│                                                                                 │
+│  KEYBOARD                          PROMPTING                                    │
+│  Ctrl+C    - Cancel                Be specific, not vague                       │
+│  Ctrl+D    - Exit                  Use /plan for complex tasks                  │
+│  ↑/↓       - History               Add constraints explicitly                   │
+│  Tab       - Autocomplete          Reference existing patterns                  │
+│                                                                                 │
+│  CONTEXT TIPS                      FILES                                        │
+│  Fresh session = new task          Use CLAUDE.md for project context            │
+│  /compact when > 50% full          Route to detailed docs                       │
+│  Subagents for exploration         Read sections, not whole files               │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -1324,18 +1901,13 @@ Create a complete Claude Code setup for a project including:
 
 ### Official Documentation
 - [Claude Code Overview](https://docs.anthropic.com/en/docs/claude-code/overview)
-- [Release Notes](https://support.claude.com/en/articles/12138966-release-notes)
-
-### Learning Platforms
-- [Anthropic Academy: Build with Claude](https://www.anthropic.com/learn/build-with-claude)
+- [Common Workflows](https://docs.anthropic.com/en/docs/claude-code/common-workflows)
+- [Settings Reference](https://docs.anthropic.com/en/docs/claude-code/settings)
+- [Best Practices](https://www.anthropic.com/engineering/claude-code-best-practices)
 
 ### Repositories
 - [anthropics/claude-code](https://github.com/anthropics/claude-code)
 - [anthropics/claude-code-action](https://github.com/anthropics/claude-code-action)
-
-### Community
-- GitHub Issues for questions and feedback
-- Anthropic Discord (if available)
 
 ---
 
@@ -1343,9 +1915,9 @@ Create a complete Claude Code setup for a project including:
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0 | December 2025 | Initial programme release |
-| 1.1 | December 2025 | Added: Subagents, Information Routing, SDK deep-dive, Context Economy, Large Files, Multi-modality, Advanced Prompting |
+| 1.0 | December 2025 | Initial programme |
+| 2.0 | December 2025 | Complete rewrite: CLI focus, Python examples, visual guides, skills documentation |
 
 ---
 
-*This training programme is based on official Anthropic documentation and resources. For the latest updates, always refer to the official documentation.*
+*This training programme is based on official Anthropic documentation. For the latest updates, refer to [docs.anthropic.com](https://docs.anthropic.com).*
