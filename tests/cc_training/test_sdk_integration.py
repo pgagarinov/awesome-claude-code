@@ -20,7 +20,7 @@ pytestmark = pytest.mark.integration
 @pytest.fixture
 def project_dir():
     """Return the project root directory."""
-    return str(Path(__file__).parent.parent)
+    return str(Path(__file__).parent.parent.parent)
 
 
 @pytest.mark.asyncio

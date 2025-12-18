@@ -5,7 +5,7 @@ import ast
 from pathlib import Path
 
 
-EXAMPLES_DIR = Path(__file__).parent.parent / "src" / "cc_training" / "examples"
+EXAMPLES_DIR = Path(__file__).parent.parent.parent / "src" / "cc_training" / "examples"
 
 
 def get_example_files():
