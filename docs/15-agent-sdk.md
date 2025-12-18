@@ -33,6 +33,24 @@ pip install claude-agent-sdk
 pixi add --pypi claude-agent-sdk
 ```
 
+## Runnable Examples
+
+This repository includes working examples you can run:
+
+| Example | Description |
+|---------|-------------|
+| [01_basic_query.py](../src/cc_training/examples/01_basic_query.py) | Simple query to Claude Code |
+| [02_with_options.py](../src/cc_training/examples/02_with_options.py) | Configuring options and parameters |
+| [03_file_analysis.py](../src/cc_training/examples/03_file_analysis.py) | Analyzing files in a project |
+| [04_batch_processing.py](../src/cc_training/examples/04_batch_processing.py) | Processing multiple items |
+| [05_message_handling.py](../src/cc_training/examples/05_message_handling.py) | Working with message streams |
+| [06_code_reviewer.py](../src/cc_training/examples/06_code_reviewer.py) | Building a code review tool |
+
+```bash
+# Run an example
+pixi run python src/cc_training/examples/01_basic_query.py
+```
+
 ## SDK Components
 
 | Component | Use Case |
