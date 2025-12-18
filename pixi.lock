@@ -29,7 +29,6 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/70/7d/9bc192684cea499815ff478dfcdc13835ddf401365057044fb721ec6bddb/certifi-2025.11.12-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/59/dd/27e9fa567a23931c838c6b02d0764611c62290062a6d4e8ff7863daf9730/cffi-2.0.0-cp314-cp314-macosx_11_0_arm64.whl
       - pypi: https://files.pythonhosted.org/packages/06/14/f529f7c4bab7c71dcbcc8c66f12f491e644ee8a027ac5111d13705df207e/claude_agent_sdk-0.1.18-py3-none-macosx_11_0_arm64.whl
-      - pypi: https://files.pythonhosted.org/packages/f5/41/c934058080f3233bbc95bc9abac5e0191bf336ad5f69a33b5f54a4737e88/claude_code_sdk-0.0.25-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/98/78/01c019cdb5d6498122777c1a43056ebb3ebfeef2076d9d026bfe15583b2b/click-8.3.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/1d/42/9c391dd801d6cf0d561b5890549d4b27bafcc53b39c31a817e69d87c625b/cryptography-46.0.3-cp311-abi3-macosx_10_9_universal2.whl
       - pypi: https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl
@@ -101,9 +100,8 @@ packages:
 - pypi: ./
   name: cc-training
   version: 0.1.0
-  sha256: b96e60e31fed3d34dd34c2cd0c2f4296cd5214141d4ca2bde4572aae9ba05a8f
+  sha256: 5b6838ffa91d100879935cdfe8a536f32b2e0823094192856f02b51af214083e
   requires_dist:
-  - claude-code-sdk>=0.0.25,<0.0.26
   - claude-agent-sdk>=0.1.18,<0.2
   requires_python: '>=3.11'
   editable: true
@@ -123,21 +121,6 @@ packages:
   name: claude-agent-sdk
   version: 0.1.18
   sha256: 9e45b4e3c20c072c3e3325fa60bab9a4b5a7cbbce64ca274b8d7d0af42dd9dd8
-  requires_dist:
-  - anyio>=4.0.0
-  - mcp>=0.1.0
-  - typing-extensions>=4.0.0 ; python_full_version < '3.11'
-  - anyio[trio]>=4.0.0 ; extra == 'dev'
-  - mypy>=1.0.0 ; extra == 'dev'
-  - pytest-asyncio>=0.20.0 ; extra == 'dev'
-  - pytest-cov>=4.0.0 ; extra == 'dev'
-  - pytest>=7.0.0 ; extra == 'dev'
-  - ruff>=0.1.0 ; extra == 'dev'
-  requires_python: '>=3.10'
-- pypi: https://files.pythonhosted.org/packages/f5/41/c934058080f3233bbc95bc9abac5e0191bf336ad5f69a33b5f54a4737e88/claude_code_sdk-0.0.25-py3-none-any.whl
-  name: claude-code-sdk
-  version: 0.0.25
-  sha256: 3d6a4ef958182f311d6050776d2675d9b39650a2db221c582a0a5156472dcee3
   requires_dist:
   - anyio>=4.0.0
   - mcp>=0.1.0
