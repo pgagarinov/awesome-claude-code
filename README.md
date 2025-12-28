@@ -33,6 +33,7 @@ A comprehensive guide to mastering Claude Code - from first launch to advanced a
 16. [Claude Agent SDK (Python)](docs/16-agent-sdk.md)
 17. [GitHub Actions Integration](docs/17-github-actions.md)
 18. [Best Practices & Tips](docs/18-best-practices.md)
+19. [Running Agents in Parallel](docs/19-parallel-agents.md)
 
 ---
 
