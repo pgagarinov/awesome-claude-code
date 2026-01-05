@@ -34,6 +34,11 @@ A comprehensive guide to mastering Claude Code - from first launch to advanced a
 17. [GitHub Actions Integration](docs/17-github-actions.md)
 18. [Best Practices & Tips](docs/18-best-practices.md)
 19. [Running Agents in Parallel](docs/19-parallel-agents.md)
+20. [LSP Plugins for Code Intelligence](docs/20-lsp-plugins.md)
+21. [SSH Multiplexing for Remote Development](docs/21-ssh-multiplexing.md)
+22. [Claude Code Hooks](docs/22-hooks.md)
+23. [Working on Multiple Features in Parallel](docs/23-parallel-features.md)
+24. [The Ralf Loop - Preventing Premature Stops](docs/24-ralf-loop.md)
 
 ---
 
