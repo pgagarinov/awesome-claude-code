@@ -39,6 +39,7 @@ A comprehensive guide to mastering Claude Code - from first launch to advanced a
 22. [Claude Code Hooks](docs/22-hooks.md)
 23. [Working on Multiple Features in Parallel](docs/23-parallel-features.md)
 24. [The Ralf Loop - Preventing Premature Stops](docs/24-ralf-loop.md)
+25. [Dev Containers with Claude Code](docs/25-dev-containers.md)
 
 ---
 

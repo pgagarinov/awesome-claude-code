@@ -1,37 +1,48 @@
 # Part 21: SSH Multiplexing for Remote Development
 
-## The Challenge
+## The Use Case
 
-When working with remote servers, you often want Claude Code's assistance without installing it directly on the server. SSH multiplexing and proper remote configuration can provide smoother remote development experiences.
+Sometimes you need to work with code on a remote server but cannot or do not want to install Claude Code directly on that server. Common scenarios:
+
+- **No installation permissions**: Restricted server access, can't install software
+- **Shared servers**: Don't want to install per-user tools on shared infrastructure
+- **Security policies**: Organization restricts what can be installed on production-like environments
+- **Temporary access**: Working with ephemeral or short-lived remote environments
+- **Resource constraints**: Remote server has limited disk space or dependencies
+
+SSH multiplexing lets you run Claude Code **locally** while working with **remote files** efficiently.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                      REMOTE DEVELOPMENT OPTIONS                             │
+│                    SSH MULTIPLEXING ARCHITECTURE                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  Option A: Full Remote Install                                              │
-│  ┌──────────┐      SSH      ┌───────────────────────────────────┐          │
-│  │  Local   │──────────────►│  Remote Server                    │          │
-│  │  Terminal│               │  ┌─────────────────────────────┐  │          │
-│  └──────────┘               │  │  Claude Code (full install) │  │          │
-│                             │  └─────────────────────────────┘  │          │
-│                             └───────────────────────────────────┘          │
+│  ┌─────────────────────┐    SSH Multiplexing    ┌─────────────────────┐    │
+│  │  Local Machine      │◄─────────────────────►│  Remote Server      │    │
+│  │                     │   Persistent Master     │                     │    │
+│  │  ┌───────────────┐  │   Connection (shared)   │  ┌──────────────┐  │    │
+│  │  │ Claude Code   │──┼──────────ssh───────────┼─►│ Tools execute│  │    │
+│  │  │ (runs here)   │  │   ║║║║║║║║║║║           │  │ here via ssh │  │    │
+│  │  └───────────────┘  │   ║║║║║║║║║║║           │  │              │  │    │
+│  │         │           │   ║║║║║║║║║║║           │  │ • bash       │  │    │
+│  │         │ initiates │   ▼▼▼▼▼▼▼▼▼▼▼           │  │ • cat/read   │  │    │
+│  │         │ remote    │   Multiple SSH          │  │ • grep       │  │    │
+│  │         │ commands  │   sessions share        │  │ • write      │  │    │
+│  │         └──────via──┼──► ONE connection       │  └──────────────┘  │    │
+│  │            ssh      │                         │                     │    │
+│  │                     │                         │  ┌──────────────┐  │    │
+│  │                     │                         │  │ Project Files│  │    │
+│  │                     │                         │  │              │  │    │
+│  └─────────────────────┘                         └─────────────────────┘    │
 │                                                                             │
-│  Option B: SSH Multiplexing + Local Claude                                  │
-│  ┌─────────────────────┐    SSH     ┌─────────────────────┐                │
-│  │  Local Machine      │◄──mux────►│  Remote Server      │                │
-│  │  ┌───────────────┐  │   ││       │  (files only)       │                │
-│  │  │ Claude Code   │  │   ││       └─────────────────────┘                │
-│  │  └───────────────┘  │   ││                                              │
-│  └─────────────────────┘   ││                                              │
-│       Persistent connection ▼▼                                              │
+│  Claude Code runs locally, logs in via SSH, executes tools on remote       │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## SSH Multiplexing Configuration
 
-SSH multiplexing maintains a persistent connection, reducing latency for subsequent commands:
+SSH multiplexing maintains a persistent master connection that all subsequent SSH operations share, dramatically reducing latency.
 
 Add to `~/.ssh/config`:
 
@@ -53,96 +64,76 @@ Host dev-server
 |--------|-------|-------------|
 | `ControlMaster` | `auto` | Automatically use existing connection or create new master |
 | `ControlPath` | `~/.ssh/control-%h-%p-%r` | Socket file path (host-port-user) |
-| `ControlPersist` | `600` | Keep connection alive for 10 minutes after last use |
+| `ControlPersist` | `600` | Keep connection alive for 10 minutes (600s) after last use |
+
+### How It Works
+
+1. **First SSH command** creates a master connection and a socket file
+2. **Subsequent commands** (file reads, bash commands, etc.) reuse that socket
+3. **No repeated authentication** or handshakes
+4. **Master persists** for 10 minutes after the last command finishes
 
 ### Benefits
 
-- **Reduced latency**: No SSH handshake for each command
-- **Faster file operations**: Multiple commands share one connection
+- **Reduced latency**: No SSH handshake for each Claude Code tool call (Read, Bash, etc.)
+- **Faster file operations**: Multiple file operations share one connection
 - **Session persistence**: Connection survives brief network interruptions
+- **Authentication once**: No repeated password/key prompts
 
-## Approach 1: Full Remote Install (Recommended)
+## Using Claude Code with SSH Multiplexing
 
-For the best experience, install Claude Code directly on the remote server:
+Once SSH multiplexing is configured, use Claude Code normally on your local machine:
 
 ```bash
-# SSH to remote server
-ssh dev-server
+# On local machine
+cd /local/path/to/project
 
-# Install Claude Code
-curl -fsSL https://claude.ai/install.sh | bash
+# Configure remote access (if using SSHFS or similar)
+# OR use Claude Code's native SSH support with Bash tool
 
-# Authenticate
-claude auth
-
-# Start working
-cd /path/to/project
+# Start Claude Code locally
 claude
 ```
 
-**Benefits**:
-- Full feature support
-- Native file access speeds
-- No network latency for file reads
-- Hooks and plugins work normally
+Claude Code's tools (Bash, Read, Write, etc.) will automatically benefit from the multiplexed SSH connection when accessing remote files.
 
-## Approach 2: JetBrains Remote Development
-
-If you use JetBrains IDEs with Remote Development:
-
-1. **Install plugin on the remote host** (not the local client)
-2. Connect to remote via JetBrains Gateway
-3. In the remote IDE, open Settings → Plugins (Host)
-4. Install Claude Code plugin
-5. Run Claude from the remote terminal
+### Example Workflow
 
 ```bash
-# In remote terminal within JetBrains
-cd /project
+# Local: Mount remote filesystem (optional, one approach)
+sshfs dev-server:/path/to/project ~/mnt/remote-project
+cd ~/mnt/remote-project
+
+# Local: Start Claude Code
 claude
+
+# In Claude Code session:
+# "Read the main.py file and refactor the authentication logic"
+# Claude's Read tool uses SSH multiplexing → fast read
+# Claude's Write tool uses SSH multiplexing → fast write
 ```
 
-## Approach 3: Dev Containers
+## VSCode Remote Development Integration
 
-For consistent, reproducible remote environments, use Claude Code's official devcontainer:
+If you use VSCode Remote - SSH extension, SSH multiplexing works seamlessly:
 
-```json
-// .devcontainer/devcontainer.json
-{
-  "name": "Claude Code Development",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "20"
-    }
-  },
-  "postCreateCommand": "curl -fsSL https://claude.ai/install.sh | bash",
-  "remoteUser": "vscode",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "anthropic.claude-code"
-      ]
-    }
-  }
-}
-```
+1. **Configure SSH multiplexing** in `~/.ssh/config` (as shown above)
+2. **Connect to remote** via VSCode Remote - SSH
+3. **Start Claude Code locally** in a terminal
+4. **VSCode serves files** from remote, Claude Code reads/writes via SSH
 
-**Features**:
-- Pre-configured Node.js 20
-- Security firewall with allowlisted domains
-- Works on macOS, Windows, and Linux
-- VS Code Remote - Containers integration
+This combines VSCode's remote file access with Claude Code running on your local machine.
 
 ## Environment Detection
 
-Claude Code sets `$CLAUDE_CODE_REMOTE=true` when running in a remote context. Use this for conditional configuration:
+Claude Code sets `$CLAUDE_CODE_REMOTE=true` when it detects remote operations. Use this for conditional configuration:
 
 ```bash
 # In a hook script
 if [ "$CLAUDE_CODE_REMOTE" = "true" ]; then
     # Remote-specific behavior
     echo "Running on remote server"
+    # Maybe skip certain hooks that require local-only tools
 fi
 ```
 
@@ -158,25 +149,41 @@ ls ~/.ssh/control-*
 ssh -O check dev-server
 ```
 
+Output:
+```
+Master running (pid=12345)
+```
+
 ### Manually Close Connections
 
 ```bash
-# Close specific connection
+# Gracefully close specific connection
 ssh -O exit dev-server
 
-# Or remove socket file
+# Or remove socket file (force close)
 rm ~/.ssh/control-dev-server-22-username
 ```
 
-## Comparison: When to Use Each Approach
+### Restart Stale Connection
 
-| Scenario | Recommended Approach |
-|----------|----------------------|
-| Daily development on remote | Full remote install |
-| Occasional remote access | SSH multiplexing + local |
-| Team with shared environments | Dev containers |
-| JetBrains Remote Development | Plugin on remote host |
-| Restricted server (no npm) | SSH multiplexing + local |
+```bash
+# Kill old master
+ssh -O exit dev-server
+
+# Next SSH command creates fresh master
+ssh dev-server "echo Connection established"
+```
+
+## When to Use SSH Multiplexing vs. Direct Install
+
+| Scenario | Approach |
+|----------|----------|
+| No installation permissions on remote | **SSH Multiplexing** (this article) |
+| Shared production-like servers | **SSH Multiplexing** (this article) |
+| Security policy restricts remote installs | **SSH Multiplexing** (this article) |
+| Temporary/ephemeral remote environments | **SSH Multiplexing** (this article) |
+| Your own dedicated development server | Direct install (see [Part 1: Getting Started](01-getting-started.md)) |
+| Need maximum performance for remote work | Direct install (no network latency) |
 
 ## Troubleshooting
 
@@ -191,7 +198,7 @@ ssh -O exit dev-server
 # Remove stale socket
 rm ~/.ssh/control-dev-server-*
 
-# Reconnect
+# Reconnect (creates new master)
 ssh dev-server
 ```
 
@@ -200,17 +207,30 @@ ssh dev-server
 ```bash
 # Fix permissions on socket directory
 chmod 700 ~/.ssh
+
+# Ensure socket path is writable
+mkdir -p ~/.ssh
 ```
 
 ### ControlPath Too Long
 
-Use a shorter path:
+Some systems have limits on socket path length. Use a shorter path:
 
 ```
 ControlPath ~/.ssh/c-%C
 ```
 
-The `%C` is a hash of the connection parameters, keeping the path short.
+The `%C` is a hash of the connection parameters, keeping the path short while remaining unique.
+
+### Slow File Operations Despite Multiplexing
+
+Check that the master connection is actually established:
+
+```bash
+ssh -O check dev-server
+```
+
+If you see "No ControlPath specified" or "Control socket connect(...): No such file or directory", the multiplexing isn't working. Verify your `~/.ssh/config` has the correct `ControlMaster`, `ControlPath`, and `ControlPersist` settings.
 
 ## Summary
 
@@ -222,3 +242,6 @@ The `%C` is a hash of the connection parameters, keeping the path short.
 | Check connection | `ssh -O check hostname` |
 | Close connection | `ssh -O exit hostname` |
 | Remote environment var | `$CLAUDE_CODE_REMOTE` |
+| Best for | When you can't/won't install Claude Code on remote server |
+
+SSH multiplexing enables efficient remote development with Claude Code running locally - no remote installation required.
