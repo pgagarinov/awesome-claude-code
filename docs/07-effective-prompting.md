@@ -116,3 +116,5 @@ Phase 3 - Implementation:
 
 Start with Phase 1 and wait for my go-ahead before each phase.
 ```
+
+> **Preventing Premature Stops**: Multi-phase workflows are prone to Claude stopping between phases or within a phase before completion. To prevent this, use the Ralf Loop pattern with phase-specific validation hooks. See [Part 24: The Ralf Loop - Preventing Premature Stops](24-ralf-loop.md) for implementation details.

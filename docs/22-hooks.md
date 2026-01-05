@@ -26,7 +26,7 @@ Hooks are custom scripts that Claude Code executes at specific points during its
 |------|---------------|----------|
 | `PreToolUse` | Before tool execution | Block dangerous commands, modify inputs |
 | `PostToolUse` | After tool completes | Format code, validate output, inject feedback |
-| `Stop` | When Claude finishes responding | Run validation, prevent premature stops |
+| `Stop` | When Claude finishes responding | Run validation, prevent premature stops (see [Part 24](24-ralf-loop.md) for Ralf Loop patterns) |
 | `SubagentStop` | When a subagent (Task tool) finishes | QA gates on subagent work |
 | `UserPromptSubmit` | When user submits a prompt | Add context, block dangerous requests |
 | `SessionStart` | Session begins or resumes | Load environment, inject context |
@@ -219,6 +219,8 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 ```
+
+> **Advanced Pattern**: This Stop hook is a foundational pattern in the Ralf Loop methodology. For advanced patterns like graduated validation, retry limits, and intelligent completion checking, see [Part 24: The Ralf Loop - Preventing Premature Stops](24-ralf-loop.md).
 
 ## Real-World Example: PostToolUse Hook for CI Watching
 

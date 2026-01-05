@@ -64,6 +64,8 @@ Block Claude until concrete validation passes (tests, linting, builds).
 - Requires defining what "done" means programmatically
 - May block on unrelated validation failures
 
+> **Note**: This approach uses Stop hooks. For a detailed guide on hook syntax, configuration, and best practices, see [Part 22: Claude Code Hooks](22-hooks.md).
+
 **Example** (`.claude/settings.json`):
 
 ```json

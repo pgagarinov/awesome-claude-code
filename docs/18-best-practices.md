@@ -16,6 +16,7 @@
 │  • Let subagents handle exploration                                             │
 │  • Review generated code before committing                                      │
 │  • Use custom commands for repetitive workflows                                 │
+│  • Use Ralf Loop pattern (Part 24) for critical tasks requiring completion     │
 │                                                                                 │
 │  DON'T ✗                                                                        │
 │  ─────────────────────────────────────────────────────────────────────────────  │
@@ -121,6 +122,26 @@ $ claude  # (not --continue)
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## Task Completion Guarantees
+
+For long-running tasks where you need to guarantee Claude completes all work before stopping, use the **Ralf Loop pattern** with Stop hooks. This prevents the common frustration of Claude stopping prematurely before finishing everything you requested.
+
+**When to use the Ralf Loop:**
+- Production code changes requiring validation
+- Multi-step features with dependencies
+- Tasks with explicit testing/validation requirements
+- Critical work that must be verified complete
+
+**How it works:**
+- Stop hooks intercept Claude's attempt to finish
+- Run validation (tests, linting, builds)
+- Block if validation fails, forcing Claude to fix issues
+- Only approve when all completion criteria met
+
+See [Part 24: The Ralf Loop - Preventing Premature Stops](24-ralf-loop.md) for implementation patterns and [Part 22: Claude Code Hooks](22-hooks.md) for configuration details.
 
 ---
 
