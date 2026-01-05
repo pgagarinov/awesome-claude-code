@@ -97,6 +97,39 @@ claude
 
 Claude Code's tools (Bash, Read, Write, etc.) will automatically benefit from the multiplexed SSH connection when accessing remote files.
 
+### Verifying Multiplexing is Working
+
+After your first SSH connection, verify the multiplexing is active:
+
+```bash
+# Check for control socket (should see a file like control-10.1.2.3-22-username)
+ls -lh ~/.ssh/control-*
+
+# Example output:
+# srw------- user staff 0 B Mon Jan  5 08:39:59 2026 /Users/user/.ssh/control-10.1.2.3-22-username
+
+# Check connection status
+ssh -O check dev-server
+# Output: Master running (pid=12345)
+```
+
+### Performance Comparison
+
+With multiplexing properly configured, subsequent commands are significantly faster:
+
+```bash
+# First command (creates master connection)
+time ssh dev-server "whoami"
+# ~0.8-1.5 seconds (includes SSH handshake)
+
+# Subsequent commands (reuse master)
+time ssh dev-server "pwd"        # ~0.15-0.19 seconds
+time ssh dev-server "uname -a"   # ~0.15-0.19 seconds
+time ssh dev-server "hostname"   # ~0.15-0.19 seconds
+```
+
+The 5-10x speedup applies to **all** SSH-based tools: scp, rsync, git, and Claude Code's Bash tool.
+
 ### Example Workflow
 
 ```bash
@@ -109,8 +142,19 @@ claude
 
 # In Claude Code session:
 # "Read the main.py file and refactor the authentication logic"
-# Claude's Read tool uses SSH multiplexing → fast read
-# Claude's Write tool uses SSH multiplexing → fast write
+# Claude's Read tool uses SSH multiplexing → fast read (~0.15s per operation)
+# Claude's Write tool uses SSH multiplexing → fast write (~0.15s per operation)
+# Multiple file operations feel instant due to shared connection
+```
+
+### Testing File Operations
+
+Verify file operations work correctly through multiplexing:
+
+```bash
+# Test creating, reading, and deleting a file
+ssh dev-server "echo 'test content' > /tmp/test.txt && cat /tmp/test.txt && rm /tmp/test.txt"
+# All operations complete quickly using the multiplexed connection
 ```
 
 ## VSCode Remote Development Integration
@@ -142,16 +186,19 @@ fi
 ### Check Active Multiplexed Connections
 
 ```bash
-# List control sockets
-ls ~/.ssh/control-*
+# List all control sockets
+ls -lh ~/.ssh/control-*
+# Output: srw------- user staff 0 B Mon Jan  5 08:39:59 2026 /Users/user/.ssh/control-10.1.2.3-22-username
 
 # Check specific connection status
 ssh -O check dev-server
-```
+# Output: Master running (pid=12345)
 
-Output:
-```
-Master running (pid=12345)
+# The socket file confirms:
+# - Connection to 10.1.2.3 (hostname/IP)
+# - Port 22 (SSH default)
+# - User 'username'
+# - Socket type 's' (socket), permissions 'rw-------' (owner only)
 ```
 
 ### Manually Close Connections
