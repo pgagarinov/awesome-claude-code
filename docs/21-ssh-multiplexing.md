@@ -70,7 +70,7 @@ For the best experience, install Claude Code directly on the remote server:
 ssh dev-server
 
 # Install Claude Code
-npm install -g @anthropic-ai/claude-code
+curl -fsSL https://claude.ai/install.sh | bash
 
 # Authenticate
 claude auth
@@ -116,7 +116,7 @@ For consistent, reproducible remote environments, use Claude Code's official dev
       "version": "20"
     }
   },
-  "postCreateCommand": "npm install -g @anthropic-ai/claude-code",
+  "postCreateCommand": "curl -fsSL https://claude.ai/install.sh | bash",
   "remoteUser": "vscode",
   "customizations": {
     "vscode": {
