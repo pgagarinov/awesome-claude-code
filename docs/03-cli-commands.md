@@ -123,6 +123,8 @@ claude --permission-mode trusted
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+For the complete CLI reference, see the [official CLI documentation](https://code.claude.com/docs/en/cli-reference).
+
 ## Practical Examples
 
 ```bash
@@ -140,4 +142,17 @@ claude --continue
 
 # Start fresh session with specific files pre-loaded
 claude --add-file pyproject.toml --add-file src/main.py "help me add a new dependency"
+```
+
+## Using Claude as a Unix Utility
+
+Pipe data to Claude for scripted workflows:
+
+```bash
+# Analyse file content
+cat error.log | claude -p "summarise the errors"
+
+# Output formats
+claude -p "list functions" --output-format json
+claude -p "explain this" --output-format stream-json
 ```

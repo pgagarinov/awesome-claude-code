@@ -28,6 +28,8 @@ For complex tasks where you want to review the approach first:
 - Unfamiliar codebases
 - When multiple valid approaches exist
 
+Enable plan mode via CLI with `claude --permission-mode plan` or toggle with `Shift+Tab` during a session. See [Common Workflows: Plan Mode](https://code.claude.com/docs/en/common-workflows#use-plan-mode-for-safe-code-analysis).
+
 ### 3. Exploration Mode
 When you need information before acting:
 
@@ -39,12 +41,14 @@ When you need information before acting:
 ```
 
 ### 4. Extended Thinking
-For complex reasoning tasks:
+For complex reasoning tasks, use the `ultrathink` keyword to allocate dedicated thinking tokens:
 
 ```
-> Think deeply about how to optimise this database query.
-  Consider indexes, query structure, and caching strategies.
+> ultrathink: design the optimal indexing strategy for this database query.
+  Consider query patterns, write frequency, and storage constraints.
 ```
+
+See [Part 26: Extended Thinking](26-extended-thinking.md) for full details on thinking modes, token budgets, and configuration options.
 
 ## Prompt Patterns
 

@@ -131,6 +131,8 @@ Hooks are configured in `.claude/settings.json`:
 | `"*"` | All tools |
 | `"mcp__memory__.*"` | MCP memory tools |
 
+For enterprise hook policies and sandbox settings, see the [official Settings documentation](https://code.claude.com/docs/en/settings).
+
 ## Real-World Example: Stop Hook for Validation
 
 A Stop hook that runs linting and tests before allowing Claude to finish:
@@ -656,6 +658,8 @@ For intelligent, context-aware decisions, use prompt-based hooks:
 | Prompt-based hooks | LLM-powered, context-aware |
 | Testing | Copy-replace-test pattern for I/O |
 | Architecture | Thin wrappers + separate body functions |
+| `disableAllHooks` | Disable all hooks globally (settings.json) |
+| `allowManagedHooksOnly` | Enterprise: only managed/SDK hooks (managed-settings.json) |
 
 ## Common Hook Patterns
 

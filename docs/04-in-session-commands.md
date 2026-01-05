@@ -19,6 +19,8 @@ Once inside Claude Code, you have access to slash commands and special operation
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │  /clear             Clear conversation history                                  │
 │  /compact           Summarise context to save tokens                            │
+│  /resume            Open session picker or resume by name                       │
+│  /rename <name>     Name the current session for easy recall                    │
 │  /exit or /quit     Exit Claude Code                                            │
 │                                                                                 │
 │  CONTEXT MANAGEMENT                                                             │
@@ -128,3 +130,31 @@ Once inside Claude Code, you have access to slash commands and special operation
 │                                                                                 │
 ╰─────────────────────────────────────────────────────────────────────────────────╯
 ```
+
+## Session Management
+
+### Naming Sessions
+
+Name sessions for easy recall:
+```
+> /rename auth-refactor
+```
+
+Later resume by name:
+```bash
+claude --resume auth-refactor
+```
+
+### Session Picker
+
+`claude --resume` opens an interactive picker with keyboard shortcuts:
+- `↑`/`↓` - Navigate sessions
+- `Enter` - Select session
+- `P` - Preview session
+- `R` - Rename session
+- `/` - Search sessions
+- `B` - Filter by git branch
+
+Sessions are grouped by repository and worktree.
+
+See [Common Workflows: Resume Sessions](https://code.claude.com/docs/en/common-workflows#resume-previous-conversations).

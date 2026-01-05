@@ -100,3 +100,18 @@ Process:
 ```
 
 **Usage:** `/project:debug users can't log in after password reset`
+
+## Personal Commands
+
+Create user-wide commands in `~/.claude/commands/`:
+
+```
+~/.claude/
+└── commands/
+    ├── my-review.md     # Available in all projects as /user:my-review
+    └── standup.md       # /user:standup
+```
+
+Personal commands are prefixed with `/user:` to distinguish from project commands (`/project:`).
+
+See [Common Workflows: Custom Slash Commands](https://code.claude.com/docs/en/common-workflows#create-custom-slash-commands).

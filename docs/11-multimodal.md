@@ -22,7 +22,9 @@ Claude Code can analyse:
 
 ### Method 2: Drag and Drop
 
-In terminal emulators that support it, drag an image directly into the session.
+In terminal emulators that support it, drag an image directly into the session. You can also paste images from your clipboard.
+
+See [Common Workflows: Images](https://code.claude.com/docs/en/common-workflows#work-with-images) for more details.
 
 ## Use Cases
 

@@ -2,6 +2,8 @@
 
 ## Automated PR Reviews
 
+For quick setup, run `/install-github-app` in Claude Code. See the [official GitHub Actions docs](https://code.claude.com/docs/en/github-actions) for AWS Bedrock and Vertex AI integration.
+
 ```yaml
 # .github/workflows/claude-review.yml
 name: Claude Code Review
@@ -76,4 +78,25 @@ jobs:
             - Sensitive data exposure
 
             Report findings as comments on specific lines.
+```
+
+## Action Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `prompt` | Instructions for Claude (text or slash command) |
+| `claude_args` | CLI arguments: `--max-turns 5 --model claude-sonnet-4-5-20250929` |
+| `anthropic_api_key` | API key (required for direct API) |
+| `trigger_phrase` | Custom trigger (default: `@claude`) |
+| `use_bedrock` | Use AWS Bedrock |
+| `use_vertex` | Use Google Vertex AI |
+
+### Example with Options
+
+```yaml
+- uses: anthropics/claude-code-action@v1
+  with:
+    anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+    prompt: "/review"
+    claude_args: "--max-turns 5 --model claude-sonnet-4-5-20250929"
 ```

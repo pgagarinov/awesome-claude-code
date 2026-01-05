@@ -139,6 +139,8 @@ git worktree remove ../my-app-feature-a
 git branch -d feature-a
 ```
 
+See also [Common Workflows: Git Worktrees](https://code.claude.com/docs/en/common-workflows#run-parallel-sessions-with-git-worktrees).
+
 ## Option B: AutoClaude
 
 [AutoClaude](https://github.com/AndyMik90/Auto-Claude) is an autonomous multi-agent framework that automates parallel development workflows.

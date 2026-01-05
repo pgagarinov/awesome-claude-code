@@ -23,6 +23,8 @@ The Claude Agent SDK allows you to control Claude Code programmatically - perfec
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+See the [Claude Agent SDK repository](https://github.com/anthropics/claude-agent-sdk-python) for the complete API reference.
+
 ## Installation
 
 ```bash

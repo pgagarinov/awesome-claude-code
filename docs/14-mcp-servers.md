@@ -43,6 +43,8 @@ claude mcp remove <name>
 claude mcp get <name>
 ```
 
+For remote HTTP/SSE servers and OAuth setup, see the [official MCP documentation](https://code.claude.com/docs/en/mcp).
+
 ## Playwright MCP Server
 
 The [Playwright MCP server](https://github.com/microsoft/playwright-mcp) lets Claude Code control a browser - navigate pages, click buttons, fill forms, take screenshots, and more.
@@ -193,3 +195,48 @@ MCP Servers:
 Browse available MCP servers at:
 - [Anthropic MCP Servers](https://github.com/anthropics/mcp-servers)
 - [Awesome MCP Servers](https://github.com/punkpeye/awesome-mcp-servers)
+
+## Remote MCP Servers
+
+Claude Code supports three MCP transport types:
+
+### Local Stdio (shown above)
+```bash
+claude mcp add playwright --transport stdio -- npx @playwright/mcp@latest
+```
+
+### Remote HTTP
+```bash
+claude mcp add --transport http notion https://mcp.notion.com/mcp
+claude mcp add --transport http github https://api.githubcopilot.com/mcp/
+```
+
+### Remote SSE (deprecated)
+```bash
+claude mcp add --transport sse asana https://mcp.asana.com/sse
+```
+
+### Authentication
+
+Remote MCP servers use OAuth 2.0. Run `/mcp` in Claude Code to authenticate - tokens are stored securely and auto-refreshed.
+
+## MCP Scopes
+
+| Scope | Location | Shared | Use Case |
+|-------|----------|--------|----------|
+| Local | `~/.claude.json` | No | Personal servers, credentials |
+| Project | `.mcp.json` | Yes (git) | Team-shared servers |
+| User | `~/.claude.json` | No | Cross-project tools |
+
+```bash
+claude mcp add --scope project paypal https://mcp.paypal.com/mcp
+claude mcp add --scope user hubspot https://mcp.hubspot.com/anthropic
+```
+
+## MCP Resources with @ Mentions
+
+Reference MCP resources directly in prompts:
+```
+> Analyse @github:issue://123 and suggest a fix
+> Compare @postgres:schema://users with the API model
+```
