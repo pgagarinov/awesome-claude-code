@@ -88,6 +88,61 @@ Other   →  Non-blocking error
 }
 ```
 
+## Common JSON Output Fields
+
+These fields work in **all hook types** when using JSON output mode (exit code 0):
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `continue` | boolean | Whether Claude should continue after hook execution (default: `true`) |
+| `stopReason` | string | Message shown to user when `continue` is `false` (not shown to Claude) |
+| `suppressOutput` | boolean | Hide stdout from transcript mode (default: `false`) |
+| `systemMessage` | string | Message shown to the user - use for warnings, status updates, or injected context |
+
+### systemMessage Usage
+
+The `systemMessage` field is the primary way to communicate information from your hook to the user:
+
+```python
+# Show a warning to the user
+write_output({
+    "continue_": True,
+    "systemMessage": "Warning: This file hasn't been saved yet"
+})
+
+# Inject context after an operation
+write_output({
+    "continue_": True,
+    "systemMessage": "CI pipeline started. Run ID: 12345"
+})
+```
+
+### Stopping Execution
+
+To stop Claude and show a reason to the user:
+
+```python
+write_output({
+    "continue_": False,
+    "stopReason": "Validation failed: 3 tests are failing"
+})
+```
+
+**Note**: `continue: false` takes precedence over any `decision` field.
+
+### Hook-Specific Fields
+
+Beyond common fields, each hook type has specialised output fields:
+
+| Hook Type | Additional Fields |
+|-----------|-------------------|
+| PreToolUse | `hookSpecificOutput.permissionDecision`, `updatedInput` |
+| PostToolUse | `decision`, `hookSpecificOutput.additionalContext` |
+| Stop | `decision`, `reason` |
+| UserPromptSubmit | `decision`, `hookSpecificOutput.additionalContext` |
+
+See the [official Hooks documentation](https://code.claude.com/docs/en/hooks#common-json-fields) for complete field reference.
+
 ## Configuration
 
 Hooks are configured in `.claude/settings.json`:
