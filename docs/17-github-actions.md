@@ -1,4 +1,4 @@
-# Part 16: GitHub Actions Integration
+# Part 17: GitHub Actions Integration
 
 ## Automated PR Reviews
 

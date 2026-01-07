@@ -48,7 +48,7 @@ For complex reasoning tasks, use the `ultrathink` keyword to allocate dedicated 
   Consider query patterns, write frequency, and storage constraints.
 ```
 
-See [Part 26: Extended Thinking](26-extended-thinking.md) for full details on thinking modes, token budgets, and configuration options.
+See [Part 27: Extended Thinking](27-extended-thinking.md) for full details on thinking modes, token budgets, and configuration options.
 
 ## Prompt Patterns
 
