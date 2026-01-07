@@ -1,4 +1,4 @@
-# Part 24: The Ralf Loop - Preventing Premature Stops
+# Part 25: The Ralf Loop - Preventing Premature Stops
 
 ## What is the Ralf Loop?
 
@@ -426,6 +426,8 @@ This approach:
 | **Safety** | Always include circuit breaker (max retries) |
 | **When to use** | Long tasks with clear completion criteria |
 | **When to avoid** | Exploratory work, research, simple fixes |
+
+> **Hardening**: To prevent Claude from circumventing the Ralf Loop by modifying hook scripts or test configuration, use permission deny rules. See [Part 23: Permission Settings & Hardening](23-permissions.md).
 
 ## Real-World Example
 

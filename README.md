@@ -37,9 +37,15 @@ A comprehensive guide to mastering Claude Code - from first launch to advanced a
 20. [LSP Plugins for Code Intelligence](docs/20-lsp-plugins.md)
 21. [SSH Multiplexing for Remote Development](docs/21-ssh-multiplexing.md)
 22. [Claude Code Hooks](docs/22-hooks.md)
-23. [Working on Multiple Features in Parallel](docs/23-parallel-features.md)
-24. [The Ralf Loop - Preventing Premature Stops](docs/24-ralf-loop.md)
-25. [Dev Containers with Claude Code](docs/25-dev-containers.md)
+23. [Permission Settings & Hardening](docs/23-permissions.md)
+24. [Working on Multiple Features in Parallel](docs/24-parallel-features.md)
+25. [The Ralf Loop - Preventing Premature Stops](docs/25-ralf-loop.md)
+26. [Dev Containers with Claude Code](docs/26-dev-containers.md)
+27. [Extended Thinking (Thinking Mode)](docs/27-extended-thinking.md)
+28. [Troubleshooting](docs/28-troubleshooting.md)
+29. [Statusline Customization](docs/29-statusline.md)
+30. [Sandboxing](docs/30-sandboxing.md)
+31. [Output Styles](docs/31-output-styles.md)
 
 ---
 

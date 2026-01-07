@@ -1,4 +1,4 @@
-# Part 17: Best Practices & Tips
+# Part 18: Best Practices & Tips
 
 ## Do's and Don'ts
 
@@ -16,7 +16,7 @@
 │  • Let subagents handle exploration                                             │
 │  • Review generated code before committing                                      │
 │  • Use custom commands for repetitive workflows                                 │
-│  • Use Ralf Loop pattern (Part 24) for critical tasks requiring completion     │
+│  • Use Ralf Loop pattern (Part 25) for critical tasks requiring completion     │
 │                                                                                 │
 │  DON'T ✗                                                                        │
 │  ─────────────────────────────────────────────────────────────────────────────  │
@@ -141,7 +141,121 @@ For long-running tasks where you need to guarantee Claude completes all work bef
 - Block if validation fails, forcing Claude to fix issues
 - Only approve when all completion criteria met
 
-See [Part 24: The Ralf Loop - Preventing Premature Stops](24-ralf-loop.md) for implementation patterns and [Part 22: Claude Code Hooks](22-hooks.md) for configuration details.
+See [Part 25: The Ralf Loop - Preventing Premature Stops](25-ralf-loop.md) for implementation patterns and [Part 22: Claude Code Hooks](22-hooks.md) for configuration details.
+
+---
+
+## Checkpointing & Recovery
+
+Claude Code automatically tracks the state of your code before each edit, providing a safety net for experimentation.
+
+### How It Works
+
+- **Automatic tracking**: Every user prompt creates a checkpoint
+- **Persistent**: Checkpoints survive session restarts (30 days retention)
+- **Selective recovery**: Restore code, conversation, or both
+
+### Using Rewind
+
+Press **`Esc` twice** (`Esc Esc`) or use `/rewind`:
+
+```bash
+> /rewind
+```
+
+Choose what to restore:
+1. **Conversation only** - Rewind to earlier message, keep code changes
+2. **Code only** - Revert files, keep conversation
+3. **Both** - Restore code and conversation to prior point
+
+### When to Use Checkpointing
+
+- **Exploring alternatives**: Try different implementations safely
+- **Recovering from mistakes**: Quickly undo broken changes
+- **Ambitious refactoring**: Pursue big changes knowing you can revert
+
+### Important Limitations
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    CHECKPOINTING LIMITATIONS                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ⚠️  Bash command changes are NOT tracked:                                  │
+│      • rm file.txt                                                          │
+│      • mv old.txt new.txt                                                   │
+│      • git reset --hard                                                     │
+│                                                                             │
+│  ⚠️  Only Claude's file edits are tracked, not:                             │
+│      • Manual edits outside Claude Code                                     │
+│      • Changes from other sessions                                          │
+│                                                                             │
+│  ✓  Checkpointing complements Git, doesn't replace it                       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Profile Switching (CLAUDE_CONFIG_DIR)
+
+Use different Claude Code configurations for different contexts (work, personal, clients).
+
+### Setting Up Profiles
+
+Create separate config directories:
+
+```bash
+# Work profile
+mkdir -p ~/.claude-work
+
+# Personal profile
+mkdir -p ~/.claude-personal
+
+# Client-specific profile
+mkdir -p ~/.claude-clientname
+```
+
+### Using Shell Aliases
+
+Add to `~/.bashrc` or `~/.zshrc`:
+
+```bash
+# Profile aliases
+alias claude-work='CLAUDE_CONFIG_DIR=~/.claude-work claude'
+alias claude-personal='CLAUDE_CONFIG_DIR=~/.claude-personal claude'
+alias claude-client='CLAUDE_CONFIG_DIR=~/.claude-clientname claude'
+```
+
+### Profile Use Cases
+
+| Profile | Configuration |
+|---------|--------------|
+| **Work** | Corporate MCP servers, strict permissions, audit logging |
+| **Personal** | Relaxed permissions, personal API keys |
+| **Client** | Client-specific settings, isolated credentials |
+| **Testing** | Experimental settings, bypass permissions |
+
+### Example: Work Profile Setup
+
+```bash
+# Create work profile
+mkdir -p ~/.claude-work
+
+# Copy base settings
+cp ~/.claude/settings.json ~/.claude-work/
+
+# Edit for work context
+cat > ~/.claude-work/CLAUDE.md << 'EOF'
+## Work Profile
+- Follow corporate coding standards
+- All commits require ticket numbers (JIRA-XXX)
+- No external API calls without VPN
+EOF
+
+# Use it
+claude-work
+```
 
 ---
 

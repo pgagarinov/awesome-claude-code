@@ -144,6 +144,144 @@ claude --continue
 claude --add-file pyproject.toml --add-file src/main.py "help me add a new dependency"
 ```
 
+## Headless Mode (Advanced)
+
+Headless mode enables fully automated, non-interactive Claude Code usage for scripts, CI/CD pipelines, and programmatic integrations.
+
+### Core Headless Flags
+
+```bash
+# Basic headless execution
+claude -p "prompt" --output-format json
+
+# Structured output with JSON schema
+claude -p "list all functions" --json-schema '{"type":"object","properties":{"functions":{"type":"array"}}}'
+
+# Custom system prompts
+claude -p "review code" --system-prompt "You are a security auditor"
+claude -p "explain" --append-system-prompt "Focus on performance"
+
+# Restrict available tools
+claude -p "analyze code" --allowedTools "Read,Grep,Glob"
+claude -p "make changes" --allowedTools "Bash(npm test:*),Edit"
+```
+
+### Tool Restriction Patterns
+
+The `--allowedTools` flag supports glob patterns:
+
+| Pattern | Description |
+|---------|-------------|
+| `Read` | Allow all Read operations |
+| `Bash(npm *)` | Allow npm commands only |
+| `Bash(git diff:*)` | Allow git diff with any args |
+| `Edit(src/**)` | Allow edits only in src/ |
+| `Bash(npm test),Bash(npm run lint)` | Allow specific commands |
+
+### Structured Output with JSON Schema
+
+```bash
+# Define expected output structure
+claude -p "list all API endpoints" --json-schema '{
+  "type": "object",
+  "properties": {
+    "endpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "method": {"type": "string"},
+          "path": {"type": "string"},
+          "description": {"type": "string"}
+        }
+      }
+    }
+  }
+}'
+```
+
+### Session Management in Scripts
+
+```bash
+# Run and capture session ID for later resumption
+RESULT=$(claude -p "start analysis" --output-format json)
+SESSION_ID=$(echo "$RESULT" | jq -r '.session_id')
+
+# Resume later with the session ID
+claude --resume "$SESSION_ID" -p "continue with the next step"
+```
+
+### Piping with jq
+
+```bash
+# Extract specific fields from JSON output
+claude -p "list files" --output-format json | jq '.files[]'
+
+# Chain multiple Claude calls
+claude -p "find bugs" --output-format json | \
+  jq -r '.bugs[].file' | \
+  xargs -I {} claude -p "fix bugs in {}"
+
+# Conditional processing
+claude -p "check for issues" --output-format json | \
+  jq -e '.issues | length > 0' && \
+  claude -p "fix all issues"
+```
+
+### CI/CD Integration Pattern
+
+```bash
+#!/bin/bash
+# ci-review.sh - Automated code review in CI
+
+# Run review with restricted permissions
+RESULT=$(claude -p "review changes for security issues" \
+  --output-format json \
+  --allowedTools "Read,Grep,Glob" \
+  --max-tokens 50000)
+
+# Check for critical issues
+CRITICAL=$(echo "$RESULT" | jq '.issues[] | select(.severity == "critical")')
+
+if [ -n "$CRITICAL" ]; then
+  echo "Critical issues found:"
+  echo "$CRITICAL" | jq -r '.description'
+  exit 1
+fi
+
+echo "Review passed"
+exit 0
+```
+
+### Environment Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `ANTHROPIC_API_KEY` | API key for direct API access |
+| `CLAUDE_CODE_USE_BEDROCK=1` | Use AWS Bedrock |
+| `CLAUDE_CODE_USE_VERTEX=1` | Use Google Vertex AI |
+| `CLAUDE_CONFIG_DIR` | Custom config directory |
+| `DISABLE_PROMPT_CACHING` | Disable prompt caching |
+
+### Agent SDK Integration
+
+For more complex programmatic integrations, use the Claude Agent SDK:
+
+```typescript
+import { Agent } from "@anthropic-ai/agent";
+
+const agent = new Agent({
+  model: "claude-sonnet-4-20250514",
+});
+
+const result = await agent.run("Review this codebase for bugs");
+console.log(result.output);
+```
+
+See [Part 16: Agent SDK](16-agent-sdk.md) for comprehensive SDK documentation.
+
+---
+
 ## Using Claude as a Unix Utility
 
 Pipe data to Claude for scripted workflows:

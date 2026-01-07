@@ -1,4 +1,4 @@
-# Part 25: Dev Containers with Claude Code
+# Part 26: Dev Containers with Claude Code
 
 ## What are Dev Containers?
 

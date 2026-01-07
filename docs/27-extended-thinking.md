@@ -1,4 +1,4 @@
-# Part 26: Extended Thinking (Thinking Mode)
+# Part 27: Extended Thinking (Thinking Mode)
 
 Extended thinking reserves a portion of the output token budget for Claude to reason through complex problems step-by-step before responding. This internal reasoning process helps Claude work through challenging problems more thoroughly.
 

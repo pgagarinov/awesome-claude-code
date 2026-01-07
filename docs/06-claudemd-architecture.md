@@ -4,35 +4,193 @@
 
 CLAUDE.md is a special markdown file that provides Claude Code with persistent context about your project. It's like giving Claude a briefing document before starting work.
 
-## File Hierarchy
+## Memory Hierarchy
 
-Claude Code reads CLAUDE.md files from multiple locations:
+Claude Code supports multiple memory locations in order of precedence:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                         CLAUDE.MD HIERARCHY                                     │
+│                         MEMORY HIERARCHY                                        │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
-│  LOADING ORDER (all are loaded and combined):                                   │
+│  PRECEDENCE (highest to lowest):                                                │
 │                                                                                 │
-│  1. ~/.claude/CLAUDE.md                    ← Global (all projects)              │
+│  1. ENTERPRISE POLICY                      ← Cannot be overridden              │
+│     │  macOS: /Library/Application Support/ClaudeCode/CLAUDE.md                │
+│     │  Linux: /etc/claude-code/CLAUDE.md                                       │
+│     │  Windows: C:\Program Files\ClaudeCode\CLAUDE.md                          │
 │     │                                                                           │
-│     │   Your personal preferences, common patterns, global settings             │
+│  2. PROJECT MEMORY (shared)                ← Team-wide instructions            │
+│     │  ./CLAUDE.md or ./.claude/CLAUDE.md                                      │
 │     │                                                                           │
-│  2. ./CLAUDE.md                            ← Project root                       │
+│  3. PROJECT RULES (modular)                ← Topic-specific instructions       │
+│     │  ./.claude/rules/*.md                                                    │
 │     │                                                                           │
-│     │   Project overview, architecture, build commands                          │
+│  4. USER MEMORY (global)                   ← Personal preferences              │
+│     │  ~/.claude/CLAUDE.md                                                     │
 │     │                                                                           │
-│  3. ./src/CLAUDE.md                        ← Subdirectory                       │
-│     │                                                                           │
-│     │   Module-specific patterns, local conventions                             │
-│     │                                                                           │
-│  4. ./src/components/CLAUDE.md             ← Deeper subdirectory                │
-│                                                                                 │
-│        Component-specific guidelines                                            │
+│  5. LOCAL PROJECT MEMORY                   ← Personal project-specific         │
+│        ./CLAUDE.local.md (auto-gitignored)                                     │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+### Memory Types Explained
+
+| Memory Type | Location | Shared? | Use Case |
+|-------------|----------|---------|----------|
+| Enterprise policy | System paths | All org users | Organization-wide instructions |
+| Project memory | `./CLAUDE.md` | Team (git) | Build commands, architecture |
+| Project rules | `.claude/rules/*.md` | Team (git) | Modular, topic-specific rules |
+| User memory | `~/.claude/CLAUDE.md` | Just you | Personal preferences |
+| Local project | `./CLAUDE.local.md` | Just you | Personal project overrides |
+
+## Using `/memory` Command
+
+Open the memory management interface:
+
+```bash
+> /memory
+```
+
+This displays all loaded memory files and lets you edit them in your system editor.
+
+## Local Project Memory (CLAUDE.local.md)
+
+For personal project-specific preferences that shouldn't be committed:
+
+```markdown
+# CLAUDE.local.md
+
+## My Local Settings
+- Use my sandbox API at https://sandbox.mycompany.dev
+- My test user: test@example.com
+- Skip the slow integration tests unless I ask
+```
+
+This file is **automatically added to .gitignore**.
+
+## File Hierarchy (Recursive Discovery)
+
+Claude Code reads CLAUDE.md files recursively:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                         RECURSIVE DISCOVERY                                     │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  Starting from current directory, Claude discovers:                             │
+│                                                                                 │
+│  1. ~/.claude/CLAUDE.md                    ← Global (all projects)              │
+│     │                                                                           │
+│  2. ./CLAUDE.md                            ← Project root                       │
+│     │                                                                           │
+│  3. ./src/CLAUDE.md                        ← Subdirectory                       │
+│     │                                                                           │
+│  4. ./src/components/CLAUDE.md             ← Deeper subdirectory                │
+│                                                                                 │
+│  Also discovers files in subtrees below current directory.                      │
+│  Files higher in hierarchy take precedence.                                     │
+│                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+## Modular Rules (.claude/rules/)
+
+For larger projects, organize instructions into focused rule files:
+
+```
+your-project/
+├── .claude/
+│   ├── CLAUDE.md           # Main instructions
+│   └── rules/
+│       ├── code-style.md
+│       ├── testing.md
+│       ├── security.md
+│       ├── frontend/
+│       │   ├── react.md
+│       │   └── styles.md
+│       └── backend/
+│           ├── api.md
+│           └── database.md
+```
+
+### Path-Specific Rules with YAML Frontmatter
+
+Rules can apply only to specific file patterns using frontmatter:
+
+```markdown
+---
+paths: src/**/*.{ts,tsx}
+---
+
+# TypeScript/React Rules
+
+- All components must include PropTypes
+- Use hooks instead of class components
+- Include error boundaries for async components
+```
+
+### Glob Pattern Examples
+
+| Pattern | Matches |
+|---------|---------|
+| `**/*.ts` | All TypeScript files |
+| `src/**/*` | All files under src/ |
+| `*.md` | Markdown files in project root |
+| `{src,lib}/**/*.ts` | TypeScript in src/ or lib/ |
+| `tests/**/*.test.ts` | Test files |
+
+## CLAUDE.md Imports
+
+Import additional content using `@path/to/file` syntax:
+
+```markdown
+# CLAUDE.md
+
+See @README for project overview.
+See @package.json for available npm commands.
+
+## Additional Instructions
+- Git workflow: @docs/git-instructions.md
+- Personal preferences: @~/.claude/my-project-instructions.md
+```
+
+### Import Features
+
+- Supports relative and absolute paths
+- Can reference files in `~/.claude/` for personal instructions
+- **Maximum depth**: 5 hops (to prevent infinite recursion)
+- Imports are **not evaluated** inside code spans or blocks
+- User-level imports (`~/.claude/`) are not committed to version control
+
+### Import Example
+
+```markdown
+# CLAUDE.md
+
+## Overview
+This project uses React with TypeScript.
+
+## Standards
+Follow our coding standards: @docs/standards.md
+
+## Personal Overrides
+@~/.claude/react-preferences.md
+```
+
+## Bootstrapping with `/init`
+
+Quickly create a CLAUDE.md for your project:
+
+```bash
+> /init
+```
+
+This analyzes your project and creates a CLAUDE.md with:
+- Detected build and test commands
+- Code style preferences from existing config
+- Architectural patterns from your codebase
 
 ## Information Routing
 

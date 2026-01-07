@@ -26,7 +26,7 @@ Hooks are custom scripts that Claude Code executes at specific points during its
 |------|---------------|----------|
 | `PreToolUse` | Before tool execution | Block dangerous commands, modify inputs |
 | `PostToolUse` | After tool completes | Format code, validate output, inject feedback |
-| `Stop` | When Claude finishes responding | Run validation, prevent premature stops (see [Part 24](24-ralf-loop.md) for Ralf Loop patterns) |
+| `Stop` | When Claude finishes responding | Run validation, prevent premature stops (see [Part 25](25-ralf-loop.md) for Ralf Loop patterns) |
 | `SubagentStop` | When a subagent (Task tool) finishes | QA gates on subagent work |
 | `UserPromptSubmit` | When user submits a prompt | Add context, block dangerous requests |
 | `SessionStart` | Session begins or resumes | Load environment, inject context |
@@ -277,7 +277,7 @@ if __name__ == "__main__":
     main()
 ```
 
-> **Advanced Pattern**: This Stop hook is a foundational pattern in the Ralf Loop methodology. For advanced patterns like graduated validation, retry limits, and intelligent completion checking, see [Part 24: The Ralf Loop - Preventing Premature Stops](24-ralf-loop.md).
+> **Advanced Pattern**: This Stop hook is a foundational pattern in the Ralf Loop methodology. For advanced patterns like graduated validation, retry limits, and intelligent completion checking, see [Part 25: The Ralf Loop - Preventing Premature Stops](25-ralf-loop.md).
 
 ## Real-World Example: PostToolUse Hook for CI Watching
 
@@ -726,3 +726,336 @@ For intelligent, context-aware decisions, use prompt-based hooks:
 | CI watching | PostToolUse | Detect `git push`, remind to watch CI |
 | Context injection | UserPromptSubmit | Add current time, project context |
 | Auto-approval | PreToolUse | Auto-approve Read on safe directories |
+
+## Security Hooks
+
+Hooks provide powerful security automation beyond basic permission rules. Use PreToolUse hooks to enforce security policies that run **regardless of permission mode**.
+
+### Dangerous Command Blocking
+
+Block risky bash commands before execution:
+
+```python
+#!/usr/bin/env python3
+"""PreToolUse hook - block dangerous commands."""
+
+import json
+import re
+import sys
+
+DANGEROUS_PATTERNS = [
+    r"rm\s+-rf\s+/",           # rm -rf /
+    r"rm\s+-rf\s+~",           # rm -rf ~
+    r"chmod\s+777",            # chmod 777
+    r"chmod\s+-R\s+777",       # chmod -R 777
+    r"curl.*\|\s*bash",        # curl | bash
+    r"curl.*\|\s*sh",          # curl | sh
+    r"wget.*\|\s*bash",        # wget | bash
+    r">\s*/dev/sd",            # > /dev/sda
+    r"mkfs\.",                 # mkfs.ext4
+    r"dd\s+if=.*of=/dev/",     # dd to disk
+    r":\(\)\s*\{\s*:\|:",      # fork bomb
+]
+
+def main():
+    inp = json.load(sys.stdin)
+
+    if inp.get("hook_event_name") != "PreToolUse":
+        json.dump({"continue": True}, sys.stdout)
+        sys.exit(0)
+
+    if inp.get("tool_name") != "Bash":
+        json.dump({"continue": True}, sys.stdout)
+        sys.exit(0)
+
+    command = inp.get("tool_input", {}).get("command", "")
+
+    for pattern in DANGEROUS_PATTERNS:
+        if re.search(pattern, command, re.IGNORECASE):
+            json.dump({
+                "continue": True,
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": f"Blocked dangerous pattern: {pattern}"
+                }
+            }, sys.stdout)
+            sys.exit(0)
+
+    json.dump({"continue": True}, sys.stdout)
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
+```
+
+### File Protection Hook
+
+Protect sensitive files from being read or modified:
+
+```python
+#!/usr/bin/env python3
+"""PreToolUse hook - protect sensitive files."""
+
+import json
+import sys
+from pathlib import Path
+
+PROTECTED_PATTERNS = [
+    ".env",
+    ".env.",
+    "id_rsa",
+    "id_ed25519",
+    ".pem",
+    "credentials.json",
+    "secrets/",
+    ".claude/hooks/",      # Protect hooks from modification
+    ".claude/settings",    # Protect settings
+]
+
+def is_protected(file_path: str) -> bool:
+    """Check if file matches any protected pattern."""
+    path_lower = file_path.lower()
+    for pattern in PROTECTED_PATTERNS:
+        if pattern in path_lower:
+            return True
+    return False
+
+def main():
+    inp = json.load(sys.stdin)
+
+    if inp.get("hook_event_name") != "PreToolUse":
+        json.dump({"continue": True}, sys.stdout)
+        sys.exit(0)
+
+    tool_name = inp.get("tool_name", "")
+    tool_input = inp.get("tool_input", {})
+
+    # Check file-related tools
+    if tool_name in ("Read", "Edit", "Write"):
+        file_path = tool_input.get("file_path", "")
+        if is_protected(file_path):
+            json.dump({
+                "continue": True,
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason": f"Protected file: {file_path}"
+                }
+            }, sys.stdout)
+            sys.exit(0)
+
+    json.dump({"continue": True}, sys.stdout)
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Secrets Detection Hook
+
+Scan Claude's outputs for accidentally exposed secrets:
+
+```python
+#!/usr/bin/env python3
+"""PostToolUse hook - detect secrets in output."""
+
+import json
+import re
+import sys
+
+SECRET_PATTERNS = [
+    (r"AKIA[0-9A-Z]{16}", "AWS Access Key"),
+    (r"sk-[a-zA-Z0-9]{48}", "OpenAI API Key"),
+    (r"ghp_[a-zA-Z0-9]{36}", "GitHub Personal Token"),
+    (r"-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----", "Private Key"),
+    (r"sk-ant-[a-zA-Z0-9-]{90,}", "Anthropic API Key"),
+]
+
+def main():
+    inp = json.load(sys.stdin)
+
+    if inp.get("hook_event_name") != "PostToolUse":
+        json.dump({"continue": True}, sys.stdout)
+        sys.exit(0)
+
+    tool_output = str(inp.get("tool_output", ""))
+
+    for pattern, secret_type in SECRET_PATTERNS:
+        if re.search(pattern, tool_output):
+            json.dump({
+                "continue": True,
+                "systemMessage": f"⚠️ WARNING: Possible {secret_type} detected in output. "
+                                 "Review before sharing or committing."
+            }, sys.stdout)
+            sys.exit(0)
+
+    json.dump({"continue": True}, sys.stdout)
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Audit Logging Hook
+
+Log all tool usage for security review:
+
+```python
+#!/usr/bin/env python3
+"""PostToolUse hook - audit logging."""
+
+import json
+import sys
+from datetime import datetime
+from pathlib import Path
+
+AUDIT_LOG = Path.home() / ".claude" / "audit.log"
+
+def main():
+    inp = json.load(sys.stdin)
+
+    if inp.get("hook_event_name") != "PostToolUse":
+        json.dump({"continue": True}, sys.stdout)
+        sys.exit(0)
+
+    # Log the tool usage
+    log_entry = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "session_id": inp.get("session_id"),
+        "tool_name": inp.get("tool_name"),
+        "tool_input": inp.get("tool_input"),
+        "cwd": inp.get("cwd"),
+    }
+
+    AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
+    with open(AUDIT_LOG, "a") as f:
+        f.write(json.dumps(log_entry) + "\n")
+
+    json.dump({"continue": True}, sys.stdout)
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Production Safeguards Hook
+
+Block deployment commands without explicit confirmation:
+
+```python
+#!/usr/bin/env python3
+"""PreToolUse hook - production safeguards."""
+
+import json
+import re
+import sys
+
+PRODUCTION_PATTERNS = [
+    r"deploy\s+prod",
+    r"--production",
+    r"kubectl.*--context.*prod",
+    r"aws.*--profile.*prod",
+    r"terraform\s+apply",
+    r"pulumi\s+up",
+]
+
+def main():
+    inp = json.load(sys.stdin)
+
+    if inp.get("hook_event_name") != "PreToolUse":
+        json.dump({"continue": True}, sys.stdout)
+        sys.exit(0)
+
+    if inp.get("tool_name") != "Bash":
+        json.dump({"continue": True}, sys.stdout)
+        sys.exit(0)
+
+    command = inp.get("tool_input", {}).get("command", "")
+
+    for pattern in PRODUCTION_PATTERNS:
+        if re.search(pattern, command, re.IGNORECASE):
+            json.dump({
+                "continue": True,
+                "hookSpecificOutput": {
+                    "hookEventName": "PreToolUse",
+                    "permissionDecision": "deny",
+                    "permissionDecisionReason":
+                        f"Production command blocked. Use explicit deployment workflow."
+                }
+            }, sys.stdout)
+            sys.exit(0)
+
+    json.dump({"continue": True}, sys.stdout)
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Security Hook Configuration
+
+Enable multiple security hooks in `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/block_dangerous.py",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "python .claude/hooks/production_safeguards.py",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/protect_files.py",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/audit_log.py",
+            "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "python .claude/hooks/detect_secrets.py",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Security Hooks vs Permission Rules
+
+| Feature | Permission Rules | Security Hooks |
+|---------|------------------|----------------|
+| Bypass with `--dangerously-skip-permissions` | Yes | **No** |
+| Pattern matching | Glob patterns | Regex, custom logic |
+| Runtime inspection | No | Yes (full context) |
+| Audit logging | No | Yes |
+| Dynamic decisions | No | Yes |
+
+**Best practice**: Use both - permission rules for basic protection, hooks for advanced security logic.
