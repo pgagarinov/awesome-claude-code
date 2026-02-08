@@ -14,6 +14,11 @@ Once inside Claude Code, you have access to slash commands and special operation
 │  /help              Show all available commands                                 │
 │  /status            Show session status, context usage, model info              │
 │  /version           Show Claude Code version                                    │
+│  /doctor            Diagnose installation and configuration issues              │
+│  /debug             Ask Claude to help troubleshoot the current session         │
+│  /usage             Show plan usage and limits                                  │
+│  /stats             Show session statistics (favourite model, usage graph)      │
+│  /context           Show context token breakdown and usage                      │
 │                                                                                 │
 │  SESSION CONTROL                                                                │
 │  ─────────────────────────────────────────────────────────────────────────────  │
@@ -21,29 +26,43 @@ Once inside Claude Code, you have access to slash commands and special operation
 │  /compact           Summarise context to save tokens                            │
 │  /resume            Open session picker or resume by name                       │
 │  /rename <name>     Name the current session for easy recall                    │
+│  /rewind            Undo conversation to a previous point                       │
+│  /export            Export conversation for sharing                             │
 │  /exit or /quit     Exit Claude Code                                            │
 │                                                                                 │
 │  CONTEXT MANAGEMENT                                                             │
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │  /add-file <path>   Add file to context                                         │
+│  /add-dir <path>    Add additional working directory                            │
 │  /init              Generate CLAUDE.md for current project                      │
+│  /memory            Edit memory files (CLAUDE.md and imports)                   │
 │                                                                                 │
 │  WORKFLOW                                                                       │
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │  /plan              Enter plan mode for complex tasks                           │
 │  /review            Review current changes                                      │
 │  /security-review   Run security analysis                                       │
+│  /tasks             View and manage background tasks                            │
 │                                                                                 │
 │  CONFIGURATION                                                                  │
 │  ─────────────────────────────────────────────────────────────────────────────  │
-│  /config            Show current configuration                                  │
-│  /model <name>      Switch model mid-session                                    │
-│  /permissions       Show/modify permission settings                             │
+│  /config             Open configuration settings                                │
+│  /model <name>       Switch model mid-session                                   │
+│  /fast               Toggle fast mode (same model, faster output)              │
+│  /permissions        Show/modify permission settings                            │
+│  /keybindings        Configure custom keyboard shortcuts                        │
+│  /terminal-setup     Configure terminal for optimal Claude Code usage           │
+│  /theme              Open theme picker                                          │
 │                                                                                 │
-│  TOOLS                                                                          │
+│  TOOLS & EXTENSIONS                                                             │
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │  /tools             List available tools                                        │
-│  /mcp               Show MCP server status                                      │
+│  /mcp               Show MCP server status, enable/disable servers              │
+│  /sandbox            Show sandbox status and toggle sandbox mode                │
+│  /skills             List available skills and slash commands                    │
+│  /agents             Create and manage custom subagents                         │
+│  /plugins            Install, enable, and manage plugins                        │
+│  /hooks              Configure hooks interactively                              │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```

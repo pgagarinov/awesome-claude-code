@@ -88,13 +88,16 @@ claude --permission-mode trusted
 │  SESSION                                                                        │
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │  -c, --continue          Resume most recent session                             │
-│  --resume <id>           Resume specific session                                │
+│  --resume <id|name>      Resume specific session by ID or name                  │
 │  --no-continue           Start fresh session                                    │
+│  --session-id <id>       Use a custom session ID                                │
+│  --from-pr <num|url>     Resume session linked to a GitHub PR                   │
+│  --fork-session          Fork the resumed session                               │
 │                                                                                 │
 │  INPUT/OUTPUT                                                                   │
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │  -p, --print             Non-interactive mode, print response and exit          │
-│  --output-format <fmt>   Output format: text, json, markdown                    │
+│  --output-format <fmt>   Output format: text, json, stream-json                 │
 │  --stream                Stream response in real-time                           │
 │  --verbose               Show detailed operation logs                           │
 │  --quiet                 Suppress non-essential output                          │
@@ -102,18 +105,41 @@ claude --permission-mode trusted
 │  CONTEXT                                                                        │
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │  --cwd <path>            Set working directory                                  │
+│  --add-dir <path>        Add additional working directory (can repeat)          │
 │  --add-file <file>       Add file to initial context (can repeat)               │
 │  --compact               Start in compact mode                                  │
 │  --max-tokens <n>        Limit context window size                              │
 │                                                                                 │
-│  MODEL                                                                          │
+│  MODEL & AGENT                                                                  │
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │  --model <name>          Select model (opus, sonnet, haiku)                     │
+│  --agent <name>          Use a custom agent configuration                       │
 │                                                                                 │
-│  PERMISSIONS                                                                    │
+│  PERMISSIONS & TOOLS                                                            │
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │  --dangerously-skip-permissions   Skip all permission prompts                   │
 │  --permission-mode <mode>         Set permission level                          │
+│  --allowedTools <tools>           Restrict available tools                      │
+│  --disallowedTools <tools>        Explicitly block tools                        │
+│  --tools <tools>                  Restrict built-in tools (interactive mode)    │
+│  --disable-slash-commands         Disable all slash commands                     │
+│                                                                                 │
+│  SYSTEM PROMPT                                                                  │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  --system-prompt <text>           Override system prompt (-p mode)               │
+│  --system-prompt-file <path>      Load system prompt from file                  │
+│  --append-system-prompt <text>    Append to system prompt                       │
+│                                                                                 │
+│  SETUP & MAINTENANCE                                                            │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  --init                  Run Setup hooks for repository initialisation          │
+│  --init-only             Run Setup hooks and exit                               │
+│  --maintenance           Run Setup hooks tagged as maintenance                  │
+│  --settings <path>       Load settings from a JSON file                         │
+│                                                                                 │
+│  BUDGET                                                                         │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  --max-budget-usd <n>    Set maximum spending budget in USD                     │
 │                                                                                 │
 │  OTHER                                                                          │
 │  ─────────────────────────────────────────────────────────────────────────────  │

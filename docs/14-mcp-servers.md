@@ -165,7 +165,7 @@ You can achieve similar browser automation by asking Claude to write Python scri
 
 ## Configuration File
 
-MCP servers are stored in `~/.claude.json` or project-local `.claude.json`:
+MCP servers are stored in `~/.claude/settings.json` (user-level) or `.mcp.json` (project-level):
 
 ```json
 {
@@ -224,19 +224,21 @@ Remote MCP servers use OAuth 2.0. Run `/mcp` in Claude Code to authenticate - to
 
 | Scope | Location | Shared | Use Case |
 |-------|----------|--------|----------|
-| Local | `~/.claude.json` | No | Personal servers, credentials |
-| Project | `.mcp.json` | Yes (git) | Team-shared servers |
-| User | `~/.claude.json` | No | Cross-project tools |
+| Project | `.mcp.json` | Yes (git-committed) | Team-shared servers |
+| Local | `.claude/settings.local.json` | No | Personal project servers |
+| User | `~/.claude/settings.json` | No | Cross-project tools |
 
 ```bash
 claude mcp add --scope project paypal https://mcp.paypal.com/mcp
+claude mcp add --scope local mydb -- my-db-server
 claude mcp add --scope user hubspot https://mcp.hubspot.com/anthropic
 ```
 
-## MCP Resources with @ Mentions
+## Enabling and Disabling MCP Servers
 
-Reference MCP resources directly in prompts:
+Toggle MCP servers on or off during a session:
+
 ```
-> Analyse @github:issue://123 and suggest a fix
-> Compare @postgres:schema://users with the API model
+> /mcp enable playwright
+> /mcp disable playwright
 ```

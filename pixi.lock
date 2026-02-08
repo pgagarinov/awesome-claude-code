@@ -109,7 +109,7 @@ packages:
 - pypi: ./
   name: cc-training
   version: 0.1.0
-  sha256: 3629834e8e44532efe6cd226169cab3198ab26dc4c10b3c7c22a8b91b4b297ce
+  sha256: a8c069df35ee62e0dc896c9fa0cd193052fd2b495b0c2fdd5263327529fa3602
   requires_dist:
   - claude-agent-sdk>=0.1.18,<0.2
   - pytest>=9.0.2,<10

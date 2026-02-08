@@ -2,108 +2,52 @@
 
 ## What Are Skills?
 
-Skills are pre-packaged capabilities that extend Claude Code for specific file types or tasks. They provide specialised handling that goes beyond default file reading.
+Skills are reusable markdown instructions that extend Claude Code's capabilities. They live in `.claude/skills/` directories and are loaded automatically. Since version 2.1.3, skills and slash commands are unified - a skill can be both an automated behaviour and a user-invocable command.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                         SKILLS                                                  │
+│                         SKILLS SYSTEM                                          │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
-│  Skills enhance Claude Code's ability to work with specific file types          │
-│  or perform specialised tasks.                                                  │
+│  Skills provide reusable instructions for Claude Code:                         │
 │                                                                                 │
 │  ┌─────────────────────────────────────────────────────────────────────────┐   │
 │  │                                                                         │   │
-│  │  Without Skill:                                                         │   │
-│  │  PDF → Raw binary / basic text extraction                               │   │
+│  │  Project skill:     .claude/skills/pdf.md                               │   │
+│  │  User skill:        ~/.claude/skills/review.md                          │   │
+│  │  Plugin skill:      Installed via /plugins                              │   │
 │  │                                                                         │   │
-│  │  With PDF Skill:                                                        │   │
-│  │  PDF → Structured content + tables + images + metadata                  │   │
+│  │  Skills can be:                                                         │   │
+│  │  • Auto-loaded into Claude's context                                    │   │
+│  │  • User-invocable via /skills menu or /skill-name                       │   │
+│  │  • Provided by plugins                                                  │   │
 │  │                                                                         │   │
 │  └─────────────────────────────────────────────────────────────────────────┘   │
-│                                                                                 │
-│  Available Skills:                                                              │
-│                                                                                 │
-│  • pdf        - Enhanced PDF reading and analysis                               │
-│  • xlsx       - Excel spreadsheet handling                                      │
-│  • docx       - Word document processing                                        │
-│  • images     - Advanced image analysis                                         │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Using Skills
+## Skills Locations
 
-Skills are invoked automatically when relevant, or you can invoke them explicitly:
+| Location | Scope | Shared |
+|----------|-------|--------|
+| `.claude/skills/` | Project | Yes (git-committed) |
+| `~/.claude/skills/` | User | No (personal) |
+| Plugin-provided | Varies | Via plugin marketplace |
+| `--add-dir` directories | Additional | `.claude/skills/` in added dirs |
 
-```
-> Analyse the quarterly report at ./reports/Q4-2024.pdf
+Skills are hot-reloaded — create or modify a skill file and it becomes available immediately without restarting the session.
 
-  [PDF skill activated - extracting structured content...]
-```
+## Creating a Skill
 
-```
-> Extract all tables from ./data/financial-data.xlsx and summarise the trends
-
-  [XLSX skill activated - parsing spreadsheet...]
-```
-
-## Skill Capabilities
-
-### PDF Skill
-- Extract text with formatting preserved
-- Parse tables into structured data
-- Extract embedded images
-- Read metadata (author, creation date, etc.)
-- Handle multi-page documents
-
-### XLSX Skill
-- Read multiple sheets
-- Parse formulas and values
-- Handle merged cells
-- Extract charts as data
-- Process large spreadsheets efficiently
-
-### DOCX Skill
-- Extract formatted text
-- Parse tables and lists
-- Handle images and diagrams
-- Read comments and track changes
-- Extract document metadata
-
-## When Skills Activate
-
-Skills activate automatically based on:
-1. File extension (.pdf, .xlsx, .docx)
-2. File content type
-3. Explicit invocation
-
-```
-> Read ./docs/specification.pdf
-  # PDF skill auto-activates
-
-> What does the spreadsheet at ./data/metrics.xlsx show?
-  # XLSX skill auto-activates
-```
-
-## Defining Custom Skills
-
-Skills are markdown files in `.claude/skills/` that tell Claude how to handle specific file types or tasks.
-
-### Structure
-
-```
-.claude/
-└── skills/
-    └── pdf.md      # Skill for handling PDFs
-```
-
-### Example: PDF Analysis Skill
+### Basic Skill
 
 Create `.claude/skills/pdf.md`:
 
 ````markdown
-# PDF Analysis Skill
+---
+description: "Enhanced PDF reading and analysis"
+---
 
 When asked to read or analyse a PDF file, follow this approach:
 
@@ -124,56 +68,107 @@ Do NOT read the entire PDF into context. Instead:
    for page_num in range(min(5, len(doc))):
        page = doc[page_num]
        text = page.get_text()
-
-   # Extract tables
-   # Extract images
-   # etc.
    ```
 
 2. **Run the script** and analyse the output
 
 3. **Read specific pages** only if needed for detail
-
-## For Tables in PDFs
-
-Use `pdfplumber` or `camelot` to extract tables:
-```python
-import pdfplumber
-
-with pdfplumber.open("file.pdf") as pdf:
-    for page in pdf.pages:
-        tables = page.extract_tables()
-        for table in tables:
-            # Process table data
-```
-
-## For Searching PDFs
-
-Write a script to search rather than reading everything:
-```python
-import pymupdf
-
-doc = pymupdf.open("file.pdf")
-for page in doc:
-    results = page.search_for("search term")
-    if results:
-        print(f"Page {page.number}: {page.get_text('text')}")
-```
-
-## Dependencies
-
-If not installed, install with:
-```bash
-pip install pymupdf pdfplumber camelot-py
-```
 ````
 
-### Example: Log Analysis Skill
+### User-Invocable Skill
+
+By default, skills in `.claude/skills/` directories are visible in the `/skills` menu. Opt out with `user-invocable: false` in frontmatter.
+
+Create `.claude/skills/review.md`:
+
+````markdown
+---
+description: "Thorough code review with security focus"
+argument-hint: "<file-or-directory>"
+---
+
+Review $ARGUMENTS for:
+- Security vulnerabilities (OWASP Top 10)
+- Error handling gaps
+- Performance issues
+- Code quality and readability
+
+Provide specific, actionable feedback with line numbers.
+````
+
+Invoke with `/review src/auth.py` or select from the `/skills` menu.
+
+### Skill with Arguments
+
+Skills can access arguments via `$ARGUMENTS` (full string) or `$ARGUMENTS[0]`, `$ARGUMENTS[1]` (indexed):
+
+````markdown
+---
+description: "Generate tests for a module"
+argument-hint: "<module-path>"
+---
+
+Generate comprehensive pytest tests for $ARGUMENTS[0].
+
+Requirements:
+- Use pytest fixtures
+- Include edge cases
+- Follow AAA pattern (Arrange, Act, Assert)
+````
+
+## Frontmatter Reference
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `description` | string | What the skill does (shown in `/skills` menu) |
+| `argument-hint` | string | Hint text for arguments (e.g., `<file>`) |
+| `user-invocable` | boolean | Show in slash command menu (default: `true` for `/skills/` dir) |
+| `allowed-tools` | list | Tools the skill can use (restricts or grants) |
+| `agent` | string | Agent type to execute the skill |
+| `context` | string | Set to `fork` to run in forked sub-agent context |
+| `model` | string | Model to use (e.g., `sonnet`, `haiku`) |
+| `hooks` | object | PreToolUse/PostToolUse/Stop hooks scoped to the skill |
+| `memory` | string | Memory scope: `user`, `project`, or `local` |
+
+### allowed-tools Examples
+
+```yaml
+---
+# YAML-style list
+allowed-tools:
+  - Bash(npm test:*)
+  - Read
+  - Grep
+---
+```
+
+```yaml
+---
+# Comma-separated
+allowed-tools: Bash(npm test:*), Read, Grep
+---
+```
+
+### Forked Context
+
+Run a skill in an isolated sub-agent to protect the main conversation context:
+
+```yaml
+---
+description: "Deep codebase exploration"
+context: fork
+agent: Explore
+---
+```
+
+## Log Analysis Skill Example
 
 Create `.claude/skills/logs.md`:
 
 ````markdown
-# Log Analysis Skill
+---
+description: "Analyse log files efficiently"
+---
 
 When asked to analyse log files, especially large ones:
 
@@ -207,9 +202,45 @@ Log files can be gigabytes. Always use tools:
    ```
 ````
 
-### Skill Activation
+## Viewing Skills
 
-Skills activate when:
-- You reference a matching file type
-- The skill's trigger conditions are met
-- You explicitly invoke with the skill name
+```
+> /skills
+
+Available Skills:
+  /pdf         Enhanced PDF reading and analysis
+  /review      Thorough code review with security focus
+  /logs        Analyse log files efficiently
+```
+
+Use `/context` to see which skills are loaded and their token cost.
+
+## Skills vs Custom Slash Commands
+
+Skills (`.claude/skills/`) and custom slash commands (`.claude/commands/`) are now unified. Both appear in the slash command menu and support frontmatter. The distinction is primarily organisational:
+
+| Aspect | `.claude/skills/` | `.claude/commands/` |
+|--------|-------------------|---------------------|
+| Default visibility | Shown in `/skills` menu | Shown in `/` menu |
+| Hot-reload | Yes | Yes |
+| Frontmatter | Full support | Full support |
+| Typical use | Reusable capabilities | Project-specific workflows |
+
+## Plugin-Provided Skills
+
+Plugins can provide skills that appear in the `/skills` menu with a plugin name badge:
+
+```
+> /skills
+
+Plugin Skills:
+  /deploy [my-plugin]    Deploy to staging or production
+  /lint [my-plugin]      Run comprehensive linting
+```
+
+See [Part 32: Plugins](32-plugins.md) for plugin installation and management.
+
+## Official Documentation
+
+- [Skills Documentation](https://code.claude.com/docs/en/skills)
+- [Custom Slash Commands](https://code.claude.com/docs/en/custom-slash-commands)

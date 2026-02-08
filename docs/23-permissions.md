@@ -133,6 +133,84 @@ This setting:
 - Cannot be overridden by users
 - Ensures deny rules are always enforced
 
+## Wildcard Permission Patterns
+
+Permission rules support wildcard patterns for flexible matching:
+
+### Bash Wildcards
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm *)",
+      "Bash(* install)",
+      "Bash(git * main)",
+      "Bash(*)"
+    ]
+  }
+}
+```
+
+`Bash(*)` matches all bash commands and is equivalent to `Bash` without arguments.
+
+### MCP Tool Wildcards
+
+Allow or deny all tools from a specific MCP server:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__playwright__*"
+    ],
+    "deny": [
+      "mcp__untrusted_server__*"
+    ]
+  }
+}
+```
+
+### Enterprise MCP Allowlist/Denylist
+
+Enterprises can control which MCP servers are permitted via managed settings:
+
+```json
+{
+  "mcpAllowlist": ["playwright", "github"],
+  "mcpDenylist": ["untrusted-server"]
+}
+```
+
+Configure in `managed-settings.json` at the system level.
+
+### Disabling Specific Tools for Custom Agents
+
+Use `disallowedTools` in agent definitions to block tools:
+
+```yaml
+---
+name: read-only-agent
+disallowedTools: Edit, Write, Bash
+---
+```
+
+### allowUnsandboxedCommands
+
+Disable the `dangerouslyDisableSandbox` escape hatch at policy level:
+
+```json
+{
+  "sandbox": {
+    "allowUnsandboxedCommands": false
+  }
+}
+```
+
+### Searching Permission Rules
+
+Use `/permissions` and press `/` to filter rules by tool name for quick navigation.
+
 ## Using Hooks as an Alternative
 
 PreToolUse hooks run **regardless of permission mode**, providing another layer of protection:

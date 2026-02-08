@@ -24,6 +24,8 @@ Sandboxing provides OS-level security isolation for Claude Code, restricting fil
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
+Sandbox mode is available for the BashTool on Linux and macOS.
+
 ## Quick Start
 
 Enable sandboxing with the `/sandbox` command:
@@ -32,10 +34,11 @@ Enable sandboxing with the `/sandbox` command:
 > /sandbox on
 ```
 
-Check current sandbox status:
+Check current sandbox status and dependency availability:
 
 ```bash
 > /sandbox
+# Shows: sandbox status, dependency status, installation instructions
 ```
 
 Disable sandboxing:
@@ -280,6 +283,34 @@ Use when:
 - Full system access required
 - Trusted codebase
 - Complex build processes
+
+## Enterprise: allowUnsandboxedCommands
+
+Prevent users from disabling sandbox via `dangerouslyDisableSandbox`:
+
+```json
+{
+  "sandbox": {
+    "allowUnsandboxedCommands": false
+  }
+}
+```
+
+Configure in `managed-settings.json` to enforce at the enterprise level. When set to `false`, the `dangerouslyDisableSandbox` option is blocked entirely.
+
+### Excluding Specific Commands
+
+Allow certain commands to bypass sandbox restrictions:
+
+```json
+{
+  "sandbox": {
+    "excludedCommands": ["docker", "npm"]
+  }
+}
+```
+
+**Note**: When `autoAllowBashIfSandboxed` is enabled, excluded commands still require Bash permission approval.
 
 ## Combining with Other Security Features
 

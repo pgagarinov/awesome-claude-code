@@ -1,8 +1,8 @@
-# Part 16: Claude Agent SDK (Python)
+# Part 16: Claude Agent SDK
 
 ## Overview
 
-The Claude Agent SDK allows you to control Claude Code programmatically - perfect for automation, CI/CD integration, and building custom tools.
+The Claude Agent SDK allows you to control Claude Code programmatically - perfect for automation, CI/CD integration, and building custom tools. Available in both **TypeScript** and **Python**.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -11,7 +11,8 @@ The Claude Agent SDK allows you to control Claude Code programmatically - perfec
 │                                                                                 │
 │  Aspect              │ CLI                    │ SDK                             │
 │  ────────────────────┼────────────────────────┼──────────────────────────────── │
-│  Interface           │ Interactive terminal   │ Python code (async)             │
+│  Interface           │ Interactive terminal   │ Code (async)                    │
+│  Languages           │ Any (shell)            │ TypeScript, Python              │
 │  Authentication      │ Browser OAuth          │ Uses existing CLI auth          │
 │  Best for            │ Interactive work       │ Automation, scripts             │
 │  Customisation       │ Slash commands         │ Full programmatic control       │
@@ -23,9 +24,17 @@ The Claude Agent SDK allows you to control Claude Code programmatically - perfec
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-See the [Claude Agent SDK repository](https://github.com/anthropics/claude-agent-sdk-python) for the complete API reference.
+See the [Claude Agent SDK documentation](https://platform.claude.com/docs/en/agent-sdk) for the complete API reference.
 
 ## Installation
+
+### TypeScript SDK
+
+```bash
+npm install @anthropic-ai/claude-agent-sdk
+```
+
+### Python SDK
 
 ```bash
 # Using pip
@@ -34,6 +43,8 @@ pip install claude-agent-sdk
 # Using pixi (recommended)
 pixi add --pypi claude-agent-sdk
 ```
+
+**Note**: Requires zod ^4.0.0 as a peer dependency for TypeScript.
 
 ## Runnable Examples
 
@@ -95,7 +106,7 @@ async def explain_code():
 
     async for message in query(
         prompt="Explain the main function in src/main.py",
-        options=options
+        options=options,
     ):
         if hasattr(message, 'content'):
             print(message.content)
@@ -427,10 +438,90 @@ if __name__ == "__main__":
     sys.exit(0 if passed else 1)
 ```
 
+## TypeScript SDK Usage
+
+```typescript
+import { query, type ClaudeAgentOptions } from "@anthropic-ai/claude-agent-sdk";
+
+const options: ClaudeAgentOptions = {
+  cwd: "/path/to/project",
+  model: "claude-sonnet-4-20250514",
+  maxBudgetUsd: 5.0,
+};
+
+// Simple query
+for await (const message of query({ prompt: "Explain this codebase", options })) {
+  if (message.type === "text") {
+    console.log(message.content);
+  }
+}
+```
+
+### Tool Confirmation (canUseTool)
+
+Control tool execution with a callback:
+
+```typescript
+const result = await query({
+  prompt: "Fix the bug in auth.py",
+  options: {
+    canUseTool: async (toolName, toolInput) => {
+      if (toolName === "Bash" && toolInput.command.includes("rm")) {
+        return false; // Deny destructive commands
+      }
+      return true;
+    },
+  },
+});
+```
+
+### Custom Callback Tools
+
+Register custom tools that Claude can invoke:
+
+```typescript
+const result = await query({
+  prompt: "Deploy the app",
+  options: {
+    tools: [
+      {
+        name: "deploy",
+        description: "Deploy to staging",
+        inputSchema: { type: "object", properties: { env: { type: "string" } } },
+        callback: async (input) => {
+          // Custom deployment logic
+          return { success: true };
+        },
+      },
+    ],
+  },
+});
+```
+
+### Request Cancellation
+
+Cancel a running query:
+
+```typescript
+const controller = new AbortController();
+
+// Cancel after 30 seconds
+setTimeout(() => controller.abort(), 30000);
+
+for await (const message of query({
+  prompt: "Analyse the entire codebase",
+  options: { signal: controller.signal },
+})) {
+  console.log(message);
+}
+```
+
 ## SDK Configuration Options
 
+### Python
+
 ```python
-from claude_agent_sdk import ClaudeAgentOptions
+from claude_agent_sdk import query, ClaudeAgentOptions
 
 # All available options
 options = ClaudeAgentOptions(
@@ -440,5 +531,38 @@ options = ClaudeAgentOptions(
     permission_mode="default",           # "default", "acceptEdits", "bypassPermissions"
     max_turns=10,                        # Limit conversation turns
     continue_conversation=False,         # Resume previous session
+    max_budget_usd=5.0,                  # Maximum spend in USD
 )
 ```
+
+### TypeScript
+
+```typescript
+import type { ClaudeAgentOptions } from "@anthropic-ai/claude-agent-sdk";
+
+const options: ClaudeAgentOptions = {
+  cwd: "/path/to/project",
+  model: "claude-sonnet-4-20250514",
+  systemPrompt: "You are a code expert",
+  permissionMode: "default",
+  maxTurns: 10,
+  maxBudgetUsd: 5.0,
+  canUseTool: async (tool, input) => true,
+};
+```
+
+### Key Options
+
+| Option | Description |
+|--------|-------------|
+| `cwd` | Working directory |
+| `model` | Model to use |
+| `system_prompt` / `systemPrompt` | Custom system prompt |
+| `permission_mode` / `permissionMode` | Permission level |
+| `max_turns` / `maxTurns` | Limit conversation turns |
+| `max_budget_usd` / `maxBudgetUsd` | Maximum spending budget (USD) |
+| `canUseTool` | Callback for tool confirmation (TS only) |
+
+### Cost Tracking
+
+The SDK returns `total_cost_usd` in results for budget monitoring.

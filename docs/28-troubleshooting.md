@@ -125,7 +125,7 @@ See [Part 23: Permission Settings](23-permissions.md) for comprehensive configur
 │  USER LEVEL                                                                 │
 │  ~/.claude/settings.json        User settings (permissions, model)          │
 │  ~/.claude/CLAUDE.md            Personal memory for all projects           │
-│  ~/.claude.json                 Global state (theme, OAuth, MCP)           │
+│  ~/.claude/settings.json        User settings (MCP servers, preferences)   │
 │                                                                             │
 │  PROJECT LEVEL                                                              │
 │  .claude/settings.json          Project settings (shared via git)          │
@@ -146,7 +146,6 @@ See [Part 23: Permission Settings](23-permissions.md) for comprehensive configur
 
 ```bash
 # Reset all user settings and state
-rm ~/.claude.json
 rm -rf ~/.claude/
 
 # Reset project-specific settings

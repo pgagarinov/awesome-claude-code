@@ -46,6 +46,9 @@ A comprehensive guide to mastering Claude Code - from first launch to advanced a
 29. [Statusline Customization](docs/29-statusline.md)
 30. [Sandboxing](docs/30-sandboxing.md)
 31. [Output Styles](docs/31-output-styles.md)
+32. [Plugins](docs/32-plugins.md)
+33. [Background Tasks](docs/33-background-tasks.md)
+34. [Session Management](docs/34-session-management.md)
 
 ---
 

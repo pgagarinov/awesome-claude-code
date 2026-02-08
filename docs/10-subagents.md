@@ -43,15 +43,51 @@ Subagents are separate Claude instances that handle specific tasks with their **
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Subagent Types
+## Built-in Subagent Types
 
-| Type | Use Case | Tools Available |
-|------|----------|-----------------|
-| `Explore` | Codebase exploration | Read, Glob, Grep |
-| `Plan` | Architecture planning | All tools |
-| `general-purpose` | Complex multi-step tasks | All tools |
+| Type | Use Case | Tools Available | Model |
+|------|----------|-----------------|-------|
+| `Explore` | Fast codebase search and exploration | Read, Glob, Grep | Haiku (fast, cheap) |
+| `Plan` | Architecture planning and design | All read tools | Configurable |
+| `general-purpose` | Complex multi-step tasks | All tools | Inherits parent |
 
-For custom subagent configuration, see the [official Subagents documentation](https://code.claude.com/docs/en/sub-agents).
+### Explore Agent
+
+The Explore agent is optimised for fast codebase searches. Powered by Haiku, it searches your codebase efficiently while preserving your main context:
+
+```
+> Search the entire codebase for deprecated API usage
+  # Claude spawns an Explore subagent (uses Haiku)
+
+> How does the authentication middleware work?
+  # Explore agent reads relevant files and reports back
+```
+
+### Plan Agent
+
+The Plan agent is designed for architecture and design tasks. It can explore the codebase and produce implementation plans:
+
+```
+> Plan the migration from REST to GraphQL
+  # Claude spawns a Plan subagent to research and design
+
+> Design a caching strategy for our API
+  # Plan agent analyses current code and proposes architecture
+```
+
+### Model Selection
+
+Claude can dynamically choose which model a subagent uses, or you can specify it in custom agent configuration:
+
+```yaml
+---
+name: quick-search
+description: Fast file searches
+model: haiku
+---
+```
+
+Available model options: `sonnet`, `opus`, `haiku`, or `inherit` (use parent's model).
 
 ## When to Use Subagents
 
@@ -130,11 +166,66 @@ Provide specific, actionable feedback with line numbers.
 | `tools` | No | Comma-separated tool list (inherits all if omitted) |
 | `model` | No | `sonnet`, `opus`, `haiku`, or `inherit` |
 | `permissionMode` | No | `default`, `acceptEdits`, `plan`, etc. |
+| `disallowedTools` | No | Tools to explicitly block |
+| `hooks` | No | PreToolUse/PostToolUse/Stop hooks scoped to the agent |
+| `memory` | No | Memory scope: `user`, `project`, or `local` |
+
+### Restricting Subagent Spawning
+
+Control which subagents can be spawned using `Task(agent_type)` syntax in the `tools` frontmatter:
+
+```yaml
+---
+name: orchestrator
+tools: Read, Grep, Task(Explore), Task(Plan)
+# Can only spawn Explore and Plan subagents, not general-purpose
+---
+```
 
 ### Resumable Subagents
 
-Each subagent execution gets a unique `agentId`. Resume with previous context:
+Each subagent execution gets a unique `agentId`. Claude can resume a subagent with its previous context:
 
 ```
 > Resume agent abc123 and analyse the authorisation logic
 ```
+
+This is useful when a subagent's work needs follow-up without re-reading all the files.
+
+## Background Agents
+
+Background agents run independently while you continue working in the main session:
+
+```
+> & Research all the API endpoints and document them
+  # Runs in background, notifies when complete
+```
+
+Press `Ctrl+B` to background a currently running agent. See [Part 33: Background Tasks](33-background-tasks.md) for details.
+
+## Agent Teams (Experimental)
+
+Agent Teams enable multi-agent collaboration where multiple agents work together on a task. This is an experimental feature requiring:
+
+```bash
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
+```
+
+Teams allow coordinated work across multiple agents with shared context and task delegation. See the [official Agent Teams documentation](https://code.claude.com/docs/en/agent-teams) for details.
+
+## Disabling Specific Agents
+
+Block certain agent types using `Task(AgentName)` in `disallowedTools` settings or the `--disallowedTools` CLI flag:
+
+```json
+{
+  "permissions": {
+    "deny": ["Task(general-purpose)"]
+  }
+}
+```
+
+## Official Documentation
+
+- [Subagents Documentation](https://code.claude.com/docs/en/sub-agents)
+- [Custom Agents](https://code.claude.com/docs/en/custom-agents)

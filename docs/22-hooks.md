@@ -34,6 +34,10 @@ Hooks are custom scripts that Claude Code executes at specific points during its
 | `PreCompact` | Before context compaction | Pre-compaction cleanup |
 | `Notification` | Claude sends notifications | Custom notification delivery |
 | `PermissionRequest` | User shown permission dialog | Auto-approve or deny |
+| `Setup` | `--init`, `--init-only`, `--maintenance` | Repository setup, dependency install |
+| `SubagentStart` | Subagent spawned | Track subagent lifecycle |
+| `TeammateIdle` | Agent team member goes idle | Multi-agent coordination |
+| `TaskCompleted` | Background task finishes | Multi-agent workflow notifications |
 
 ## Two Key Distinctions
 
@@ -371,9 +375,9 @@ if __name__ == "__main__":
 
 ## Writing Your Own hook_sdk
 
-### Why Custom vs claude-agent-sdk?
+### Why Custom vs Claude Agent SDK?
 
-The [Claude Agent SDK](https://github.com/anthropics/claude-agent-sdk-python) provides hooks for **programmatic API calls**:
+The [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk) provides hooks for **programmatic API calls**:
 
 ```python
 # Agent SDK hooks - for programmatic use
@@ -715,6 +719,180 @@ For intelligent, context-aware decisions, use prompt-based hooks:
 | Architecture | Thin wrappers + separate body functions |
 | `disableAllHooks` | Disable all hooks globally (settings.json) |
 | `allowManagedHooksOnly` | Enterprise: only managed/SDK hooks (managed-settings.json) |
+| `once: true` | Run hook only once per session |
+| `timeout` | Per-command timeout (milliseconds) |
+
+## Setup Hooks
+
+Setup hooks run during repository initialisation via `--init`, `--init-only`, or `--maintenance` flags:
+
+```json
+{
+  "hooks": {
+    "Setup": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/setup.sh",
+            "timeout": 300000
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+```bash
+# .claude/hooks/setup.sh
+#!/bin/bash
+# Install dependencies and prepare environment
+npm install
+pip install -r requirements.txt
+echo '{"continue": true, "systemMessage": "Setup complete"}'
+```
+
+Use cases:
+- `claude --init` — run setup on first launch in a repo
+- `claude --init-only` — run setup and exit (CI/CD)
+- `claude --maintenance` — run periodic maintenance tasks
+
+## PermissionRequest Hooks
+
+Auto-approve or deny permission requests programmatically:
+
+```json
+{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/auto_approve.py",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+```python
+#!/usr/bin/env python3
+"""Auto-approve safe operations, deny dangerous ones."""
+import json, sys
+
+inp = json.load(sys.stdin)
+tool_name = inp.get("tool_name", "")
+tool_input = inp.get("tool_input", {})
+
+# Auto-approve read operations
+if tool_name in ("Read", "Grep", "Glob"):
+    json.dump({
+        "continue": True,
+        "hookSpecificOutput": {
+            "hookEventName": "PermissionRequest",
+            "permissionDecision": "allow",
+            "permissionDecisionReason": "Auto-approved read operation"
+        }
+    }, sys.stdout)
+else:
+    json.dump({"continue": True}, sys.stdout)
+```
+
+## Hook Configuration Options
+
+### once: true
+
+Run a hook only once per session (useful for setup tasks):
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python .claude/hooks/load_env.py",
+            "once": true
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+### Per-Command Timeout
+
+Set custom timeouts for individual hook commands:
+
+```json
+{
+  "hooks": [
+    {
+      "type": "command",
+      "command": "python .claude/hooks/slow_validation.py",
+      "timeout": 600000
+    }
+  ]
+}
+```
+
+### PreToolUse Hook Modifying Inputs
+
+PreToolUse hooks can modify tool inputs via `updatedInput`:
+
+```python
+# Modify the command before execution
+json.dump({
+    "continue": True,
+    "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "updatedInput": {
+            "command": modified_command
+        }
+    }
+}, sys.stdout)
+```
+
+### PreToolUse Hook Adding Context
+
+Inject additional context for Claude to consider:
+
+```python
+json.dump({
+    "continue": True,
+    "hookSpecificOutput": {
+        "hookEventName": "PreToolUse",
+        "additionalContext": "Note: this file was recently modified by another developer"
+    }
+}, sys.stdout)
+```
+
+## Agent and Skill Hooks
+
+Hooks can be scoped to specific agents or skills via frontmatter:
+
+```yaml
+---
+name: my-agent
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "python .claude/hooks/agent_bash_guard.py"
+  Stop:
+    - hooks:
+        - type: prompt
+          prompt: "Has the agent completed its specific task?"
+---
+```
 
 ## Common Hook Patterns
 
