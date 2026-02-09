@@ -142,6 +142,8 @@ Plugin-provided MCP servers are managed in the `/plugins` installed tab alongsid
 
 ### Output Styles
 
+> **Note**: Output styles were deprecated in v2.0.30. Use `--system-prompt`, `--system-prompt-file`, or CLAUDE.md instructions instead.
+
 Plugins can share output style presets. Install and activate via `/output-style`.
 
 ## Plugin Structure

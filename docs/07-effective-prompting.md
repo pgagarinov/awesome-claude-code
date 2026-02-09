@@ -41,12 +41,19 @@ When you need information before acting:
 ```
 
 ### 4. Extended Thinking
-For complex reasoning tasks, use the `ultrathink` keyword to allocate dedicated thinking tokens:
+For complex reasoning tasks, enable extended thinking mode to allocate dedicated thinking tokens:
 
 ```
-> ultrathink: design the optimal indexing strategy for this database query.
+> Design the optimal indexing strategy for this database query.
   Consider query patterns, write frequency, and storage constraints.
 ```
+
+Enable extended thinking via:
+- CLI flag: `claude --thinking-budget 10000` (specify token budget)
+- Keyboard toggle: Press `Alt+T` during a session to enable/disable thinking mode
+- Settings: Configure default thinking budget in `~/.claude/settings.json`
+
+**Note:** The `ultrathink` keyword syntax was deprecated in v2.1.0. Use the methods above instead.
 
 See [Part 27: Extended Thinking](27-extended-thinking.md) for full details on thinking modes, token budgets, and configuration options.
 

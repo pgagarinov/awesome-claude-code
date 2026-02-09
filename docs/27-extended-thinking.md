@@ -27,6 +27,8 @@ Use `/model` to view or switch your current model.
 
 ### Per-Request: The `ultrathink` Keyword
 
+> **Deprecated (v2.1.0)**: The `ultrathink` keyword is deprecated. Use `--thinking-budget` CLI flag or the extended thinking settings instead. `ultrathink` still works but may be removed in a future version.
+
 Use `ultrathink` at the start of your prompt to enable thinking for a single request:
 
 ```

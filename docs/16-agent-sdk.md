@@ -100,7 +100,7 @@ from claude_agent_sdk import query, ClaudeAgentOptions
 async def explain_code():
     options = ClaudeAgentOptions(
         cwd="/path/to/project",           # Working directory
-        model="claude-sonnet-4-20250514", # Model to use
+        model="claude-sonnet-4-5-20250929", # Model to use
         # permission_mode="bypassPermissions",  # For automation (use with caution)
     )
 
@@ -445,7 +445,7 @@ import { query, type ClaudeAgentOptions } from "@anthropic-ai/claude-agent-sdk";
 
 const options: ClaudeAgentOptions = {
   cwd: "/path/to/project",
-  model: "claude-sonnet-4-20250514",
+  model: "claude-sonnet-4-5-20250929",
   maxBudgetUsd: 5.0,
 };
 
@@ -526,7 +526,7 @@ from claude_agent_sdk import query, ClaudeAgentOptions
 # All available options
 options = ClaudeAgentOptions(
     cwd="/path/to/project",              # Working directory
-    model="claude-sonnet-4-20250514",    # Model to use
+    model="claude-sonnet-4-5-20250929",    # Model to use
     system_prompt="You are a code expert", # Custom system prompt
     permission_mode="default",           # "default", "acceptEdits", "bypassPermissions"
     max_turns=10,                        # Limit conversation turns
@@ -542,7 +542,7 @@ import type { ClaudeAgentOptions } from "@anthropic-ai/claude-agent-sdk";
 
 const options: ClaudeAgentOptions = {
   cwd: "/path/to/project",
-  model: "claude-sonnet-4-20250514",
+  model: "claude-sonnet-4-5-20250929",
   systemPrompt: "You are a code expert",
   permissionMode: "default",
   maxTurns: 10,

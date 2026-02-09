@@ -1,5 +1,7 @@
 # Part 31: Output Styles
 
+> **Deprecated (v2.0.30)**: Output styles are deprecated. Use `--system-prompt`, `--system-prompt-file`, CLAUDE.md instructions, or plugins for customizing Claude Code output instead.
+
 ## What are Output Styles?
 
 Output styles customize how Claude Code communicates - its tone, detail level, and focus areas. They're useful for adapting Claude to different use cases beyond software engineering.

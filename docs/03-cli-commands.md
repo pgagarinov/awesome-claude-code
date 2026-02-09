@@ -47,7 +47,7 @@ claude -p "explain main.py" --stream
 
 ```bash
 # Use a specific model
-claude --model claude-sonnet-4-20250514
+claude --model claude-sonnet-4-5-20250929
 claude --model opus
 
 # Use Haiku for quick, simple tasks
@@ -119,8 +119,8 @@ claude --permission-mode trusted
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │  --dangerously-skip-permissions   Skip all permission prompts                   │
 │  --permission-mode <mode>         Set permission level                          │
-│  --allowedTools <tools>           Restrict available tools                      │
-│  --disallowedTools <tools>        Explicitly block tools                        │
+│  --allowedTools <tools>           Restrict available tools (legacy)             │
+│  --disallowedTools <tools>        Explicitly block tools (legacy)               │
 │  --tools <tools>                  Restrict built-in tools (interactive mode)    │
 │  --disable-slash-commands         Disable all slash commands                     │
 │                                                                                 │
@@ -192,6 +192,8 @@ claude -p "analyze code" --allowedTools "Read,Grep,Glob"
 claude -p "make changes" --allowedTools "Bash(npm test:*),Edit"
 ```
 
+> **Note**: `--allowedTools` and `--disallowedTools` are legacy flags. For new projects, use `allowed-tools` and `disallowed-tools` in agent/skill frontmatter configuration.
+
 ### Tool Restriction Patterns
 
 The `--allowedTools` flag supports glob patterns:
@@ -261,6 +263,7 @@ claude -p "check for issues" --output-format json | \
 # ci-review.sh - Automated code review in CI
 
 # Run review with restricted permissions
+# Note: --allowedTools is legacy; prefer agent frontmatter for tool restrictions
 RESULT=$(claude -p "review changes for security issues" \
   --output-format json \
   --allowedTools "Read,Grep,Glob" \
@@ -297,7 +300,7 @@ For more complex programmatic integrations, use the Claude Agent SDK:
 import { Agent } from "@anthropic-ai/agent";
 
 const agent = new Agent({
-  model: "claude-sonnet-4-20250514",
+  model: "claude-sonnet-4-5-20250929",
 });
 
 const result = await agent.run("Review this codebase for bugs");
