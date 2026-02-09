@@ -1,0 +1,17 @@
+[project]
+name = "ralf-loop"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = ["pytest>=8,<9"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+ralf-loop = { path = ".", editable = true }
+
+[tool.pixi.tasks]

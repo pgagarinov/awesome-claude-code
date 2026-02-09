@@ -1,0 +1,22 @@
+[project]
+authors = [{name = "Peter Gagarinov", email = "4868370+pgagarinov@users.noreply.github.com"}]
+name = "agent-teams"
+requires-python = ">= 3.11"
+version = "0.1.0"
+dependencies = ["it2>=0.2.3,<0.3", "click>=8.3.1,<9", "pytest>=9.0.2,<10"]
+
+[project.scripts]
+wc-tool = "agent_teams.cli:main"
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+agent_teams = { path = ".", editable = true }
+
+[tool.pixi.tasks]
