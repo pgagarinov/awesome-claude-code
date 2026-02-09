@@ -1,4 +1,4 @@
-# Part 18: Best Practices & Tips
+# Part 21: Best Practices & Tips
 
 ## Do's and Don'ts
 
@@ -16,7 +16,7 @@
 │  • Let subagents handle exploration                                             │
 │  • Review generated code before committing                                      │
 │  • Use custom commands for repetitive workflows                                 │
-│  • Use Ralf Loop pattern (Part 25) for critical tasks requiring completion     │
+│  • Use Ralf Loop pattern (Part 14) for critical tasks requiring completion     │
 │                                                                                 │
 │  DON'T ✗                                                                        │
 │  ─────────────────────────────────────────────────────────────────────────────  │
@@ -141,7 +141,7 @@ For long-running tasks where you need to guarantee Claude completes all work bef
 - Block if validation fails, forcing Claude to fix issues
 - Only approve when all completion criteria met
 
-See [Part 25: The Ralf Loop - Preventing Premature Stops](25-ralf-loop.md) for implementation patterns and [Part 22: Claude Code Hooks](22-hooks.md) for configuration details.
+See [Part 14: The Ralf Loop - Preventing Premature Stops](14-ralf-loop.md) for implementation patterns and [Part 13: Claude Code Hooks](13-hooks.md) for configuration details.
 
 ---
 

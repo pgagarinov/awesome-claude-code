@@ -307,7 +307,7 @@ const result = await agent.run("Review this codebase for bugs");
 console.log(result.output);
 ```
 
-See [Part 16: Agent SDK](16-agent-sdk.md) for comprehensive SDK documentation.
+See [Part 19: Agent SDK](19-agent-sdk.md) for comprehensive SDK documentation.
 
 ---
 

@@ -1,4 +1,4 @@
-# Part 15: MCP Servers vs Python Libraries
+# Part 18: MCP Servers vs Python Libraries
 
 ## The Question
 

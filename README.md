@@ -1,12 +1,35 @@
-# Claude Code Training Programme
+# Awesome Claude Code
 
 ```
-   ██████╗██╗      █████╗ ██╗   ██╗██████╗ ███████╗     ██████╗ ██████╗ ██████╗ ███████╗
-  ██╔════╝██║     ██╔══██╗██║   ██║██╔══██╗██╔════╝    ██╔════╝██╔═══██╗██╔══██╗██╔════╝
-  ██║     ██║     ███████║██║   ██║██║  ██║█████╗      ██║     ██║   ██║██║  ██║█████╗
-  ██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══╝      ██║     ██║   ██║██║  ██║██╔══╝
-  ╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝███████╗    ╚██████╗╚██████╔╝██████╔╝███████╗
-   ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝     ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
+  ┃
+  ┃  ░▒▓██████████████████████████████████████████████▓▒░
+  ┃
+  ┃    ┌─┐ ┬ ┬ ┌─┐ ┌─┐ ┌─┐ ┌┬┐ ┌─┐
+  ┃    ├─┤ │││ ├┤  └─┐ │ │ │││ ├┤                     ◈ v2.0
+  ┃    ┘ └ └┴┘ └─┘ └─┘ └─┘ ┘ └ └─┘
+  ┃
+  ┃  ────────────────────────────────────────────────────
+  ┃
+  ┃     ██████╗██╗      █████╗ ██╗   ██╗██████╗ ███████╗
+  ┃    ██╔════╝██║     ██╔══██╗██║   ██║██╔══██╗██╔════╝
+  ┃    ██║     ██║     ███████║██║   ██║██║  ██║█████╗
+  ┃    ██║     ██║     ██╔══██║██║   ██║██║  ██║██╔══╝
+  ┃    ╚██████╗███████╗██║  ██║╚██████╔╝██████╔╝███████╗
+  ┃     ╚═════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝╚══════╝
+  ┃
+  ┃     ██████╗ ██████╗ ██████╗ ███████╗
+  ┃    ██╔════╝██╔═══██╗██╔══██╗██╔════╝
+  ┃    ██║     ██║   ██║██║  ██║█████╗
+  ┃    ██║     ██║   ██║██║  ██║██╔══╝
+  ┃    ╚██████╗╚██████╔╝██████╔╝███████╗
+  ┃     ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝
+  ┃
+  ┃  ────────────────────────────────────────────────────
+  ┃
+  ┃    ◇── tips ── tricks ── tools ── workflows ──◇
+  ┃
+  ┃  ░▒▓██████████████████████████████████████████████▓▒░
+  ┃
 ```
 
 A comprehensive guide to mastering Claude Code - from first launch to advanced automation.
@@ -25,21 +48,21 @@ A comprehensive guide to mastering Claude Code - from first launch to advanced a
 8. [Context Management](docs/08-context-management.md)
 9. [Working with Large Files](docs/09-large-files.md)
 10. [Subagents](docs/10-subagents.md)
-11. [Multi-Modal: Screenshots & Images](docs/11-multimodal.md)
-12. [Custom Slash Commands](docs/12-custom-commands.md)
-13. [Skills](docs/13-skills.md)
-14. [MCP Servers](docs/14-mcp-servers.md)
-15. [MCP vs Python Libraries](docs/15-mcp-vs-python.md)
-16. [Claude Agent SDK (Python)](docs/16-agent-sdk.md)
-17. [GitHub Actions Integration](docs/17-github-actions.md)
-18. [Best Practices & Tips](docs/18-best-practices.md)
-19. [Running Agents in Parallel](docs/19-parallel-agents.md)
-20. [LSP Plugins for Code Intelligence](docs/20-lsp-plugins.md)
-21. [SSH Multiplexing for Remote Development](docs/21-ssh-multiplexing.md)
-22. [Claude Code Hooks](docs/22-hooks.md)
-23. [Permission Settings & Hardening](docs/23-permissions.md)
-24. [Working on Multiple Features in Parallel](docs/24-parallel-features.md)
-25. [The Ralf Loop - Preventing Premature Stops](docs/25-ralf-loop.md)
+11. [Skills](docs/11-skills.md)
+12. [Running Agents in Parallel](docs/12-parallel-agents.md)
+13. [Claude Code Hooks](docs/13-hooks.md)
+14. [The Ralf Loop - Preventing Premature Stops](docs/14-ralf-loop.md)
+15. [Multi-Modal: Screenshots & Images](docs/15-multimodal.md)
+16. [Custom Slash Commands](docs/16-custom-commands.md)
+17. [MCP Servers](docs/17-mcp-servers.md)
+18. [MCP vs Python Libraries](docs/18-mcp-vs-python.md)
+19. [Claude Agent SDK (Python)](docs/19-agent-sdk.md)
+20. [GitHub Actions Integration](docs/20-github-actions.md)
+21. [Best Practices & Tips](docs/21-best-practices.md)
+22. [LSP Plugins for Code Intelligence](docs/22-lsp-plugins.md)
+23. [SSH Multiplexing for Remote Development](docs/23-ssh-multiplexing.md)
+24. [Permission Settings & Hardening](docs/24-permissions.md)
+25. [Working on Multiple Features in Parallel](docs/25-parallel-features.md)
 26. [Dev Containers with Claude Code](docs/26-dev-containers.md)
 27. [Extended Thinking (Thinking Mode)](docs/27-extended-thinking.md)
 28. [Troubleshooting](docs/28-troubleshooting.md)
@@ -49,6 +72,7 @@ A comprehensive guide to mastering Claude Code - from first launch to advanced a
 32. [Plugins](docs/32-plugins.md)
 33. [Background Tasks](docs/33-background-tasks.md)
 34. [Session Management](docs/34-session-management.md)
+35. [OAuth Token Storage](docs/35-oauth-token-storage.md)
 
 ---
 

@@ -1,4 +1,4 @@
-# Part 21: SSH Multiplexing for Remote Development
+# Part 23: SSH Multiplexing for Remote Development
 
 ## The Use Case
 

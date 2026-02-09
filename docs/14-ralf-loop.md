@@ -1,4 +1,4 @@
-# Part 25: The Ralf Loop - Preventing Premature Stops
+# Part 14: The Ralf Loop - Preventing Premature Stops
 
 ## What is the Ralf Loop?
 
@@ -64,7 +64,7 @@ Block Claude until concrete validation passes (tests, linting, builds).
 - Requires defining what "done" means programmatically
 - May block on unrelated validation failures
 
-> **Note**: This approach uses Stop hooks. For a detailed guide on hook syntax, configuration, and best practices, see [Part 22: Claude Code Hooks](22-hooks.md).
+> **Note**: This approach uses Stop hooks. For a detailed guide on hook syntax, configuration, and best practices, see [Part 13: Claude Code Hooks](13-hooks.md).
 
 **Example** (`.claude/settings.json`):
 
@@ -427,7 +427,7 @@ This approach:
 | **When to use** | Long tasks with clear completion criteria |
 | **When to avoid** | Exploratory work, research, simple fixes |
 
-> **Hardening**: To prevent Claude from circumventing the Ralf Loop by modifying hook scripts or test configuration, use permission deny rules. See [Part 23: Permission Settings & Hardening](23-permissions.md).
+> **Hardening**: To prevent Claude from circumventing the Ralf Loop by modifying hook scripts or test configuration, use permission deny rules. See [Part 24: Permission Settings & Hardening](24-permissions.md).
 
 ## Real-World Example
 

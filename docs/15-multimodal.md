@@ -1,4 +1,4 @@
-# Part 11: Multi-Modal: Screenshots & Images
+# Part 15: Multi-Modal: Screenshots & Images
 
 ## Claude's Vision Capabilities
 

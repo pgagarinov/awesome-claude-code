@@ -111,7 +111,7 @@ Or configure in `.claude/settings.json`:
 }
 ```
 
-See [Part 23: Permission Settings](23-permissions.md) for comprehensive configuration.
+See [Part 24: Permission Settings](24-permissions.md) for comprehensive configuration.
 
 ---
 
@@ -281,7 +281,7 @@ Restart WSL: `wsl --shutdown`
 
 Ask Claude: "Add appropriate language tags to all code blocks in this markdown file"
 
-Or use post-processing hooks (see [Part 22: Hooks](22-hooks.md)).
+Or use post-processing hooks (see [Part 13: Hooks](13-hooks.md)).
 
 ### Inconsistent Formatting
 

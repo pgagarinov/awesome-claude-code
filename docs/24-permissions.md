@@ -1,8 +1,8 @@
-# Part 23: Permission Settings & Hardening
+# Part 24: Permission Settings & Hardening
 
 ## Why Protect Files from Claude?
 
-When using Stop hooks for validation (Ralf Loop, [Part 25](25-ralf-loop.md)), Claude might try to "cheat" by:
+When using Stop hooks for validation (Ralf Loop, [Part 14](14-ralf-loop.md)), Claude might try to "cheat" by:
 - Modifying hook scripts to skip validation
 - Editing `pyproject.toml` to disable tests
 - Changing test files to make them pass
@@ -261,7 +261,7 @@ if __name__ == "__main__":
     main()
 ```
 
-See [Part 22: Claude Code Hooks](22-hooks.md) for hook configuration details.
+See [Part 13: Claude Code Hooks](13-hooks.md) for hook configuration details.
 
 ## Summary
 

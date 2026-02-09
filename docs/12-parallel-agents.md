@@ -1,4 +1,4 @@
-# Part 19: Running Agents in Parallel
+# Part 12: Running Agents in Parallel
 
 ## The Performance Challenge
 
@@ -305,3 +305,8 @@ The speedup is limited by:
 2. **Early return/break in async for** - Breaks cleanup
 3. **No rate limiting** - Overwhelms API
 4. **Forgetting functools.partial** - anyio.run() doesn't accept kwargs
+
+## Official Documentation
+
+- [Agent Teams](https://code.claude.com/docs/en/agent-teams) - coordinating multiple Claude agents
+- See `examples/03-agent-teams` for a working multi-agent example

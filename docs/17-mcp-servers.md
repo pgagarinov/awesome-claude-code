@@ -1,4 +1,4 @@
-# Part 14: MCP Servers
+# Part 17: MCP Servers
 
 ## What is MCP?
 
@@ -161,7 +161,7 @@ docker run -i --rm --init mcr.microsoft.com/playwright/mcp
 
 ### Alternative: Python Libraries
 
-You can achieve similar browser automation by asking Claude to write Python scripts using Playwright directly. See [MCP Servers vs Python Libraries](15-mcp-vs-python.md) for a detailed comparison of when to use each approach.
+You can achieve similar browser automation by asking Claude to write Python scripts using Playwright directly. See [MCP Servers vs Python Libraries](18-mcp-vs-python.md) for a detailed comparison of when to use each approach.
 
 ## Configuration File
 

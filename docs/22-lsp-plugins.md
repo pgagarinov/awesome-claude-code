@@ -1,4 +1,4 @@
-# Part 20: LSP Plugins for Code Intelligence
+# Part 22: LSP Plugins for Code Intelligence
 
 ## What are LSP Plugins?
 

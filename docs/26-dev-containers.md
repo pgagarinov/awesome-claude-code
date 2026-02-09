@@ -312,7 +312,7 @@ No manual setup needed!
 | Testing on different OS/environments | ✅ **Use dev containers** |
 | Solo developer, simple project | ⚠️  Optional (local install may be simpler) |
 | Need maximum performance | ⚠️  Consider local install (no virtualization overhead) |
-| Cannot install Docker | ❌ Use local install or SSH multiplexing ([Part 21](21-ssh-multiplexing.md)) |
+| Cannot install Docker | ❌ Use local install or SSH multiplexing ([Part 23](23-ssh-multiplexing.md)) |
 
 ## Troubleshooting
 

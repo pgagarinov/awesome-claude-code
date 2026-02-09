@@ -1,4 +1,4 @@
-# Part 12: Custom Slash Commands
+# Part 16: Custom Slash Commands
 
 ## Creating Custom Commands
 
