@@ -46,24 +46,6 @@ pixi add --pypi claude-agent-sdk
 
 **Note**: Requires zod ^4.0.0 as a peer dependency for TypeScript.
 
-## Runnable Examples
-
-This repository includes working examples you can run:
-
-| Example | Description |
-|---------|-------------|
-| [01_basic_query.py](../src/cc_training/examples/01_basic_query.py) | Simple query to Claude Code |
-| [02_with_options.py](../src/cc_training/examples/02_with_options.py) | Configuring options and parameters |
-| [03_file_analysis.py](../src/cc_training/examples/03_file_analysis.py) | Analyzing files in a project |
-| [04_batch_processing.py](../src/cc_training/examples/04_batch_processing.py) | Processing multiple items |
-| [05_message_handling.py](../src/cc_training/examples/05_message_handling.py) | Working with message streams |
-| [06_code_reviewer.py](../src/cc_training/examples/06_code_reviewer.py) | Building a code review tool |
-
-```bash
-# Run an example
-pixi run python src/cc_training/examples/01_basic_query.py
-```
-
 ## SDK Components
 
 | Component | Use Case |
@@ -112,6 +94,80 @@ async def explain_code():
             print(message.content)
 
 asyncio.run(explain_code())
+```
+
+### Handling Message Types
+
+The SDK returns various message types. Use type-specific imports to handle them:
+
+```python
+import asyncio
+from pathlib import Path
+from claude_agent_sdk import (
+    query,
+    ClaudeAgentOptions,
+    TextBlock,
+    ToolUseBlock,
+    ToolResultBlock,
+    ThinkingBlock,
+    AssistantMessage,
+    ResultMessage,
+)
+
+async def handle_messages():
+    options = ClaudeAgentOptions(cwd=str(Path.cwd()))
+
+    async for message in query(
+        prompt="Read the first 5 lines of pyproject.toml",
+        options=options
+    ):
+        if isinstance(message, AssistantMessage):
+            # AssistantMessage may contain multiple content blocks
+            if hasattr(message, 'content'):
+                for block in (message.content if isinstance(message.content, list) else [message.content]):
+                    if isinstance(block, TextBlock):
+                        print(f"  Text: {block.text[:100]}...")
+                    elif isinstance(block, ToolUseBlock):
+                        print(f"  Tool: {block.name}")
+                    elif isinstance(block, ThinkingBlock):
+                        print(f"  Thinking: {block.thinking[:50]}...")
+
+        elif isinstance(message, ResultMessage):
+            print(f"Result: {message.content[:200] if hasattr(message, 'content') else message}")
+
+asyncio.run(handle_messages())
+```
+
+### Parallel Batch Processing
+
+Process multiple queries concurrently with `asyncio.gather`:
+
+```python
+import asyncio
+from claude_agent_sdk import query, ClaudeAgentOptions
+
+async def collect_response(prompt: str, options: ClaudeAgentOptions | None = None) -> str:
+    """Helper to collect full response from a query."""
+    parts = []
+    async for message in query(prompt=prompt, options=options):
+        if hasattr(message, 'content'):
+            parts.append(str(message.content))
+    return "".join(parts)
+
+async def main():
+    questions = [
+        "What is a Python decorator? (1 sentence)",
+        "What is a Python generator? (1 sentence)",
+        "What is a Python context manager? (1 sentence)",
+    ]
+
+    # Run all queries in parallel
+    responses = await asyncio.gather(*[collect_response(q) for q in questions])
+
+    for question, response in zip(questions, responses):
+        print(f"Q: {question}\nA: {response}\n")
+
+asyncio.run(main())
 ```
 
 ## Practical Examples

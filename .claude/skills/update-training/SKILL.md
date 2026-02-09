@@ -19,7 +19,7 @@ missing feature coverage, and legacy content. Optionally fix all issues in paral
 /update-training --dry-run                # Show what would be fixed without applying
 /update-training 2.0.0-2.1.37            # Audit only changes in version range
 /update-training --focus docs             # Limit scan to docs/ only
-/update-training --focus exercises        # Limit scan to exercises/ only
+/update-training --focus examples        # Limit scan to examples/ only
 ```
 
 ## Arguments
@@ -30,7 +30,7 @@ missing feature coverage, and legacy content. Optionally fix all issues in paral
 | `--fix` | Apply fixes after scanning (without this, only reports findings) |
 | `--severity <level>` | Filter fixes by minimum severity: `error`, `warning`, or `info` (default: all) |
 | `--dry-run` | Show what would be fixed without writing any files |
-| `--focus <area>` | Limit scan scope: `docs`, `exercises`, `solutions`, or `all` (default: all) |
+| `--focus <area>` | Limit scan scope: `docs`, `examples`, or `all` (default: all) |
 
 **Default behavior:** Scan only — display audit report without modifying files. `--fix` is required
 to apply changes.
@@ -139,10 +139,9 @@ Use Glob to find training files based on the `focus_area`:
 
 | Focus Area | Glob Patterns |
 |------------|---------------|
-| `all` (default) | `docs/*.md`, `exercises/**/*.md`, `solutions/**/*.md` |
+| `all` (default) | `docs/*.md`, `examples/**/*.md` |
 | `docs` | `docs/*.md` |
-| `exercises` | `exercises/**/*.md` |
-| `solutions` | `solutions/**/*.md` |
+| `examples` | `examples/**/*.md` |
 
 Collect all matching file paths.
 

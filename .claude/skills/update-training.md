@@ -26,8 +26,7 @@ Compare the training materials in this repository against the official Claude Co
 
 3. **Scan training materials**: Search all files in:
    - `docs/*.md`
-   - `exercises/**/*.md`
-   - `solutions/**/*.md`
+   - `examples/**/*.md`
 
 4. **Cross-reference for issues**:
 

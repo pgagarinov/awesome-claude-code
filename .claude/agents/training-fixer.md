@@ -17,8 +17,7 @@ and solution files based on findings from the training-scanner agent.
 You may ONLY modify files in these locations:
 
 - `docs/*.md` - Training documentation
-- `exercises/**/*.md` - Exercise files
-- `solutions/**/*.md` - Solution files
+- `examples/**/*.md` - Example files
 - `README.md` - Repository root readme
 
 Do NOT modify:
