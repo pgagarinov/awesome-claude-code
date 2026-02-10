@@ -3,7 +3,7 @@ name: api-conventions
 description: Python API coding conventions for this BookStore project. Use when writing or reviewing Python code.
 ---
 
-# BookStore API Conventions
+# S1 — BookStore API Conventions
 
 Follow these conventions when writing or reviewing Python code in this project.
 

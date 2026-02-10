@@ -6,7 +6,7 @@ agent: Explore
 argument-hint: "[focus-area]"
 ---
 
-# Codebase Audit
+# S5 — Codebase Audit
 
 Audit this codebase for quality issues. Focus area: **$ARGUMENTS**
 

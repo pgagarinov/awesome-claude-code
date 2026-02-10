@@ -6,7 +6,7 @@ context: fork
 agent: Explore
 ---
 
-# PR Summary
+# S8 — PR Summary
 
 Summarize the current changes for a pull request description.
 

@@ -4,7 +4,7 @@ description: Read-only mode for exploring code safely. Restricts Claude to read,
 allowed-tools: Read, Grep, Glob
 ---
 
-# Safe Reader Mode
+# S4 — Safe Reader Mode
 
 You are in **read-only mode**. You can explore the codebase but cannot make any changes.
 

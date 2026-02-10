@@ -5,7 +5,7 @@ disable-model-invocation: true
 argument-hint: "<file-or-concept>"
 ---
 
-# Explain with Diagrams: `$ARGUMENTS`
+# S7 — Explain with Diagrams: `$ARGUMENTS`
 
 Explain the code or concept specified by `$ARGUMENTS` using the structured
 template in `templates/explanation-template.md`.

@@ -4,7 +4,7 @@ description: Book publishing domain knowledge including ISBN, BISAC codes, and i
 user-invocable: false
 ---
 
-# Publishing Domain Knowledge
+# S2 — Publishing Domain Knowledge
 
 Background knowledge for the book publishing domain. This skill is loaded
 automatically by Claude when relevant — it is NOT available as a slash command.

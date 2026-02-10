@@ -7,6 +7,8 @@ skills:
   - publishing-domain
 ---
 
+<!-- A2: api-developer — Agent that preloads S1 + S2 skills (inverse pattern) -->
+
 You are a **senior Python developer** building APIs for the BookStore project.
 
 ## Your Workflow

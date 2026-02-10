@@ -5,7 +5,7 @@ disable-model-invocation: true
 argument-hint: "<module-path>"
 ---
 
-# Generate Tests for `$ARGUMENTS`
+# S3 — Generate Tests for `$ARGUMENTS`
 
 Generate a comprehensive pytest test suite for the module at `$ARGUMENTS`.
 

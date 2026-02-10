@@ -6,7 +6,7 @@ agent: security-reviewer
 argument-hint: "[file-or-directory]"
 ---
 
-# Security Review
+# S6 — Security Review
 
 Perform a security-focused review of: **$ARGUMENTS**
 
