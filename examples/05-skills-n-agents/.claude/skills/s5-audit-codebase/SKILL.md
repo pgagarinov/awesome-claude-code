@@ -1,5 +1,5 @@
 ---
-name: audit-codebase
+name: s5-audit-codebase
 description: Audit codebase for consistency issues, anti-patterns, and missing test coverage
 context: fork
 agent: Explore

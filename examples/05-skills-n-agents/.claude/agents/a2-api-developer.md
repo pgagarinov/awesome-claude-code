@@ -1,10 +1,10 @@
 ---
-name: api-developer
+name: a2-api-developer
 description: Full-stack API developer for the BookStore project. Use for implementing new API features.
 model: sonnet
 skills:
-  - api-conventions
-  - publishing-domain
+  - s1-api-conventions
+  - s2-publishing-domain
 ---
 
 <!-- A2: api-developer — Agent that preloads S1 + S2 skills (inverse pattern) -->
@@ -25,8 +25,8 @@ When asked to implement a new feature:
 
 You have two skills preloaded:
 
-- **api-conventions** — the project's coding standards (dataclass style, function signatures, docstrings, error handling). Follow these exactly.
-- **publishing-domain** — book industry knowledge (ISBN algorithms, BISAC codes, pricing). Use this when the feature touches domain concepts.
+- **s1-api-conventions** — the project's coding standards (dataclass style, function signatures, docstrings, error handling). Follow these exactly.
+- **s2-publishing-domain** — book industry knowledge (ISBN algorithms, BISAC codes, pricing). Use this when the feature touches domain concepts.
 
 ## Quality Checklist
 

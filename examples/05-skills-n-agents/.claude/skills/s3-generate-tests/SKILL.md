@@ -1,5 +1,5 @@
 ---
-name: generate-tests
+name: s3-generate-tests
 description: Generate pytest test suite for a given module
 disable-model-invocation: true
 argument-hint: "<module-path>"

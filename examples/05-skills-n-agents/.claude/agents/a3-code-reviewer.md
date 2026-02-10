@@ -1,5 +1,5 @@
 ---
-name: code-reviewer
+name: a3-code-reviewer
 description: Code reviewer that learns project patterns over time. Use proactively after code changes.
 tools: Read, Grep, Glob
 memory: project

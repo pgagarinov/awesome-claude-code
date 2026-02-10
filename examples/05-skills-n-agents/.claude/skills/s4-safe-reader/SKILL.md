@@ -1,5 +1,5 @@
 ---
-name: safe-reader
+name: s4-safe-reader
 description: Read-only mode for exploring code safely. Restricts Claude to read, search, and glob operations only.
 allowed-tools: Read, Grep, Glob
 ---

@@ -1,5 +1,5 @@
 ---
-name: publishing-domain
+name: s2-publishing-domain
 description: Book publishing domain knowledge including ISBN, BISAC codes, and industry pricing standards.
 user-invocable: false
 ---

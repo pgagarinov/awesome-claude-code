@@ -1,5 +1,5 @@
 ---
-name: pr-summary
+name: s8-pr-summary
 description: Summarize changes in the current branch or working directory
 disable-model-invocation: true
 context: fork

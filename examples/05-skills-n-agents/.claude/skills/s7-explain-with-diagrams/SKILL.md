@@ -1,5 +1,5 @@
 ---
-name: explain-with-diagrams
+name: s7-explain-with-diagrams
 description: Explain code using visual ASCII diagrams and analogies
 disable-model-invocation: true
 argument-hint: "<file-or-concept>"

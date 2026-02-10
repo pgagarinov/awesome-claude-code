@@ -1,5 +1,5 @@
 ---
-name: api-conventions
+name: s1-api-conventions
 description: Python API coding conventions for this BookStore project. Use when writing or reviewing Python code.
 ---
 

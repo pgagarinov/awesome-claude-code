@@ -1,8 +1,8 @@
 ---
-name: security-review
+name: s6-security-review
 description: Run a security-focused code review identifying vulnerabilities
 context: fork
-agent: security-reviewer
+agent: a1-security-reviewer
 argument-hint: "[file-or-directory]"
 ---
 

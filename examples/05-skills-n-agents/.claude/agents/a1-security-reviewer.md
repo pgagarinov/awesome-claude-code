@@ -1,5 +1,5 @@
 ---
-name: security-reviewer
+name: a1-security-reviewer
 description: Security-focused code reviewer. Identifies vulnerabilities and suggests fixes.
 model: sonnet
 tools: Read, Grep, Glob
