@@ -4,7 +4,7 @@ from app import add, greet
 
 
 def test_greet_returns_hello():
-    assert greet("World") == "Hi, World!"
+    assert greet("World") == "Hi, world!"
 
 
 def test_greet_with_empty_string():
