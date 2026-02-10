@@ -240,6 +240,171 @@ Plugin Skills:
 
 See [Part 32: Plugins](32-plugins.md) for plugin installation and management.
 
+## Skills vs Agents (Subagents)
+
+Skills and agents are complementary but distinct concepts. People often confuse them because they overlap — a skill *can* run inside an agent, and an agent *can* preload skills. The diagrams below clarify the difference.
+
+### Where Things Run
+
+The single most important distinction: **skills run inline** (in your conversation) by default, while **agents always run in their own isolated context** behind a wall.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  YOUR CONVERSATION                                                          │
+│                                                                             │
+│  You ←──→ Claude                                                            │
+│                                                                             │
+│  Skills load here by default ──────────────────────────────────────────┐    │
+│  ┌───────────────────────────────────────────────────────────────────┐ │    │
+│  │                                                                   │ │    │
+│  │  /review src/auth.py        (you invoked it)                      │ │    │
+│  │  api-conventions             (Claude auto-loaded it)              │ │    │
+│  │                                                                   │ │    │
+│  │  Shares your full conversation context                            │ │    │
+│  │  No isolation — instructions merge into the current window        │ │    │
+│  │                                                                   │ │    │
+│  └───────────────────────────────────────────────────────────────────┘ │    │
+│                                                                        │    │
+│               │ delegate                         ▲ return summary      │    │
+│               ▼                                  │                     │    │
+├═══════════════╪══════════ CONTEXT WALL ══════════╪═════════════════════╪════┤
+│               ▼                                  │                     │    │
+│  ┌───────────────────────────────────────────────────────────────────┐ │    │
+│  │  AGENT (subagent) — own isolated context                          │ │    │
+│  │                                                                   │ │    │
+│  │  ┌───────────┐ ┌──────────────┐ ┌─────────────┐ ┌─────────────┐ │ │    │
+│  │  │  Model     │ │    Tools     │ │ Permissions  │ │  System     │ │ │    │
+│  │  │  haiku     │ │  Read, Grep  │ │  dontAsk     │ │  prompt     │ │ │    │
+│  │  └───────────┘ └──────────────┘ └─────────────┘ └─────────────┘ │ │    │
+│  │                                                                   │ │    │
+│  │  Cannot see your conversation history                             │ │    │
+│  │  Cannot spawn other subagents                                     │ │    │
+│  │  Returns only a summary when done                                 │ │    │
+│  │                                                                   │ │    │
+│  │  Can preload skills: ─────────────────────────────────────────────┘ │    │
+│  │  skills: [api-conventions]   (full content injected at startup)     │    │
+│  │                                                                     │    │
+│  └─────────────────────────────────────────────────────────────────────┘    │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Anatomy Comparison
+
+A side-by-side look at what each contains and how each behaves.
+
+```
+          SKILL (.claude/skills/)                AGENT (.claude/agents/)
+          ═══════════════════════                ════════════════════════
+
+          "What to do"                           "Who does it"
+          Instructions / Knowledge               Execution Environment
+
+          ┌────────────────────────┐             ┌────────────────────────┐
+          │  SKILL.md              │             │  agent.md              │
+          ├────────────────────────┤             ├────────────────────────┤
+   front  │ description            │      front  │ name, description      │
+   matter │ allowed-tools          │      matter │ model: haiku           │
+          │ context: fork?         │             │ tools: Read, Grep      │
+          │ agent: Explore?        │             │ permissionMode         │
+          │ user-invocable         │             │ skills: [x, y]         │
+          │ disable-model-invoc    │             │ hooks, maxTurns        │
+          ├────────────────────────┤             ├────────────────────────┤
+          │                        │             │                        │
+   body   │ Step-by-step task      │      body   │ System prompt:         │
+          │ instructions           │             │ "You are a senior      │
+          │    — OR —              │             │  code reviewer..."     │
+          │ Reference knowledge    │             │                        │
+          │ (conventions, rules)   │             │                        │
+          └────────────────────────┘             └────────────────────────┘
+
+   Invoked by │ You (/name)                Invoked by │ Claude delegates
+              │ Claude (auto)                          │ You ("use X agent")
+              │ Both (default)                         │
+
+   Runs in    │ YOUR context               Runs in    │ OWN isolated
+              │  (default, inline)                     │  context (always)
+              │ Forked context                         │
+              │  (context: fork)                       │
+
+   Analogy    │ Recipe / Playbook          Analogy    │ Specialist with
+              │                                       │  their own office
+```
+
+### How Skills and Agents Connect
+
+They compose bidirectionally. A skill can run *inside* an agent, and an agent can load skills as reference material.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                HOW SKILLS AND AGENTS CONNECT                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  (1) SKILL ──→ AGENT     "Run my instructions in that environment"          │
+│                                                                             │
+│    SKILL.md                              Agent (Explore)                    │
+│    ┌───────────────────┐                 ┌────────────────────────────────┐ │
+│    │ context: fork      │── task ──→     │ Receives skill content as the │ │
+│    │ agent: Explore     │                │ task prompt to execute         │ │
+│    │                    │                │                                │ │
+│    │ "Research the      │                │ Agent provides: model, tools,  │ │
+│    │  auth module..."   │                │ permissions, isolation          │ │
+│    └───────────────────┘                 └────────────────────────────────┘ │
+│                                                                             │
+│  (2) AGENT ──→ SKILL     "Load that knowledge into my context"              │
+│                                                                             │
+│    agent.md                              Skill (api-conventions)            │
+│    ┌────────────────────────────┐        ┌──────────────────────┐          │
+│    │ skills:                    │←─────  │ Full skill content   │          │
+│    │   - api-conventions        │        │ injected at startup  │          │
+│    │   - error-handling         │        └──────────────────────┘          │
+│    │                            │                                           │
+│    │ "Implement API endpoints   │        Skill (error-handling)             │
+│    │  following conventions"    │        ┌──────────────────────┐          │
+│    │                            │←─────  │ Full skill content   │          │
+│    └────────────────────────────┘        │ injected at startup  │          │
+│                                          └──────────────────────┘          │
+│                                                                             │
+│  Summary:                                                                   │
+│  ┌────────────────────────┬──────────────────┬────────────────────────────┐ │
+│  │  Approach              │ System prompt     │ Task                      │ │
+│  ├────────────────────────┼──────────────────┼────────────────────────────┤ │
+│  │  Skill + context: fork │ From agent type  │ SKILL.md content          │ │
+│  │  Agent + skills: [...] │ Agent's body     │ Claude's delegation msg   │ │
+│  └────────────────────────┴──────────────────┴────────────────────────────┘ │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### When to Use What
+
+```
+  Do you have instructions or knowledge to give Claude?
+  │
+  ├─ YES ──→ Create a SKILL
+  │          │
+  │          ├─ Reference content? (conventions, patterns, rules)
+  │          │  └─→ Default skill, runs inline
+  │          │      user-invocable: false  (if users shouldn't /invoke it)
+  │          │
+  │          ├─ A task? (deploy, review, generate)
+  │          │  ├─ Lightweight, needs conversation context
+  │          │  │  └─→ Default skill (inline)
+  │          │  └─ Heavy, protect main context
+  │          │     └─→ context: fork  +  agent: Explore
+  │          │
+  │          └─ Only the user should trigger it? (deploy, send-message)
+  │             └─→ disable-model-invocation: true
+  │
+  └─ NO, you need a specialized executor ──→ Create an AGENT
+                │
+                ├─ Need a specific model?        →  model: haiku
+                ├─ Need restricted tools?        →  tools: Read, Grep
+                ├─ Need custom permissions?      →  permissionMode: dontAsk
+                ├─ Need persistent memory?       →  memory: user
+                └─ Need reference knowledge?     →  skills: [api-conventions]
+```
+
 ## Official Documentation
 
 - [Skills Documentation](https://code.claude.com/docs/en/skills)
