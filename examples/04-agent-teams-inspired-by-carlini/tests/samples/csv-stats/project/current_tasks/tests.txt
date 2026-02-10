@@ -1,0 +1,1 @@
+Create `test_stats.py` with at least 8 pytest tests covering `load_csv`, `compute_stats`, `filter_rows`, and edge cases.

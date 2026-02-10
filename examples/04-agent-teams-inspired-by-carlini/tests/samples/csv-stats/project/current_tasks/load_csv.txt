@@ -1,0 +1,1 @@
+Implement `load_csv(path)` in `stats.py` — reads a CSV file and returns a list of dicts (use `csv.DictReader`). Numeric-looking values should be converted to `float`.

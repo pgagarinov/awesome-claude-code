@@ -1,0 +1,1 @@
+Implement `compute_stats(rows, column)` in `stats.py` — returns a dict with keys `min`, `max`, `mean`, `median` for the given column's numeric values.

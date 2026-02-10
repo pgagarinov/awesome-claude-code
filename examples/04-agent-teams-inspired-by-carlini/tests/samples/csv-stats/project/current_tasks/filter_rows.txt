@@ -1,0 +1,1 @@
+Implement `filter_rows(rows, column, op, value)` in `stats.py` — filters rows where `column op value` is true. Supported ops: `>`, `<`, `==`, `>=`, `<=`. Value should be compared numerically if possible.

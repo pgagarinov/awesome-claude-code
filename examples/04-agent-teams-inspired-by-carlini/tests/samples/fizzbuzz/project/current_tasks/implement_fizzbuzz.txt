@@ -1,0 +1,1 @@
+Implement `fizzbuzz(n)` in `fizzbuzz.py` — returns a list of strings from 1 to n. For multiples of 3: "Fizz", multiples of 5: "Buzz", multiples of both: "FizzBuzz", otherwise the number as a string.

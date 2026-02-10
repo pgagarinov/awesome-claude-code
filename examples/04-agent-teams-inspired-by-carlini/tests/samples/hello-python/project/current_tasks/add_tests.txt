@@ -1,0 +1,1 @@
+Create `test_main.py` with pytest tests covering `greet()` with various inputs (at least 3 test cases).

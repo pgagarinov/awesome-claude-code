@@ -1,0 +1,1 @@
+Add CLI with argparse — `python stats.py sample.csv --column score` prints stats. Adding `--filter "age>25"` filters first, then computes stats. Output should be human-readable.

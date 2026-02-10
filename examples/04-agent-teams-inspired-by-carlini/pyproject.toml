@@ -1,0 +1,17 @@
+[project]
+authors = [{name = "Peter Gagarinov", email = "4868370+pgagarinov@users.noreply.github.com"}]
+name = "cc-harness-01-docker"
+requires-python = ">= 3.11"
+version = "0.1.0"
+dependencies = ["pytest>=9.0.2,<10"]
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+
+[tool.pixi.tasks]
+test-hello = { cmd = "./tests/run_test.sh hello-python --agents 2" }
+test-fizzbuzz = { cmd = "./tests/run_test.sh fizzbuzz --agents 1" }
+test-csv-stats = { cmd = "./tests/run_test.sh csv-stats --agents 3" }
