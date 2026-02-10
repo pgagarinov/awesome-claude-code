@@ -1,6 +1,6 @@
 [project]
 authors = [{name = "Peter Gagarinov", email = "4868370+pgagarinov@users.noreply.github.com"}]
-dependencies = []
+dependencies = ["pytest"]
 name = "05-skills-n-agents"
 requires-python = ">= 3.11"
 version = "0.1.0"
@@ -15,5 +15,13 @@ platforms = ["osx-arm64"]
 
 [tool.pixi.pypi-dependencies]
 05_skills_n_agents = { path = ".", editable = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+pythonpath = ["."]
 
 [tool.pixi.tasks]
