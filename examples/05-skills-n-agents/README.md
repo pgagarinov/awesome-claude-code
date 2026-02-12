@@ -7,6 +7,33 @@ demonstrate every representative combination of Claude Code's skill/agent system
 — simple enough to understand instantly, rich enough for skills to have something
 meaningful to operate on.
 
+## Feature Comparison
+
+Each skill demonstrates a different combination of frontmatter options. Scan across
+a row to see which features a skill uses; scan down a column to find which skills
+demonstrate a given feature.
+
+| Skill | Description | Type | User Invokes | Claude Invokes | Context | Agent | `$ARGUMENTS` | `` !`cmd` `` | `allowed-tools` | Supporting Files |
+|-------|-------------|------|:---:|:---:|---------|-------|:---:|:---:|:---:|:---:|
+| **S1** api-conventions | Simplest skill — Claude auto-loads conventions → writes compliant code | Ref | \* | \* | Inline | — | | | | |
+| **S2** publishing-domain | `user-invocable: false` hides from `/` menu → only Claude loads ISBN/BISAC rules | Ref | | \* | Inline | — | | | | |
+| **S3** generate-tests | User passes `$ARGUMENTS` path → `!`cmd`` injects pytest config → generates tests | Action | \* | | Inline | — | \* | \* | | |
+| **S4** safe-reader | `allowed-tools` locks Claude to Read, Grep, Glob → safe code exploration | Ref | \* | \* | Inline | — | | | \* | |
+| **S5** audit-codebase | `context: fork` → Explore agent reads 20+ files → returns summary only | Action | \* | \* | Fork | Explore | \* | | | |
+| **S6** security-review | `context: fork` → dispatches to custom agent A1 → returns vulnerability report | Action | \* | \* | Fork | Custom (A1) | \* | | | |
+| **S7** explain-with-diagrams | SKILL.md → reads `templates/explanation-template.md` → structured explanation | Action | \* | | Inline | — | \* | | | \* |
+| **S8** pr-summary | `!`git diff`` injects live state → forks to Explore → returns change summary | Action | \* | | Fork | Explore | | \* | | |
+
+**Legend**: \* = yes / enabled. Blank = no / default.
+**User Invokes** = appears in `/` menu. **Claude Invokes** = Claude can auto-load based on description matching.
+`disable-model-invocation` removes Claude's ability; `user-invocable: false` removes the user's.
+
+| Agent | Description | `model` | `tools` | `skills` | `memory` | Triggered by Skill |
+|-------|-------------|---------|---------|----------|----------|:---:|
+| **A1** security-reviewer | S6 dispatches here → read-only OWASP scan → returns vulnerability report | sonnet | Read, Grep, Glob | — | — | S6 |
+| **A2** api-developer | Preloads S1 + S2 as knowledge → writes code following conventions + domain rules | sonnet | *(all)* | S1, S2 | — | |
+| **A3** code-reviewer | Reads persistent memory → reviews code → writes findings back for next session | *(default)* | Read, Grep, Glob, Write, Edit | — | project | |
+
 ## Quick Start
 
 ```bash
