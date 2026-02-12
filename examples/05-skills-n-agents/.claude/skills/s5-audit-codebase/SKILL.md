@@ -10,41 +10,22 @@ argument-hint: "[focus-area]"
 
 Audit this codebase for quality issues. Focus area: **$ARGUMENTS**
 
-If no focus area is specified, perform a full audit.
+If no focus area is specified, perform a full audit across all categories.
 
-## Audit Checklist
+## Audit Categories
 
-### 1. Naming Consistency
-- Are all functions `snake_case` with verb prefixes?
-- Are all classes `PascalCase`?
-- Are private helpers prefixed with `_`?
-- Are test classes named `TestFunctionName`?
+Each category has a detailed checklist in the `checklists/` subdirectory.
+Read only the relevant checklist(s) based on the focus area requested.
 
-### 2. Import Patterns
-- Standard library → third-party → local ordering?
-- Absolute imports used (not relative)?
-- No wildcard imports?
+1. **Naming** — `checklists/naming.md` — snake_case, PascalCase, verb prefixes
+2. **Imports** — `checklists/imports.md` — ordering, absolute paths, no wildcards
+3. **Error Handling** — `checklists/error-handling.md` — specific exceptions, no bare except
+4. **Type Hints** — `checklists/type-hints.md` — annotations, modern union syntax
+5. **Docstrings** — `checklists/docstrings.md` — Args/Returns/Raises sections
+6. **Test Coverage** — `checklists/test-coverage.md` — happy path, edge cases, fixtures
 
-### 3. Error Handling
-- `ValueError` for invalid inputs?
-- `KeyError` for missing resources?
-- No bare `except:` clauses?
-- No silently swallowed exceptions?
-
-### 4. Type Hints
-- All function parameters annotated?
-- Return types annotated?
-- Modern syntax used (`str | None` not `Optional[str]`)?
-
-### 5. Docstrings
-- All public functions have docstrings?
-- Args/Returns/Raises sections present?
-- One-line summary on first line?
-
-### 6. Test Coverage
-- Every public function has at least one test?
-- Happy path, edge cases, and error cases covered?
-- Fixtures used for shared setup?
+**If `$ARGUMENTS` specifies a focus area** (e.g., "error handling"), read only that
+checklist file. **If no focus area**, read all 6 checklists and audit everything.
 
 ## Output Format
 

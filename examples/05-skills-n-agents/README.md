@@ -19,7 +19,7 @@ demonstrate a given feature.
 | **S2** publishing-domain | `user-invocable: false` hides from `/` menu → only Claude loads ISBN/BISAC rules | Ref | | \* | Inline | — | | | | |
 | **S3** generate-tests | User passes `$ARGUMENTS` path → `!`cmd`` injects pytest config → generates tests | Action | \* | | Inline | — | \* | \* | | |
 | **S4** safe-reader | `allowed-tools` locks Claude to Read, Grep, Glob → safe code exploration | Ref | \* | \* | Inline | — | | | \* | |
-| **S5** audit-codebase | `context: fork` → Explore agent reads 20+ files → returns summary only | Action | \* | \* | Fork | Explore | \* | | | |
+| **S5** audit-codebase | `context: fork` → Explore reads `checklists/` per focus area → returns summary | Action | \* | \* | Fork | Explore | \* | | | \* |
 | **S6** security-review | `context: fork` → dispatches to custom agent A1 → returns vulnerability report | Action | \* | \* | Fork | Custom (A1) | \* | | | |
 | **S7** explain-with-diagrams | SKILL.md → reads `templates/explanation-template.md` → structured explanation | Action | \* | | Inline | — | \* | | | \* |
 | **S8** pr-summary | `!`git diff`` injects live state → forks to Explore → returns change summary | Action | \* | | Fork | Explore | | \* | | |
@@ -57,7 +57,7 @@ Then try:
 | S2 | `s2-publishing-domain` | Reference | Claude only | Inline | `user-invocable: false` |
 | S3 | `s3-generate-tests` | Action | User only | Inline | `disable-model-invocation`, `$ARGUMENTS`, `` !`cmd` `` |
 | S4 | `s4-safe-reader` | Reference | Both | Inline | `allowed-tools: Read, Grep, Glob` |
-| S5 | `s5-audit-codebase` | Action | Both | Forked → Explore | `context: fork`, built-in agent |
+| S5 | `s5-audit-codebase` | Action | Both | Forked → Explore | `context: fork`, built-in agent, `checklists/` supporting files |
 | S6 | `s6-security-review` | Action | Both | Forked → Custom | `context: fork`, `agent: a1-security-reviewer` |
 | S7 | `s7-explain-with-diagrams` | Action | User only | Inline | Supporting files (templates/) |
 | S8 | `s8-pr-summary` | Action | User only | Forked → Explore | `context: fork` + `` !`cmd` `` |
@@ -239,13 +239,16 @@ operations (Read, Grep, Glob) while the skill is active.
 
 ### S5: s5-audit-codebase — Forked → Built-in Explore Agent
 
-**What it demonstrates**: `context: fork` runs the skill in an isolated
-subagent (Explore). The main conversation stays clean — only the summary
-comes back.
+**What it demonstrates**: Two things at once:
+1. `context: fork` runs the skill in an isolated subagent (Explore) — the
+   main conversation stays clean, only the summary comes back.
+2. **Progressive disclosure** via a `checklists/` subdirectory — SKILL.md is a
+   lightweight router that lists 6 audit categories. The Explore agent reads
+   only the relevant checklist file(s) based on `$ARGUMENTS`, not all of them.
 
 **Try it**:
-1. Type `/s5-audit-codebase` → subagent spinner appears
-2. Type `/s5-audit-codebase error handling` → focused audit via `$ARGUMENTS`
+1. Type `/s5-audit-codebase` → subagent reads all 6 checklists, full audit
+2. Type `/s5-audit-codebase error handling` → reads only `checklists/error-handling.md`
 3. After completion, ask "What files did the audit read?" → Claude doesn't
    know (the Explore agent's context was isolated)
 
@@ -254,25 +257,33 @@ comes back.
 │  Type: Action   │  Invokes: Both   │  Runs: Forked → Explore (built-in)   │
 │───────────────────────────────────────────────────────────────────────────│
 │                                                                           │
-│  TRIGGER                  SKILL.md                 FORKED SUBAGENT        │
+│  TRIGGER                  SKILL DIRECTORY          FORKED SUBAGENT        │
 │  ┌──────────────────┐     ┌─────────────────┐     ┌────────────────────┐ │
-│  │ User types       │     │ context: fork    │     │ EXPLORE AGENT      │ │
-│  │ /s5-audit-       │────▶│ agent: Explore   │─task▶│                    │ │
-│  │  codebase        │     │                 │     │ Reads 20+ files    │ │
-│  │  error handling  │     │ Audit checklist: │     │ Searches patterns  │ │
-│  │       │          │     │ • Naming         │     │ Compiles report    │ │
-│  │       ▼          │     │ • Imports        │     │        │           │ │
-│  │ $ARGUMENTS =     │     │ • Error handling │     │        ▼           │ │
-│  │ "error handling" │     │ • Type hints     │     │ ┌──────────────┐   │ │
-│  └──────────────────┘     │ • Test coverage  │     │ │  Summary     │   │ │
-│  MAIN CONVERSATION        └─────────────────┘     │ │  only       │   │ │
-│  ┌──────────────────┐                              │ └─────────────┘   │ │
-│  │ Receives ONLY    │◀────────── summary ──────────│ (file contents    │ │
-│  │ the summary.     │                              │  stay isolated)   │ │
-│  │ Context clean.   │                              └───────────────────┘ │
-│  └──────────────────┘                                                    │
-│  context: fork isolates heavy work. Skill = TASK. Agent = ENVIRONMENT.   │
-└──────────────────────────────────────────────────────────────────────────┘
+│  │ User types       │     │ s5-audit-        │     │ EXPLORE AGENT      │ │
+│  │ /s5-audit-       │────▶│  codebase/       │─task▶│                    │ │
+│  │  codebase        │     │                 │     │ 1. Reads SKILL.md  │ │
+│  │  error handling  │     │ ├─ SKILL.md      │     │    (lightweight    │ │
+│  │       │          │     │ │  (router: lists │     │     router)       │ │
+│  │       ▼          │     │ │   6 categories, │     │ 2. Matches focus  │ │
+│  │ $ARGUMENTS =     │     │ │   refs files)   │     │    → reads only   │ │
+│  │ "error handling" │     │ │        │        │     │    error-handling  │ │
+│  └──────────────────┘     │ │        ▼        │     │    .md            │ │
+│                           │ └─ checklists/    │     │ 3. Audits code    │ │
+│  MAIN CONVERSATION        │    ├─ naming.md   │     │    against rules  │ │
+│  ┌──────────────────┐     │    ├─ imports.md  │     │        │          │ │
+│  │ Receives ONLY    │◀sum─│    ├─ error-      │     │        ▼          │ │
+│  │ the summary.     │     │    │   handling.md │     │ ┌──────────────┐ │ │
+│  │ Context clean.   │     │    ├─ type-hints  │     │ │ Summary      │ │ │
+│  └──────────────────┘     │    │   .md         │     │ │ only         │ │ │
+│                           │    ├─ docstrings  │     │ └──────────────┘ │ │
+│                           │    │   .md         │     │ (file contents   │ │
+│                           │    └─ test-       │     │  stay isolated)  │ │
+│                           │       coverage.md │     └────────────────────┘ │
+│                           └─────────────────┘                             │
+│                                                                           │
+│  Progressive disclosure: SKILL.md routes to category files. $ARGUMENTS    │
+│  controls which checklists get loaded. context: fork isolates the work.   │
+└───────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -490,7 +501,15 @@ examples/05-skills-n-agents/
 │   │   ├── s2-publishing-domain/SKILL.md  # S2: Reference, Claude-only
 │   │   ├── s3-generate-tests/SKILL.md     # S3: Action, user-only, args
 │   │   ├── s4-safe-reader/SKILL.md        # S4: Reference, tool restriction
-│   │   ├── s5-audit-codebase/SKILL.md     # S5: Forked → Explore
+│   │   ├── s5-audit-codebase/              # S5: Forked → Explore
+│   │   │   ├── SKILL.md                   #     Lightweight router
+│   │   │   └── checklists/                #     Progressive disclosure
+│   │   │       ├── naming.md
+│   │   │       ├── imports.md
+│   │   │       ├── error-handling.md
+│   │   │       ├── type-hints.md
+│   │   │       ├── docstrings.md
+│   │   │       └── test-coverage.md
 │   │   ├── s6-security-review/SKILL.md    # S6: Forked → custom agent
 │   │   ├── s7-explain-with-diagrams/      # S7: With supporting files
 │   │   │   ├── SKILL.md
