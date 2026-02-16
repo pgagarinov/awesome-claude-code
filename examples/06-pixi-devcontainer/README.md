@@ -164,3 +164,79 @@ Three named volumes keep state across rebuilds:
 
 Your workspace is bind-mounted at `/workspace` with `consistency=delegated` for
 better filesystem performance on macOS.
+
+### How Claude Credentials Are Stored
+
+When you run `claude` and authenticate (via OAuth or API key), credentials are
+written to `/home/vscode/.claude` inside the container. This path is backed by
+the `claude-code-config-*` named Docker volume, so:
+
+- Credentials **never touch your host filesystem** — they live only in the Docker volume
+- Credentials **survive container rebuilds** — the named volume persists independently
+- Credentials **are scoped per project** — the `${devcontainerId}` suffix makes each volume unique
+- If you `docker volume rm` the volume, credentials are deleted and you must re-authenticate
+
+Alternatively, you can skip the interactive auth flow entirely by setting
+`ANTHROPIC_API_KEY` in the `containerEnv` section of `devcontainer.json`.
+
+### What Is `devcontainerId`?
+
+The `*` in volume names like `claude-code-config-*` is `${devcontainerId}` — a
+built-in variable from the devcontainer spec. It's a unique hash automatically
+computed from:
+
+- The **workspace folder path** on your host machine
+- The **devcontainer config file path**
+
+This means:
+
+| Action | ID changes? | Effect on volumes |
+|--------|:-----------:|-------------------|
+| Rebuild the container | No | State preserved |
+| Stop and restart the container | No | State preserved |
+| Edit `devcontainer.json` contents | No | State preserved |
+| Update Docker or VS Code | No | State preserved |
+| Move the project folder to a new path | **Yes** | New volumes — must re-authenticate |
+| Rename the `.devcontainer/` config path | **Yes** | New volumes — must re-authenticate |
+
+Note: `devcontainer build` only builds the Docker image — it doesn't create a
+container, so the devcontainer ID isn't involved at all. The ID is computed
+when `devcontainer up` creates the container.
+
+To see your actual volume names:
+
+```bash
+docker volume ls | grep claude-code
+```
+
+## GUI Apps in the Container
+
+**Web apps** work out of the box — VS Code automatically forwards ports from the
+container to your host, so you can open `localhost:<port>` in your host browser.
+Port forwarding uses the local network, which the firewall allows.
+
+**Desktop GUI apps** (Qt, GTK, Tkinter, Electron) require extra setup since
+containers don't have a display server. Options:
+
+1. **`desktop-lite` feature** — adds a lightweight VNC desktop accessible via
+   browser at `localhost:6080`:
+
+   ```json
+   "features": {
+       "ghcr.io/devcontainers/features/desktop-lite:1": {}
+   }
+   ```
+
+2. **X11 forwarding** (Linux hosts only) — mount the host X11 socket:
+
+   ```json
+   "mounts": [
+       "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind"
+   ],
+   "containerEnv": {
+       "DISPLAY": "${localEnv:DISPLAY}"
+   }
+   ```
+
+If your GUI app needs external network access beyond the allowlist, add the
+required domains to `init-firewall.sh`.
