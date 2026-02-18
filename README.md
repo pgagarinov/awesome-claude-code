@@ -92,3 +92,29 @@ claude
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code/overview)
 - [Getting Started Guide](https://docs.anthropic.com/en/docs/claude-code/getting-started)
 - [Best Practices](https://www.anthropic.com/engineering/claude-code-best-practices)
+
+## Ecosystem & Community
+
+### Multi-Agent Orchestration
+
+- [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) — 32 specialized agents and 7 execution modes for Claude Code, with smart model routing and automatic parallelization
+- [oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode) — Agent harness plugin for OpenCode with multi-model orchestration, specialized agents (Sisyphus, Hephaestus, Oracle), and LSP/AST tools
+- [Claude Code Agent Teams](https://code.claude.com/docs/en/agent-teams) — Official docs for native multi-agent coordination (launched with Opus 4.6)
+- [Claude Code Custom Agents](https://code.claude.com/docs/en/custom-agents) — Official guide for creating specialized agent definitions
+- [Claude Code Sub-Agents](https://code.claude.com/docs/en/sub-agents) — Official docs for spawning sub-agents from the task tool
+
+### AI Coding Agents
+
+- [OpenCode](https://github.com/sst/opencode) — Open-source, provider-agnostic terminal AI coding agent supporting Claude, OpenAI, Google, and local models
+- [OpenClaw](https://openclaw.ai/) ([GitHub](https://github.com/openclaw/openclaw)) — Open-source personal AI assistant with 50+ integrations (WhatsApp, Telegram, Discord, Slack, Gmail, GitHub) and persistent memory
+
+### Developer Tools
+
+- [grep.app](https://grep.app/) — Code search engine across a million GitHub repositories — find implementations, examples, and patterns across open source
+- [git-delta](https://github.com/dandavison/delta) — Syntax-highlighting pager for git diffs (pre-installed in the [devcontainer example](examples/06-pixi-devcontainer))
+
+### Articles & Guides
+
+- [The Ever-Changing AI Coding Agent Ecosystem](https://jeongil.dev/en/blog/trends/claude-code-agent-teams/) — Deep dive on the multi-agent landscape: Claude Code Agent Teams, community frameworks, and the ecosystem's evolution
+- [Building Agent Teams in OpenCode](https://dev.to/uenyioha/porting-claude-codes-agent-teams-to-opencode-4hol) — Architecture walkthrough of porting multi-agent coordination to OpenCode with event-driven messaging and multi-provider support
+- [Claude Opus 4.6 Announcement](https://www.anthropic.com/news/claude-opus-4-6) — Release announcement including Agent Teams introduction
