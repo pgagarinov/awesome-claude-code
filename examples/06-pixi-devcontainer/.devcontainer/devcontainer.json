@@ -1,35 +1,53 @@
 {
+  // Display name shown in VS Code's Remote Explorer and window title
   "name": "Claude Code Sandbox",
+
   "build": {
+    // Custom Dockerfile in this directory (not a pre-built image)
     "dockerfile": "Dockerfile",
     "args": {
+      // Propagate host timezone so container logs/timestamps match local time.
+      // Falls back to America/Los_Angeles if $TZ is unset on the host.
       "TZ": "${localEnv:TZ:America/Los_Angeles}",
+      // Pin tool versions for reproducible builds
       "PIXI_VERSION": "v0.63.2",
       "GIT_DELTA_VERSION": "0.18.2",
       "ZSH_IN_DOCKER_VERSION": "1.2.0"
     }
   },
+
+  // Devcontainer Features — pre-packaged tools installed at build time
   "features": {
+    // GitHub CLI (`gh`) for PR workflows, issue management, and API calls
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
+
+  // Docker run arguments — these Linux capabilities are required for iptables.
+  // NET_ADMIN: modify network config (iptables rules, ipset, routing).
+  // NET_RAW:   use raw sockets (needed by iptables for packet matching).
+  // Both are scoped to the container's network namespace — they don't affect the host.
   "runArgs": [
     "--cap-add=NET_ADMIN",
     "--cap-add=NET_RAW"
   ],
+
   "customizations": {
     "vscode": {
       "extensions": [
-        "anthropic.claude-code",
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
-        "eamodio.gitlens"
+        "anthropic.claude-code",     // Claude Code extension for VS Code
+        "dbaeumer.vscode-eslint",    // ESLint integration
+        "esbenp.prettier-vscode",    // Prettier code formatter
+        "eamodio.gitlens"            // Git blame, history, and annotations
       ],
       "settings": {
+        // Auto-format files on save using Prettier
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "esbenp.prettier-vscode",
+        // Run ESLint auto-fix on save (requires explicit action, not "always")
         "editor.codeActionsOnSave": {
           "source.fixAll.eslint": "explicit"
         },
+        // Default to zsh (which has our Powerlevel10k theme and completions)
         "terminal.integrated.defaultProfile.linux": "zsh",
         "terminal.integrated.profiles.linux": {
           "bash": {
@@ -43,19 +61,47 @@
       }
     }
   },
+
+  // Run as non-root user (the base image creates 'vscode' with sudo access)
   "remoteUser": "vscode",
+
+  // Named Docker volumes persist state across container rebuilds.
+  // ${devcontainerId} is a unique hash of (workspace path + config path),
+  // ensuring each project gets its own isolated volumes.
   "mounts": [
+    // Shell history — survives rebuilds so you don't lose command recall
     "source=claude-code-bashhistory-${devcontainerId},target=/commandhistory,type=volume",
+    // Claude Code config + auth tokens — persists login across rebuilds.
+    // Credentials live only in this Docker volume, never on the host filesystem.
     "source=claude-code-config-${devcontainerId},target=/home/vscode/.claude,type=volume",
+    // Pixi package cache — avoids re-downloading packages on rebuild.
+    // Uses ${localWorkspaceFolderBasename} so the cache name is human-readable.
     "source=${localWorkspaceFolderBasename}-pixi,target=${containerWorkspaceFolder}/.pixi,type=volume"
   ],
+
   "containerEnv": {
+    // Tell Claude Code where to find its config (matches the volume mount above)
     "CLAUDE_CONFIG_DIR": "/home/vscode/.claude",
+    // Disable Powerlevel10k's git status segment — it runs `gitstatus` in the
+    // background which can be slow on Docker volumes or large repos
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true"
   },
+
+  // Bind-mount the host workspace into the container.
+  // consistency=delegated improves filesystem performance on macOS by allowing
+  // the container's view to lag slightly behind the host (safe for dev work).
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",
+
+  // postCreateCommand runs once after the container is first created.
+  // The .pixi volume is owned by root initially, so chown it before pixi install.
   "postCreateCommand": "sudo chown vscode .pixi && pixi install",
+
+  // postStartCommand runs every time the container starts.
+  // Initializes the iptables firewall with the domain allowlist.
   "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
+
+  // Wait for the firewall to be fully configured before giving the user a terminal.
+  // Without this, the user could run commands before the network is locked down.
   "waitFor": "postStartCommand"
 }
