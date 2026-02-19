@@ -73,6 +73,8 @@ A comprehensive guide to mastering Claude Code - from first launch to advanced a
 33. [Background Tasks](docs/33-background-tasks.md)
 34. [Session Management](docs/34-session-management.md)
 35. [OAuth Token Storage](docs/35-oauth-token-storage.md)
+36. [Native Sandbox vs Dev Containers](docs/36-sandbox-vs-devcontainers.md)
+37. [Browser Automation](docs/37-browser-automation.md)
 
 ---
 
