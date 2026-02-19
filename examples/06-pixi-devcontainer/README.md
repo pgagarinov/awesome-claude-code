@@ -18,6 +18,7 @@ everything else.
 | **GitHub CLI (`gh`)** | For PR workflows inside the container |
 | **git-delta** | Better diffs in the terminal |
 | **zsh + Powerlevel10k** | Themed shell with git status, completions |
+| **Playwright MCP** | Headless Chromium for browser automation via Claude Code MCP |
 | **Persistent volumes** | Bash history, `.claude/` config, and `.pixi/` cache survive rebuilds |
 
 ## Network Firewall
@@ -45,6 +46,25 @@ VS Code marketplace / blob storage / update server
 If Claude (or any process) tries to reach an unapproved domain, the connection
 is immediately rejected. This is enforced at the kernel level — no process in the
 container can bypass it.
+
+## Browser Automation
+
+The container includes [Playwright MCP](https://github.com/anthropics/mcp-playwright),
+a Model Context Protocol server that gives Claude Code headless Chromium access
+for web development workflows (inspecting pages, taking screenshots, clicking
+elements, filling forms).
+
+- **Pre-installed:** Node.js, Chromium, and `@playwright/mcp` are baked into the
+  Docker image — no runtime downloads needed
+- **Configured via `.mcp.json`:** Claude Code automatically discovers the MCP
+  server at container start. Tools like `browser_navigate` and `browser_snapshot`
+  appear in your Claude Code session
+- **Sandboxed by the firewall:** The headless browser is subject to the same
+  iptables rules as every other process — it can only reach whitelisted domains
+
+The MCP server communicates with Claude Code via stdio (no network ports). The
+`--headless`, `--no-sandbox`, and `--isolated` flags in `.mcp.json` are required
+for running inside a container without a display server or user namespaces.
 
 ## Option A: VS Code
 
@@ -143,9 +163,10 @@ from the GitHub API at each container start, so they stay current automatically.
 
 ```
 .devcontainer/
-├── Dockerfile          # Base image + pixi + git-delta + Claude Code + zsh
+├── Dockerfile          # Base image + Node.js + pixi + git-delta + Playwright + Claude Code + zsh
 ├── devcontainer.json   # Container config, volumes, VS Code settings
 └── init-firewall.sh    # iptables firewall (runs at container start)
+.mcp.json               # Playwright MCP server config (auto-discovered by Claude Code)
 ```
 
 The container uses `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW` to allow
@@ -256,6 +277,7 @@ commented in-source; this section provides a higher-level walkthrough.
 | `build.args.PIXI_VERSION` | `"v0.63.2"` | Pins pixi version for reproducible builds |
 | `build.args.GIT_DELTA_VERSION` | `"0.18.2"` | Pins git-delta version |
 | `build.args.ZSH_IN_DOCKER_VERSION` | `"1.2.0"` | Pins zsh-in-docker installer version |
+| `build.args.NODE_MAJOR` | `"22"` | Pins Node.js major version for Playwright MCP server |
 
 ### Features
 
@@ -398,6 +420,55 @@ Installs the pre-built `.deb` package (handles dependencies automatically).
 `dpkg --print-architecture` returns `amd64` or `arm64` for multi-arch support,
 so the same Dockerfile works on Intel and Apple Silicon hosts.
 
+### Node.js + Chromium System Dependencies
+
+```dockerfile
+ARG NODE_MAJOR=22
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
+  && apt-get install -y --no-install-recommends nodejs \
+    libasound2 libatk-bridge2.0-0 ... xvfb fonts-liberation ... \
+  && node --version && npm --version \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
+```
+
+Node.js is installed from NodeSource (not as a devcontainer feature) so that
+Playwright's browser binaries can be baked into the image at build time. The
+`NODE_MAJOR` arg is pinned in `devcontainer.json` for reproducible builds.
+
+Chromium's ~30 system dependencies (shared libraries, fonts, xvfb) are listed
+explicitly in the same `apt-get install` as Node.js. This is done instead of
+using `playwright install-deps` because that command runs its own `apt-get
+update` which triggers HTTP 400 errors in Docker BuildKit's networking layer.
+The dependency list comes from Playwright's `nativeDeps.ts` source file.
+
+### Global npm Packages
+
+```dockerfile
+RUN npm install -g @anthropic-ai/claude-code @playwright/mcp
+```
+
+Installed as root (before `USER vscode`) since global npm packages require
+write access to `/usr/lib/node_modules`. Two packages:
+
+- **`@anthropic-ai/claude-code`** — Claude Code CLI. Installed via npm instead
+  of the curl install script, which avoids the `sudo cp` workaround (npm puts
+  the binary on `$PATH` directly)
+- **`@playwright/mcp`** — Playwright MCP server for headless browser automation
+
+### Chromium Browser Binary
+
+```dockerfile
+ENV PLAYWRIGHT_BROWSERS_PATH=/home/vscode/.cache/ms-playwright
+RUN /usr/lib/node_modules/@playwright/mcp/node_modules/.bin/playwright install chromium
+```
+
+Downloads the Chromium binary into the vscode user's cache. Uses the MCP
+package's **bundled** Playwright (not a standalone install) to ensure the
+browser revision matches what the MCP server expects at runtime. The
+`PLAYWRIGHT_BROWSERS_PATH` env var tells Playwright where to store and find
+browser binaries. The MCP server is configured in `.mcp.json` at the project
+root with flags for headless, no-sandbox, and isolated operation.
+
 ### Bash History Persistence
 
 ```dockerfile
@@ -436,17 +507,12 @@ immediately.
 
 ### Claude Code Install
 
-```dockerfile
-USER vscode
-RUN curl -fsSL https://claude.ai/install.sh | bash \
-  && sudo cp /home/vscode/.local/bin/claude /usr/local/bin/claude \
-  && sudo chmod +x /usr/local/bin/claude
-```
-
-The install script places `claude` at `~/.local/bin/claude`. However, the
-`~/.claude` volume mount (from `devcontainer.json`) shadows that path on
-subsequent container starts. The `sudo cp` copies the binary to `/usr/local/bin/`
-— a system path that isn't affected by any volume mount.
+Claude Code is installed via `npm install -g @anthropic-ai/claude-code` (see
+[Global npm Packages](#global-npm-packages) above). This places the `claude`
+binary at `/usr/bin/claude` — a system path not affected by any volume mount.
+The npm approach replaced the previous `curl | bash` install script, which
+required a `sudo cp` workaround to move the binary out of the volume-shadowed
+`~/.local/bin/` path.
 
 ### Shell and Editor
 
@@ -727,3 +793,10 @@ Two smoke tests verify the firewall is working correctly:
 If either test produces an unexpected result, the script exits with an error
 code, and `postStartCommand` fails — preventing the user from getting a terminal
 with a misconfigured firewall.
+
+---
+
+## Further Reading
+
+- [Native Sandbox vs Dev Containers](../../docs/36-sandbox-vs-devcontainers.md) — Decision guide comparing Claude Code's `/sandbox` (OS-level isolation) with dev containers (Docker-based isolation), including the Docker root problem and when to use each approach
+- [Browser Automation in Containers and Beyond](../../docs/37-browser-automation.md) — Comprehensive survey of browser automation MCP tools, why Playwright MCP is the only option with production-ready container support, and alternatives for host-only workflows

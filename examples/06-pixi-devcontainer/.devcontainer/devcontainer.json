@@ -12,7 +12,9 @@
       // Pin tool versions for reproducible builds
       "PIXI_VERSION": "v0.63.2",
       "GIT_DELTA_VERSION": "0.18.2",
-      "ZSH_IN_DOCKER_VERSION": "1.2.0"
+      "ZSH_IN_DOCKER_VERSION": "1.2.0",
+      // Pin Node.js major version for Playwright MCP server
+      "NODE_MAJOR": "22"
     }
   },
 

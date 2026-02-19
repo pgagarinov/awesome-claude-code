@@ -49,6 +49,30 @@ RUN ARCH=$(dpkg --print-architecture) && \
   dpkg -i "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" && \
   rm "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb"
 
+# Install Node.js LTS from NodeSource, then Chromium system dependencies.
+# The NodeSource setup script adds its repo and runs `apt-get update`, so
+# the subsequent `apt-get install` uses a fresh package index.
+# Chromium deps are listed explicitly (instead of using `playwright install-deps`)
+# because that command runs its own `apt-get update` which triggers HTTP 400
+# errors in Docker BuildKit's networking layer.
+# Node is installed in the Dockerfile (not as a devcontainer feature) so that
+# Playwright's browser binaries are baked into the image at build time —
+# zero runtime downloads required.
+ARG NODE_MAJOR=22
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
+  && apt-get install -y --no-install-recommends nodejs \
+    # --- Chromium runtime deps (from Playwright's nativeDeps.ts) ---
+    libasound2 libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 libcairo2 \
+    libcups2 libdbus-1-3 libdrm2 libgbm1 libglib2.0-0 libnspr4 libnss3 \
+    libpango-1.0-0 libwayland-client0 libx11-6 libxcb1 libxcomposite1 \
+    libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
+    # --- Headless rendering: virtual framebuffer + fonts ---
+    xvfb fonts-noto-color-emoji fonts-unifont libfontconfig1 libfreetype6 \
+    xfonts-cyrillic xfonts-scalable fonts-liberation fonts-ipafont-gothic \
+    fonts-wqy-zenhei fonts-tlwg-loma-otf fonts-freefont-ttf \
+  && node --version && npm --version \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Persist bash/zsh history to a volume-mountable path outside $HOME.
 # The /commandhistory directory is mounted as a named Docker volume in
 # devcontainer.json, so history survives container rebuilds.
@@ -68,15 +92,22 @@ RUN mkdir -p /workspace /home/vscode/.claude && \
 
 WORKDIR /workspace
 
+# Install global npm packages (requires root for /usr/lib/node_modules).
+# - @anthropic-ai/claude-code: Claude Code CLI (replaces the curl install script,
+#   and avoids the sudo cp workaround since npm puts the binary on $PATH directly)
+# - @playwright/mcp: Playwright MCP server for headless browser automation
+RUN npm install -g @anthropic-ai/claude-code @playwright/mcp
+
 # Switch to non-root user for all subsequent commands
 USER vscode
 
-# Install Claude Code CLI, then copy the binary to a system path.
-# Why the copy? The ~/.claude volume mount (from devcontainer.json) shadows
-# ~/.local/bin/claude, so we need the binary at a path outside that mount.
-RUN curl -fsSL https://claude.ai/install.sh | bash \
-  && sudo cp /home/vscode/.local/bin/claude /usr/local/bin/claude \
-  && sudo chmod +x /usr/local/bin/claude
+# Download the Chromium binary into the vscode user's cache.
+# Uses the MCP package's bundled Playwright (not a standalone install) to ensure
+# the browser revision matches what the MCP server expects at runtime.
+# PLAYWRIGHT_BROWSERS_PATH sets where Playwright stores browser binaries —
+# must be under the vscode user's home so it persists and is accessible.
+ENV PLAYWRIGHT_BROWSERS_PATH=/home/vscode/.cache/ms-playwright
+RUN /usr/lib/node_modules/@playwright/mcp/node_modules/.bin/playwright install chromium
 
 # Set default shell to zsh (matches our Powerlevel10k theme setup below).
 # Set nano as the default editor — Claude Code uses $EDITOR for file operations.
