@@ -78,7 +78,7 @@ for domain in \
     "files.pythonhosted.org" \
     "prefix.dev" \
     "repo.prefix.dev" \
-    "https://conda-mapping.prefix.dev" \
+    "conda-mapping.prefix.dev" \
     "claude.ai"; do
     echo "Resolving $domain..."
     ips=$(dig +noall +answer A "$domain" | awk '$4 == "A" {print $5}')
