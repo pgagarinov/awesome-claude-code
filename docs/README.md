@@ -43,6 +43,7 @@ Training materials and reference guides for mastering Claude Code.
 | 35 | [OAuth Token Storage](35-oauth-token-storage.md) | Token and credential storage |
 | 36 | [Native Sandbox vs Dev Containers](36-sandbox-vs-devcontainers.md) | Comparison guide for choosing an isolation strategy |
 | 37 | [Browser Automation](37-browser-automation.md) | Browser automation tools in containers and beyond |
+| 38 | [Browser-Use Deep Dive](38-browser-use.md) | Browser-Use architecture, CDP migration, and comparison with MCP tools |
 
 ## Highlighted Articles
 
@@ -52,4 +53,8 @@ A decision guide comparing Claude Code's two isolation approaches. Native sandbo
 
 ### [Browser Automation in Containers and Beyond](37-browser-automation.md)
 
-Comprehensive survey of browser automation options for Claude Code and OpenCode. Playwright MCP is the only tool with first-class Docker support; Claude Code's built-in Chrome integration is architecturally blocked in containers. Covers Playwright MCP, Chrome DevTools MCP, Browser-Use, Browserbase, Dev-Browser, BrowserMCP, BrowserTools, and OpenCode-specific options.
+Comprehensive survey of browser automation options for Claude Code and OpenCode. Playwright MCP is the only tool with first-class Docker support; Claude Code's built-in Chrome integration is architecturally blocked in containers. Covers Playwright MCP, Chrome DevTools MCP, Browser-Use, Browserbase, Dev-Browser, BrowserMCP, BrowserTools, browser pools for parallel testing, and OpenCode-specific options.
+
+### [Browser-Use Deep Dive](38-browser-use.md)
+
+Browser-Use (~79K stars) is an autonomous agent framework, not a tool server — fundamentally different from MCP browser tools. This guide covers the Playwright-to-CDP migration, architecture comparison with Playwright MCP and Chrome DevTools MCP, and when to use each approach.

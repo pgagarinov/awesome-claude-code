@@ -7,6 +7,10 @@ FROM mcr.microsoft.com/devcontainers/base:jammy
 ARG TZ
 ENV TZ="$TZ"
 
+# Disable HTTP pipelining for apt — OrbStack's virtual network returns 400 Bad Request
+# when apt pipelines multiple requests over the same connection during docker build.
+RUN echo 'Acquire::http::Pipeline-Depth "0";' > /etc/apt/apt.conf.d/99-orbstack-fix
+
 # Install system dependencies not in the base image.
 # (base already has: git, curl, wget, sudo, zsh, gnupg2, less, procps, man-db, unzip)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -28,6 +32,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   # nano:      terminal editor — set as $EDITOR so Claude Code uses it for file editing
   vim \
   # vim:       alternative terminal editor for users who prefer it
+  netcat-openbsd \
+  # netcat:    network utility (nc) for testing TCP connectivity (e.g. CDP port checks)
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install pixi — a fast conda/PyPI package manager.
@@ -35,7 +41,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # for maximum portability across container base images.
 # `pixi info` is a smoke test to verify the binary works.
 ARG PIXI_VERSION=v0.63.2
-RUN curl -L -o /usr/local/bin/pixi -fsSL --compressed \
+RUN curl -4 -fsSL --compressed --retry 5 --retry-all-errors \
+    -o /usr/local/bin/pixi \
     "https://github.com/prefix-dev/pixi/releases/download/${PIXI_VERSION}/pixi-$(uname -m)-unknown-linux-musl" \
     && chmod +x /usr/local/bin/pixi \
     && pixi info
@@ -45,31 +52,19 @@ RUN curl -L -o /usr/local/bin/pixi -fsSL --compressed \
 # `dpkg --print-architecture` detects amd64/arm64 for multi-arch support.
 ARG GIT_DELTA_VERSION=0.18.2
 RUN ARCH=$(dpkg --print-architecture) && \
-  wget "https://github.com/dandavison/delta/releases/download/${GIT_DELTA_VERSION}/git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" && \
+  curl -4 -fsSL --retry 5 --retry-all-errors \
+    -o "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" \
+    "https://github.com/dandavison/delta/releases/download/${GIT_DELTA_VERSION}/git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" && \
   dpkg -i "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" && \
   rm "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb"
 
-# Install Node.js LTS from NodeSource, then Chromium system dependencies.
-# The NodeSource setup script adds its repo and runs `apt-get update`, so
-# the subsequent `apt-get install` uses a fresh package index.
-# Chromium deps are listed explicitly (instead of using `playwright install-deps`)
-# because that command runs its own `apt-get update` which triggers HTTP 400
-# errors in Docker BuildKit's networking layer.
+# Install Node.js LTS from NodeSource.
 # Node is installed in the Dockerfile (not as a devcontainer feature) so that
 # Playwright's browser binaries are baked into the image at build time —
 # zero runtime downloads required.
 ARG NODE_MAJOR=22
-RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
+RUN curl -4 -fsSL --retry 5 --retry-all-errors https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
   && apt-get install -y --no-install-recommends nodejs \
-    # --- Chromium runtime deps (from Playwright's nativeDeps.ts) ---
-    libasound2 libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 libcairo2 \
-    libcups2 libdbus-1-3 libdrm2 libgbm1 libglib2.0-0 libnspr4 libnss3 \
-    libpango-1.0-0 libwayland-client0 libx11-6 libxcb1 libxcomposite1 \
-    libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2 \
-    # --- Headless rendering: virtual framebuffer + fonts ---
-    xvfb fonts-noto-color-emoji fonts-unifont libfontconfig1 libfreetype6 \
-    xfonts-cyrillic xfonts-scalable fonts-liberation fonts-ipafont-gothic \
-    fonts-wqy-zenhei fonts-tlwg-loma-otf fonts-freefont-ttf \
   && node --version && npm --version \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -92,22 +87,25 @@ RUN mkdir -p /workspace /home/vscode/.claude && \
 
 WORKDIR /workspace
 
-# Install global npm packages (requires root for /usr/lib/node_modules).
-# - @anthropic-ai/claude-code: Claude Code CLI (replaces the curl install script,
-#   and avoids the sudo cp workaround since npm puts the binary on $PATH directly)
-# - @playwright/mcp: Playwright MCP server for headless browser automation
-RUN npm install -g @anthropic-ai/claude-code @playwright/mcp
+# Install Playwright MCP server globally, then use its bundled Playwright to
+# install Chromium + system dependencies. --with-deps handles apt-get internally.
+ENV PLAYWRIGHT_BROWSERS_PATH=/home/vscode/.cache/ms-playwright
+RUN npm install -g @playwright/mcp \
+  && /usr/lib/node_modules/@playwright/mcp/node_modules/.bin/playwright install --with-deps chromium \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Fix ownership of .cache (created as root by playwright install above)
+RUN chown -R vscode:vscode /home/vscode/.cache
 
 # Switch to non-root user for all subsequent commands
 USER vscode
 
-# Download the Chromium binary into the vscode user's cache.
-# Uses the MCP package's bundled Playwright (not a standalone install) to ensure
-# the browser revision matches what the MCP server expects at runtime.
-# PLAYWRIGHT_BROWSERS_PATH sets where Playwright stores browser binaries —
-# must be under the vscode user's home so it persists and is accessible.
-ENV PLAYWRIGHT_BROWSERS_PATH=/home/vscode/.cache/ms-playwright
-RUN /usr/lib/node_modules/@playwright/mcp/node_modules/.bin/playwright install chromium
+# Install Claude Code CLI via the official installer script.
+# Running as vscode so the binary lands at /home/vscode/.local/bin/claude.
+# ENV PATH ensures it's available in all subsequent layers and at runtime.
+# This path is not affected by any volume mount.
+RUN curl -4 -fsSL --retry 5 --retry-all-errors https://claude.ai/install.sh | bash
+ENV PATH="/home/vscode/.local/bin:$PATH"
 
 # Set default shell to zsh (matches our Powerlevel10k theme setup below).
 # Set nano as the default editor — Claude Code uses $EDITOR for file operations.
@@ -124,7 +122,7 @@ ENV VISUAL=nano
 #     - persist command history to the mounted /commandhistory volume
 #   -x:  skip automatic theme configuration (we customize colors below)
 ARG ZSH_IN_DOCKER_VERSION=1.2.0
-RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/v${ZSH_IN_DOCKER_VERSION}/zsh-in-docker.sh)" -- \
+RUN sh -c "$(curl -4 -fsSL --retry 5 --retry-all-errors https://github.com/deluan/zsh-in-docker/releases/download/v${ZSH_IN_DOCKER_VERSION}/zsh-in-docker.sh)" -- \
   -p git \
   -p fzf \
   -a 'eval "$(pixi completion -s zsh)"' \

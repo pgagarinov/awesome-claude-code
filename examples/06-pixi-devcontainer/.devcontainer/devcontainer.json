@@ -5,6 +5,10 @@
   "build": {
     // Custom Dockerfile in this directory (not a pre-built image)
     "dockerfile": "Dockerfile",
+    // Use host networking during build to avoid BuildKit's SSL issues on ARM64/OrbStack.
+    // BuildKit's docker-container driver adds an extra network namespace that causes
+    // intermittent TLS failures (error:0A000126). --network=host bypasses this.
+    "options": ["--network=host"],
     "args": {
       // Propagate host timezone so container logs/timestamps match local time.
       // Falls back to America/Los_Angeles if $TZ is unset on the host.

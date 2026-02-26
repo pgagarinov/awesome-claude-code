@@ -111,6 +111,18 @@ echo "Host network detected as: $HOST_NETWORK"
 iptables -A INPUT -s "$HOST_NETWORK" -j ACCEPT
 iptables -A OUTPUT -d "$HOST_NETWORK" -j ACCEPT
 
+# Allow host.docker.internal — needed for CDP browser automation and any
+# container-to-host communication. On OrbStack this resolves to a different
+# IP (e.g. 0.250.250.254) than the default gateway subnet, so the /24 rule
+# above doesn't cover it. Resolved dynamically at each container start via
+# postStartCommand, so no rebuild needed when the host IP changes.
+DOCKER_HOST_IP=$(getent hosts host.docker.internal 2>/dev/null | awk '{print $1}' || true)
+if [ -n "$DOCKER_HOST_IP" ]; then
+    echo "host.docker.internal detected as: $DOCKER_HOST_IP"
+    iptables -A INPUT -s "$DOCKER_HOST_IP" -j ACCEPT
+    iptables -A OUTPUT -d "$DOCKER_HOST_IP" -j ACCEPT
+fi
+
 # Set default policies to DROP first
 iptables -P INPUT DROP
 iptables -P FORWARD DROP
