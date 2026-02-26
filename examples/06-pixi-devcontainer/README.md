@@ -19,6 +19,7 @@ everything else.
 | **git-delta** | Better diffs in the terminal |
 | **zsh + Powerlevel10k** | Themed shell with git status, completions |
 | **Playwright MCP** | Browser automation — headless Chromium or host Chrome via CDP |
+| **playwright-cli** | Token-efficient browser automation via CLI skills |
 | **Persistent volumes** | Bash history, `.claude/` config, and `.pixi/` cache survive rebuilds |
 
 ---
@@ -101,6 +102,19 @@ The `.mcp.json` config for this mode:
 }
 ```
 
+### playwright-cli skills (optional)
+
+[`playwright-cli`](https://github.com/microsoft/playwright-cli) provides
+CLI-based browser automation as "skills" — more token-efficient than MCP tool
+schemas. To install the skills:
+
+```bash
+playwright-cli install --skills
+```
+
+This generates skill files in `.claude/skills/playwright-cli/` (gitignored).
+Claude Code discovers them automatically on next start.
+
 ### Host browser mode — Chrome on your machine via CDP
 
 Connect Claude to Chrome running on your host machine. Use this when you need to
@@ -157,8 +171,10 @@ nc -zv host.docker.internal 9222
 .devcontainer/toggle-browser.sh host         # Chrome on host via CDP
 ```
 
-The script copies the appropriate template (`mcp-container.json` or
-`mcp-host-browser.json`) to `.mcp.json`. Restart Claude Code after switching.
+The script writes `container` or `host` to the `.devcontainer/.browser-mode`
+dotfile. The launcher (`playwright-launcher.sh`) reads this at startup.
+You can also override the mode with `BROWSER_MODE=host` (env var wins over
+the dotfile). Restart Claude Code after switching.
 
 ---
 
@@ -297,16 +313,14 @@ container to your host, so you can open `localhost:<port>` in your host browser.
 
 ```
 .devcontainer/
-├── Dockerfile              # Base image + pixi + Node.js + Playwright + Claude Code + zsh
+├── Dockerfile              # Base image + pixi + Playwright + Node.js + playwright-cli + Claude Code + zsh
 ├── devcontainer.json       # Container config, volumes, VS Code settings
 ├── init-firewall.sh        # iptables firewall (runs at every container start)
 ├── cdp-relay.sh            # Rewrites Chrome's WebSocket URL for container→host CDP
-├── toggle-browser.sh       # Switches .mcp.json between container/host modes
-├── mcp-container.json      # Template: headless Chromium inside the container
-└── mcp-host-browser.json   # Template: Chrome on host via CDP relay
+├── playwright-launcher.sh  # Reads browser mode and launches Playwright MCP accordingly
+└── toggle-browser.sh       # Writes .browser-mode dotfile to switch container/host modes
 .mcp.json                   # Active Playwright MCP config (auto-discovered by Claude Code)
-pixi.toml                   # Pixi project config
-pyproject.toml              # Python project config with test dependencies
+pyproject.toml              # Python project config with pixi workspace + test dependencies
 tests/                      # Playwright browser tests
 ```
 
@@ -343,7 +357,7 @@ commented in-source; this section provides a higher-level walkthrough.
 | `build.args.PIXI_VERSION` | `"v0.63.2"` | Pins pixi version for reproducible builds |
 | `build.args.GIT_DELTA_VERSION` | `"0.18.2"` | Pins git-delta version |
 | `build.args.ZSH_IN_DOCKER_VERSION` | `"1.2.0"` | Pins zsh-in-docker installer version |
-| `build.args.NODE_MAJOR` | `"22"` | Pins Node.js major version for Playwright MCP server |
+| `build.args.NODE_MAJOR` | `"22"` | Pins Node.js major version for `@playwright/mcp` and `@playwright/cli` |
 
 ### Features
 
@@ -355,7 +369,7 @@ commented in-source; this section provides a higher-level walkthrough.
 
 | Key | Value | Why |
 |-----|-------|-----|
-| `runArgs` | `["--cap-add=NET_ADMIN", "--cap-add=NET_RAW"]` | Required for `iptables`. `NET_ADMIN` allows modifying network config (firewall rules, ipset, routing). `NET_RAW` allows raw sockets (needed by iptables for packet matching). Both are scoped to the container's network namespace — they don't affect the host |
+| `runArgs` | `["--cap-add=NET_ADMIN", "--cap-add=NET_RAW", "-p", "5006:5006"]` | `NET_ADMIN`/`NET_RAW`: required for `iptables` firewall rules (scoped to container namespace). `-p 5006:5006`: forwards the Panel dev-server port so host-mode browser tests can reach `http://localhost:5006` from Chrome on the host via CDP |
 
 ### VS Code Customizations
 
@@ -404,7 +418,7 @@ commented in-source; this section provides a higher-level walkthrough.
 
 | Key | Value | When | Why |
 |-----|-------|------|-----|
-| `postCreateCommand` | `sudo chown vscode .pixi && pixi install` | Once, after first creation | The `.pixi` volume is root-owned initially; `chown` fixes permissions, then `pixi install` sets up the environment |
+| `postCreateCommand` | `pixi install` | Once, after first creation | Reconciles the volume-mounted `.pixi` with the image-baked environment. No `sudo chown` needed — `.pixi` is already vscode-owned from the image |
 | `postStartCommand` | `sudo /usr/local/bin/init-firewall.sh` | Every container start | Configures the iptables firewall with the domain allowlist |
 | `waitFor` | `"postStartCommand"` | Before user gets terminal | Ensures the firewall is fully active before the user can run commands. Without this, there's a window where the network is unrestricted |
 
@@ -507,33 +521,39 @@ so the same Dockerfile works on Intel and Apple Silicon hosts.
 ARG NODE_MAJOR=22
 RUN curl -4 -fsSL --retry 5 --retry-all-errors \
     https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
-  && apt-get install -y --no-install-recommends nodejs \
-  && node --version && npm --version \
-  && apt-get clean && rm -rf /var/lib/apt/lists/*
+  && apt-get install -y --no-install-recommends nodejs
 ```
 
-Node.js is installed from NodeSource (not as a devcontainer feature) so that
-Playwright's browser binaries can be baked into the image at build time. The
-`NODE_MAJOR` arg is pinned in `devcontainer.json` for reproducible builds.
+Node.js is installed from NodeSource for two npm packages:
+`@playwright/mcp` (the MCP server for Claude Code browser automation) and
+`@playwright/cli` (token-efficient browser skills). The Python `playwright-mcp`
+package (v0.1.0) hardcodes `headless=False`, so we use the mature npm version.
 
-### Playwright MCP + Chromium
+### Playwright + Chromium (pixi-managed)
 
 ```dockerfile
+COPY pyproject.toml pixi.lock* /workspace/
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/vscode/.cache/ms-playwright
-RUN npm install -g @playwright/mcp \
-  && /usr/lib/node_modules/@playwright/mcp/node_modules/.bin/playwright install --with-deps chromium \
-  && apt-get clean && rm -rf /var/lib/apt/lists/*
-RUN chown -R vscode:vscode /home/vscode/.cache
+RUN cd /workspace && pixi install && \
+    .pixi/envs/default/bin/playwright install --with-deps chromium && \
+    chown -R vscode:vscode /home/vscode/.cache /workspace/.pixi
 ```
 
-Installs the Playwright MCP server globally, then uses its **bundled** Playwright
-(not a standalone install) to install Chromium and all system dependencies in one
-step. `--with-deps` runs `apt-get` internally to install Chromium's ~30 shared
-libraries, fonts, and xvfb.
+Pixi manages the Python environment including `pytest-playwright` (which pulls in
+the `playwright` Python library). `pixi install` reads `pyproject.toml` and
+creates the environment at `/workspace/.pixi`. The pixi-installed Playwright
+installs Chromium and system dependencies in one step. `--with-deps` runs
+`apt-get` internally to install Chromium's ~30 shared libraries, fonts, and xvfb.
 
-Using the MCP package's bundled Playwright ensures the browser revision matches
-what the MCP server expects at runtime. The `chown` fixes ownership of `.cache`
-which is created as root by the install step.
+The npm `@playwright/mcp` also installs its own Chromium revision via its bundled
+Playwright. Both coexist in `~/.cache/ms-playwright/` — each version auto-detects
+the revision it needs. The `conftest.py` browser fixture uses
+`playwright.chromium.launch(headless=True)` which auto-resolves the matching
+Chromium for the pixi-installed version.
+
+The `chown` fixes ownership of `.cache` and `.pixi` (created as root during
+build) so the `vscode` user owns them when Docker copies to empty volumes on
+first mount.
 
 ### Claude Code CLI
 

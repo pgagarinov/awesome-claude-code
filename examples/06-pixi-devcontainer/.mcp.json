@@ -2,7 +2,7 @@
   "mcpServers": {
     "playwright": {
       "command": "bash",
-      "args": [".devcontainer/cdp-relay.sh"]
+      "args": [".devcontainer/playwright-launcher.sh"]
     }
   }
 }

@@ -5,6 +5,9 @@
   "build": {
     // Custom Dockerfile in this directory (not a pre-built image)
     "dockerfile": "Dockerfile",
+    // Build context is the project root (parent of .devcontainer/) so the
+    // Dockerfile can COPY pyproject.toml and pixi.lock into the image.
+    "context": "..",
     // Use host networking during build to avoid BuildKit's SSL issues on ARM64/OrbStack.
     // BuildKit's docker-container driver adds an extra network namespace that causes
     // intermittent TLS failures (error:0A000126). --network=host bypasses this.
@@ -17,7 +20,7 @@
       "PIXI_VERSION": "v0.63.2",
       "GIT_DELTA_VERSION": "0.18.2",
       "ZSH_IN_DOCKER_VERSION": "1.2.0",
-      // Pin Node.js major version for Playwright MCP server
+      // Pin Node.js major version for @playwright/mcp and @playwright/cli
       "NODE_MAJOR": "22"
     }
   },
@@ -28,13 +31,14 @@
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
 
-  // Docker run arguments — these Linux capabilities are required for iptables.
-  // NET_ADMIN: modify network config (iptables rules, ipset, routing).
-  // NET_RAW:   use raw sockets (needed by iptables for packet matching).
-  // Both are scoped to the container's network namespace — they don't affect the host.
+  // Docker run arguments:
+  // NET_ADMIN / NET_RAW: required for iptables (scoped to container namespace).
+  // -p 5006:5006: exposes the Panel dev-server so host-mode browser tests can
+  //   reach http://localhost:5006 from Chrome on the host via CDP.
   "runArgs": [
     "--cap-add=NET_ADMIN",
-    "--cap-add=NET_RAW"
+    "--cap-add=NET_RAW",
+    "-p", "5006:5006"
   ],
 
   "customizations": {
@@ -100,8 +104,8 @@
   "workspaceFolder": "/workspace",
 
   // postCreateCommand runs once after the container is first created.
-  // The .pixi volume is owned by root initially, so chown it before pixi install.
-  "postCreateCommand": "sudo chown vscode .pixi && pixi install",
+  // pixi install reconciles the volume-mounted .pixi with the image-baked environment.
+  "postCreateCommand": "pixi install",
 
   // postStartCommand runs every time the container starts.
   // Initializes the iptables firewall with the domain allowlist.

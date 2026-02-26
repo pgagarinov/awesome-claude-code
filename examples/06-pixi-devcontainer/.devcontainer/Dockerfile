@@ -59,9 +59,9 @@ RUN ARCH=$(dpkg --print-architecture) && \
   rm "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb"
 
 # Install Node.js LTS from NodeSource.
-# Node is installed in the Dockerfile (not as a devcontainer feature) so that
-# Playwright's browser binaries are baked into the image at build time —
-# zero runtime downloads required.
+# Node is needed for @playwright/mcp (MCP server) and @playwright/cli (skills).
+# The Python playwright-mcp package (0.1.0) hardcodes headless=False, so we use
+# the mature npm @playwright/mcp which properly supports --headless and other flags.
 ARG NODE_MAJOR=22
 RUN curl -4 -fsSL --retry 5 --retry-all-errors https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
   && apt-get install -y --no-install-recommends nodejs \
@@ -87,15 +87,27 @@ RUN mkdir -p /workspace /home/vscode/.claude && \
 
 WORKDIR /workspace
 
-# Install Playwright MCP server globally, then use its bundled Playwright to
-# install Chromium + system dependencies. --with-deps handles apt-get internally.
+# Install pixi environment and Playwright Chromium at build time.
+# pixi install reads pyproject.toml and creates .pixi/envs/default/.
+# playwright install --with-deps chromium installs the browser binary +
+# all system dependencies (fonts, shared libraries, xvfb) via apt-get.
+# chown ensures the vscode user owns both directories when Docker copies
+# them to empty volumes on first mount.
+COPY pyproject.toml pixi.lock* /workspace/
+COPY src/ /workspace/src/
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/vscode/.cache/ms-playwright
-RUN npm install -g @playwright/mcp \
+RUN cd /workspace && pixi install && \
+    .pixi/envs/default/bin/playwright install --with-deps chromium && \
+    chown -R vscode:vscode /home/vscode/.cache /workspace/.pixi
+
+# Install Playwright MCP server and CLI globally.
+# @playwright/mcp  — MCP server for Claude Code browser automation (npx @playwright/mcp)
+# @playwright/cli  — token-efficient browser skills (playwright-cli install --skills)
+# The MCP package bundles its own Playwright; we use that to install Chromium so the
+# browser revision matches what the MCP server expects at runtime.
+RUN npm install -g @playwright/mcp @playwright/cli \
   && /usr/lib/node_modules/@playwright/mcp/node_modules/.bin/playwright install --with-deps chromium \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Fix ownership of .cache (created as root by playwright install above)
-RUN chown -R vscode:vscode /home/vscode/.cache
 
 # Switch to non-root user for all subsequent commands
 USER vscode
@@ -177,7 +189,7 @@ p.write_text('\n'.join(lines) + '\n'); \
 #    this follows least-privilege (vscode can't sudo arbitrary commands)
 # 4. chmod 0440 on sudoers files — required by sudo for security
 # 5. Switch back to vscode for the final image layer
-COPY init-firewall.sh /usr/local/bin/
+COPY .devcontainer/init-firewall.sh /usr/local/bin/
 USER root
 RUN chmod +x /usr/local/bin/init-firewall.sh && \
   echo "vscode ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh" > /etc/sudoers.d/vscode-firewall && \

@@ -1,3 +1,12 @@
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+# browser mode toggle state (local preference, not project config)
+.devcontainer/.browser-mode
+
+# Playwright local browser config
+.playwright/
+
+# playwright-cli generated skill files (user runs `playwright-cli install --skills` manually)
+.claude/skills/playwright-cli/
