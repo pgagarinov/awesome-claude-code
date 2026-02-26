@@ -18,135 +18,179 @@ everything else.
 | **GitHub CLI (`gh`)** | For PR workflows inside the container |
 | **git-delta** | Better diffs in the terminal |
 | **zsh + Powerlevel10k** | Themed shell with git status, completions |
-| **Playwright MCP** | Headless Chromium for browser automation via Claude Code MCP |
+| **Playwright MCP** | Browser automation — headless Chromium or host Chrome via CDP |
 | **Persistent volumes** | Bash history, `.claude/` config, and `.pixi/` cache survive rebuilds |
 
-## Network Firewall
+---
 
-The firewall (`init-firewall.sh`) runs at container start and:
+## Getting Started
 
-1. Sets the default iptables policy to **DROP** all outbound traffic
-2. Resolves and whitelists only these domains:
+### VS Code
 
-```
-GitHub          (API, web, git — full CIDR ranges from api.github.com/meta)
-api.anthropic.com
-claude.ai
-statsig.anthropic.com / statsig.com
-registry.npmjs.org
-conda.anaconda.org / prefix.dev / repo.prefix.dev
-pypi.org / files.pythonhosted.org
-VS Code marketplace / blob storage / update server
-```
-
-3. Verifies the firewall works:
-   - Confirms `https://example.com` is **blocked**
-   - Confirms `https://api.github.com` is **reachable**
-
-If Claude (or any process) tries to reach an unapproved domain, the connection
-is immediately rejected. This is enforced at the kernel level — no process in the
-container can bypass it.
-
-## Browser Automation
-
-The container includes [Playwright MCP](https://github.com/anthropics/mcp-playwright),
-a Model Context Protocol server that gives Claude Code headless Chromium access
-for web development workflows (inspecting pages, taking screenshots, clicking
-elements, filling forms).
-
-- **Pre-installed:** Node.js, Chromium, and `@playwright/mcp` are baked into the
-  Docker image — no runtime downloads needed
-- **Configured via `.mcp.json`:** Claude Code automatically discovers the MCP
-  server at container start. Tools like `browser_navigate` and `browser_snapshot`
-  appear in your Claude Code session
-- **Sandboxed by the firewall:** The headless browser is subject to the same
-  iptables rules as every other process — it can only reach whitelisted domains
-
-The MCP server communicates with Claude Code via stdio (no network ports). The
-`--headless`, `--no-sandbox`, and `--isolated` flags in `.mcp.json` are required
-for running inside a container without a display server or user namespaces.
-
-## Option A: VS Code
-
-### Prerequisites
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-
-### Steps
+**Prerequisites:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+and VS Code with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
 
 1. Open this folder in VS Code
 2. When prompted "Reopen in Container", click it — or run the command palette
-   (`Cmd+Shift+P`) and select **Dev Containers: Reopen in Container**
+   (`Cmd+Shift+P`) → **Dev Containers: Reopen in Container**
 3. Wait for the build (first time takes a few minutes, rebuilds are cached)
-4. The container opens with zsh, Claude Code on `$PATH`, and the firewall active
+4. Open the integrated terminal and run `claude`
 
-The `devcontainer.json` auto-installs these VS Code extensions inside the container:
+The following VS Code extensions are auto-installed inside the container:
+`anthropic.claude-code`, `dbaeumer.vscode-eslint`, `esbenp.prettier-vscode`,
+`eamodio.gitlens`.
 
-- `anthropic.claude-code` — Claude Code extension
-- `dbaeumer.vscode-eslint` — ESLint
-- `esbenp.prettier-vscode` — Prettier (set as default formatter)
-- `eamodio.gitlens` — GitLens
-
-Open the integrated terminal and run `claude` to start a session.
-
-## Option B: Devcontainer CLI
+### Devcontainer CLI
 
 Use this when you want a sandboxed Claude session without VS Code — from any
 terminal, in CI, or on a remote server.
 
-### Prerequisites
-
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- devcontainer CLI: `npm install -g @devcontainers/cli`
-
-### Steps
+**Prerequisites:** [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+and the devcontainer CLI (`npm install -g @devcontainers/cli`).
 
 ```bash
-# 1. Build the container
+# Build and start the container
 devcontainer build --workspace-folder .
-
-# 2. Start the container and get a shell
 devcontainer up --workspace-folder .
+
+# Get a shell
 devcontainer exec --workspace-folder . zsh
+
+# Or run a one-liner
+devcontainer exec --workspace-folder . claude -p "explain this codebase"
 ```
 
 From the shell inside the container:
 
 ```bash
-# Verify Claude is available
-claude --version
-
-# Verify the firewall is active
-curl -s --connect-timeout 3 https://example.com    # should fail
-curl -s --connect-timeout 3 https://api.github.com  # should work
-
-# Start a Claude session
-claude
-```
-
-### One-liner for headless use
-
-Run a single Claude prompt in the sandbox and exit:
-
-```bash
-devcontainer exec --workspace-folder . claude -p "explain this codebase"
+claude --version        # verify Claude is available
+claude                  # start an interactive session
 ```
 
 ### Stopping the container
 
 ```bash
-# Find the container ID
-docker ps --filter label=devcontainer.local_folder=$(pwd) -q
-
-# Stop it
 docker stop $(docker ps --filter label=devcontainer.local_folder=$(pwd) -q)
 ```
 
-## Customizing the Allowlist
+---
 
-Edit the domain list in `.devcontainer/init-firewall.sh` to add or remove
-allowed domains:
+## Browser Automation
+
+The container includes [Playwright MCP](https://github.com/microsoft/playwright-mcp),
+which gives Claude Code browser access via tools like `browser_navigate`,
+`browser_snapshot`, `browser_click`, and `browser_fill_form`. Two modes are
+available.
+
+### Container mode (default) — headless Chromium
+
+The container ships with Chromium baked into the Docker image. Claude controls a
+headless browser inside the container — no host setup needed. The browser is
+sandboxed by the firewall (it can only reach whitelisted domains).
+
+The `.mcp.json` config for this mode:
+
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp", "--headless", "--no-sandbox", "--isolated", "--browser", "chromium"]
+    }
+  }
+}
+```
+
+### Host browser mode — Chrome on your machine via CDP
+
+Connect Claude to Chrome running on your host machine. Use this when you need to
+see what Claude is doing in a visible browser, access authenticated sessions, or
+work with sites that block headless browsers.
+
+**Step 1:** Launch Chrome with remote debugging on your host:
+
+```bash
+# macOS
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug
+
+# Linux
+google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug
+
+# Windows
+"C:\Program Files\Google\Chrome\Application\chrome.exe" ^
+  --remote-debugging-port=9222 --user-data-dir=%TEMP%\chrome-debug
+```
+
+`--user-data-dir` is required when using `--remote-debugging-port` — Chrome
+refuses to start without it.
+
+**Step 2:** Switch to host mode inside the container:
+
+```bash
+.devcontainer/toggle-browser.sh host
+```
+
+**Step 3:** Restart Claude Code to pick up the new MCP config.
+
+**How it works:** Chrome's CDP endpoint returns WebSocket URLs pointing to
+`ws://localhost/...`, but from inside the container `localhost` is the
+container itself. The `cdp-relay.sh` script resolves the real WebSocket URL
+from Chrome's `/json/version` endpoint and rewrites `localhost` to
+`host.docker.internal:9222` before passing it to Playwright MCP.
+
+**Verify connectivity** (from inside the container):
+
+```bash
+# Check Chrome is reachable
+curl -sf -H "Host: localhost" http://host.docker.internal:9222/json/version | jq .
+
+# Check CDP port with netcat
+nc -zv host.docker.internal 9222
+```
+
+### Switching modes
+
+```bash
+.devcontainer/toggle-browser.sh              # show current mode
+.devcontainer/toggle-browser.sh container    # headless Chromium (default)
+.devcontainer/toggle-browser.sh host         # Chrome on host via CDP
+```
+
+The script copies the appropriate template (`mcp-container.json` or
+`mcp-host-browser.json`) to `.mcp.json`. Restart Claude Code after switching.
+
+---
+
+## Network Firewall
+
+The firewall (`init-firewall.sh`) runs at every container start and:
+
+1. Sets the default iptables policy to **DROP** all outbound traffic
+2. Resolves and whitelists only approved domains
+3. Verifies the firewall works (blocked site fails, allowed site succeeds)
+
+If Claude (or any process) tries to reach an unapproved domain, the connection
+is immediately rejected at the kernel level — no process can bypass it.
+
+### Allowed domains
+
+| Domain | Purpose |
+|--------|---------|
+| GitHub (full CIDR ranges from `api.github.com/meta`) | API, web, git |
+| `api.anthropic.com` | Claude API |
+| `claude.ai` | Claude Code authentication |
+| `sentry.io` | Error reporting |
+| `statsig.anthropic.com` / `statsig.com` | Feature flags and analytics |
+| `registry.npmjs.org` | npm package downloads |
+| `conda.anaconda.org` / `prefix.dev` / `repo.prefix.dev` | Conda/pixi packages |
+| `pypi.org` / `files.pythonhosted.org` | PyPI packages |
+| VS Code marketplace / blob storage / update server | VS Code extensions |
+| `host.docker.internal` (dynamic) | Container-to-host communication (CDP, etc.) |
+
+### Customizing the allowlist
+
+Edit the domain list in `.devcontainer/init-firewall.sh`:
 
 ```bash
 for domain in \
@@ -159,23 +203,20 @@ for domain in \
 Rebuild the container after changes. GitHub IP ranges are fetched dynamically
 from the GitHub API at each container start, so they stay current automatically.
 
-## Architecture
+### Verifying the firewall
 
-```
-.devcontainer/
-├── Dockerfile          # Base image + Node.js + pixi + git-delta + Playwright + Claude Code + zsh
-├── devcontainer.json   # Container config, volumes, VS Code settings
-└── init-firewall.sh    # iptables firewall (runs at container start)
-.mcp.json               # Playwright MCP server config (auto-discovered by Claude Code)
+```bash
+curl -s --connect-timeout 3 https://example.com    # should fail (blocked)
+curl -s --connect-timeout 3 https://api.github.com  # should work (allowed)
 ```
 
-The container uses `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW` to allow
-iptables inside the container. These capabilities are scoped to the container's
-network namespace — they don't affect the host.
+---
 
-### Volume Mounts
+## Credentials & Volumes
 
-Three named volumes keep state across rebuilds:
+### Volume mounts
+
+Three named volumes keep state across container rebuilds:
 
 | Volume | Mounted at | Purpose |
 |--------|-----------|---------|
@@ -186,7 +227,7 @@ Three named volumes keep state across rebuilds:
 Your workspace is bind-mounted at `/workspace` with `consistency=delegated` for
 better filesystem performance on macOS.
 
-### How Claude Credentials Are Stored
+### How credentials are stored
 
 When you run `claude` and authenticate (via OAuth or API key), credentials are
 written to `/home/vscode/.claude` inside the container. This path is backed by
@@ -197,19 +238,13 @@ the `claude-code-config-*` named Docker volume, so:
 - Credentials **are scoped per project** — the `${devcontainerId}` suffix makes each volume unique
 - If you `docker volume rm` the volume, credentials are deleted and you must re-authenticate
 
-Alternatively, you can skip the interactive auth flow entirely by setting
-`ANTHROPIC_API_KEY` in the `containerEnv` section of `devcontainer.json`.
+Alternatively, set `ANTHROPIC_API_KEY` in the `containerEnv` section of
+`devcontainer.json` to skip interactive auth entirely.
 
-### What Is `devcontainerId`?
+### What is `devcontainerId`?
 
-The `*` in volume names like `claude-code-config-*` is `${devcontainerId}` — a
-built-in variable from the devcontainer spec. It's a unique hash automatically
-computed from:
-
-- The **workspace folder path** on your host machine
-- The **devcontainer config file path**
-
-This means:
+The `*` in volume names is `${devcontainerId}` — a unique hash computed from
+the workspace folder path and devcontainer config path.
 
 | Action | ID changes? | Effect on volumes |
 |--------|:-----------:|-------------------|
@@ -220,27 +255,24 @@ This means:
 | Move the project folder to a new path | **Yes** | New volumes — must re-authenticate |
 | Rename the `.devcontainer/` config path | **Yes** | New volumes — must re-authenticate |
 
-Note: `devcontainer build` only builds the Docker image — it doesn't create a
-container, so the devcontainer ID isn't involved at all. The ID is computed
-when `devcontainer up` creates the container.
-
-To see your actual volume names:
+`devcontainer build` only builds the Docker image — it doesn't create a
+container, so the ID isn't involved. The ID is computed when `devcontainer up`
+creates the container.
 
 ```bash
-docker volume ls | grep claude-code
+docker volume ls | grep claude-code    # see your actual volume names
 ```
+
+---
 
 ## GUI Apps in the Container
 
 **Web apps** work out of the box — VS Code automatically forwards ports from the
 container to your host, so you can open `localhost:<port>` in your host browser.
-Port forwarding uses the local network, which the firewall allows.
 
-**Desktop GUI apps** (Qt, GTK, Tkinter, Electron) require extra setup since
-containers don't have a display server. Options:
+**Desktop GUI apps** (Qt, GTK, Tkinter, Electron) require extra setup:
 
-1. **`desktop-lite` feature** — adds a lightweight VNC desktop accessible via
-   browser at `localhost:6080`:
+1. **`desktop-lite` feature** — lightweight VNC desktop at `localhost:6080`:
 
    ```json
    "features": {
@@ -259,8 +291,41 @@ containers don't have a display server. Options:
    }
    ```
 
-If your GUI app needs external network access beyond the allowlist, add the
-required domains to `init-firewall.sh`.
+---
+
+## Architecture
+
+```
+.devcontainer/
+├── Dockerfile              # Base image + pixi + Node.js + Playwright + Claude Code + zsh
+├── devcontainer.json       # Container config, volumes, VS Code settings
+├── init-firewall.sh        # iptables firewall (runs at every container start)
+├── cdp-relay.sh            # Rewrites Chrome's WebSocket URL for container→host CDP
+├── toggle-browser.sh       # Switches .mcp.json between container/host modes
+├── mcp-container.json      # Template: headless Chromium inside the container
+└── mcp-host-browser.json   # Template: Chrome on host via CDP relay
+.mcp.json                   # Active Playwright MCP config (auto-discovered by Claude Code)
+pixi.toml                   # Pixi project config
+pyproject.toml              # Python project config with test dependencies
+tests/                      # Playwright browser tests
+```
+
+The container uses `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW` to allow
+iptables inside the container. These capabilities are scoped to the container's
+network namespace — they don't affect the host.
+
+### Build hardening (ARM64 / OrbStack)
+
+The Dockerfile includes workarounds for Docker BuildKit networking issues that
+affect ARM64 hosts and OrbStack users:
+
+| Fix | Why |
+|-----|-----|
+| `Acquire::http::Pipeline-Depth "0"` | OrbStack drops pipelined HTTP connections during `docker build`, causing apt `400 Bad Request` errors |
+| `curl -4 --retry 5 --retry-all-errors` on all downloads | Forces IPv4 and retries on intermittent SSL failures (`error:0A000126`) |
+| `"options": ["--network=host"]` in devcontainer.json build config | Bypasses BuildKit's extra network namespace that causes TLS failures |
+
+---
 
 ## Reference: devcontainer.json Line by Line
 
@@ -273,6 +338,7 @@ commented in-source; this section provides a higher-level walkthrough.
 |-----|-------|-----|
 | `name` | `"Claude Code Sandbox"` | Display name in VS Code's Remote Explorer and window title |
 | `build.dockerfile` | `"Dockerfile"` | Points to our custom Dockerfile in the same directory |
+| `build.options` | `["--network=host"]` | Bypasses BuildKit SSL issues on ARM64/OrbStack (see [Build hardening](#build-hardening-arm64--orbstack)) |
 | `build.args.TZ` | `"${localEnv:TZ:America/Los_Angeles}"` | Propagates host timezone so container timestamps match local time. `${localEnv:TZ}` reads the host's `$TZ`; falls back to `America/Los_Angeles` |
 | `build.args.PIXI_VERSION` | `"v0.63.2"` | Pins pixi version for reproducible builds |
 | `build.args.GIT_DELTA_VERSION` | `"0.18.2"` | Pins git-delta version |
@@ -371,11 +437,21 @@ The `TZ` build arg is passed from `devcontainer.json`'s `build.args.TZ`, which
 reads the host's `$TZ` environment variable. Setting `ENV TZ` propagates it into
 the running container so logs, git commits, and `date` output use local time.
 
+### Apt Pipeline Fix
+
+```dockerfile
+RUN echo 'Acquire::http::Pipeline-Depth "0";' > /etc/apt/apt.conf.d/99-orbstack-fix
+```
+
+Disables HTTP pipelining for apt. OrbStack's virtual network drops pipelined
+connections during `docker build`, causing `400 Bad Request` errors. This must
+come before any `apt-get` command.
+
 ### System Packages
 
 ```dockerfile
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  fzf iptables ipset iproute2 dnsutils aggregate jq nano vim
+  fzf iptables ipset iproute2 dnsutils aggregate jq nano vim netcat-openbsd
 ```
 
 | Package | Why |
@@ -389,6 +465,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 | `jq` | JSON parser — extracts IP ranges from the GitHub API `/meta` endpoint |
 | `nano` | Terminal editor — set as `$EDITOR` so Claude Code uses it for file operations |
 | `vim` | Alternative terminal editor for users who prefer it |
+| `netcat-openbsd` | Network utility (`nc`) for testing TCP connectivity (e.g., CDP port checks) |
 
 `--no-install-recommends` keeps the image lean by skipping suggested packages.
 The `apt-get clean && rm -rf /var/lib/apt/lists/*` cleanup reduces the layer size.
@@ -397,7 +474,8 @@ The `apt-get clean && rm -rf /var/lib/apt/lists/*` cleanup reduces the layer siz
 
 ```dockerfile
 ARG PIXI_VERSION=v0.63.2
-RUN curl -L -o /usr/local/bin/pixi -fsSL --compressed \
+RUN curl -4 -fsSL --compressed --retry 5 --retry-all-errors \
+    -o /usr/local/bin/pixi \
     "https://...pixi-$(uname -m)-unknown-linux-musl" \
     && chmod +x /usr/local/bin/pixi \
     && pixi info
@@ -406,13 +484,16 @@ RUN curl -L -o /usr/local/bin/pixi -fsSL --compressed \
 Direct binary download — no package manager needed. The `musl` build is used for
 portability across container base images (musl binaries don't depend on specific
 glibc versions). `pixi info` is a smoke test that verifies the binary runs.
+`-4` forces IPv4 and `--retry` handles intermittent SSL failures on ARM64.
 
 ### git-delta
 
 ```dockerfile
 ARG GIT_DELTA_VERSION=0.18.2
 RUN ARCH=$(dpkg --print-architecture) && \
-  wget "https://...git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" && \
+  curl -4 -fsSL --retry 5 --retry-all-errors \
+    -o "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" \
+    "https://...git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" && \
   dpkg -i "git-delta_...deb" && rm "git-delta_...deb"
 ```
 
@@ -420,13 +501,13 @@ Installs the pre-built `.deb` package (handles dependencies automatically).
 `dpkg --print-architecture` returns `amd64` or `arm64` for multi-arch support,
 so the same Dockerfile works on Intel and Apple Silicon hosts.
 
-### Node.js + Chromium System Dependencies
+### Node.js
 
 ```dockerfile
 ARG NODE_MAJOR=22
-RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
+RUN curl -4 -fsSL --retry 5 --retry-all-errors \
+    https://deb.nodesource.com/setup_${NODE_MAJOR}.x | bash - \
   && apt-get install -y --no-install-recommends nodejs \
-    libasound2 libatk-bridge2.0-0 ... xvfb fonts-liberation ... \
   && node --version && npm --version \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 ```
@@ -435,39 +516,35 @@ Node.js is installed from NodeSource (not as a devcontainer feature) so that
 Playwright's browser binaries can be baked into the image at build time. The
 `NODE_MAJOR` arg is pinned in `devcontainer.json` for reproducible builds.
 
-Chromium's ~30 system dependencies (shared libraries, fonts, xvfb) are listed
-explicitly in the same `apt-get install` as Node.js. This is done instead of
-using `playwright install-deps` because that command runs its own `apt-get
-update` which triggers HTTP 400 errors in Docker BuildKit's networking layer.
-The dependency list comes from Playwright's `nativeDeps.ts` source file.
-
-### Global npm Packages
-
-```dockerfile
-RUN npm install -g @anthropic-ai/claude-code @playwright/mcp
-```
-
-Installed as root (before `USER vscode`) since global npm packages require
-write access to `/usr/lib/node_modules`. Two packages:
-
-- **`@anthropic-ai/claude-code`** — Claude Code CLI. Installed via npm instead
-  of the curl install script, which avoids the `sudo cp` workaround (npm puts
-  the binary on `$PATH` directly)
-- **`@playwright/mcp`** — Playwright MCP server for headless browser automation
-
-### Chromium Browser Binary
+### Playwright MCP + Chromium
 
 ```dockerfile
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/vscode/.cache/ms-playwright
-RUN /usr/lib/node_modules/@playwright/mcp/node_modules/.bin/playwright install chromium
+RUN npm install -g @playwright/mcp \
+  && /usr/lib/node_modules/@playwright/mcp/node_modules/.bin/playwright install --with-deps chromium \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN chown -R vscode:vscode /home/vscode/.cache
 ```
 
-Downloads the Chromium binary into the vscode user's cache. Uses the MCP
-package's **bundled** Playwright (not a standalone install) to ensure the
-browser revision matches what the MCP server expects at runtime. The
-`PLAYWRIGHT_BROWSERS_PATH` env var tells Playwright where to store and find
-browser binaries. The MCP server is configured in `.mcp.json` at the project
-root with flags for headless, no-sandbox, and isolated operation.
+Installs the Playwright MCP server globally, then uses its **bundled** Playwright
+(not a standalone install) to install Chromium and all system dependencies in one
+step. `--with-deps` runs `apt-get` internally to install Chromium's ~30 shared
+libraries, fonts, and xvfb.
+
+Using the MCP package's bundled Playwright ensures the browser revision matches
+what the MCP server expects at runtime. The `chown` fixes ownership of `.cache`
+which is created as root by the install step.
+
+### Claude Code CLI
+
+```dockerfile
+USER vscode
+RUN curl -4 -fsSL --retry 5 --retry-all-errors https://claude.ai/install.sh | bash
+ENV PATH="/home/vscode/.local/bin:$PATH"
+```
+
+Installed as `vscode` user via the official install script. The binary lands at
+`/home/vscode/.local/bin/claude`, which is not affected by any volume mount.
 
 ### Bash History Persistence
 
@@ -479,40 +556,7 @@ RUN mkdir /commandhistory && \
 
 Creates a directory at a **volume-mountable path outside `$HOME`**. The
 `devcontainer.json` mounts a named volume here, so shell history survives
-container rebuilds. It's outside `$HOME` so it doesn't interfere with other home
-directory mounts.
-
-### Environment Flag
-
-```dockerfile
-ENV DEVCONTAINER=true
-```
-
-Convention flag for scripts to detect they're running inside a devcontainer.
-Claude Code, init scripts, and CI tooling can check `$DEVCONTAINER` to adjust
-behavior.
-
-### Workspace and Config Directories
-
-```dockerfile
-RUN mkdir -p /workspace /home/vscode/.claude && \
-  chown -R vscode:vscode /workspace /home/vscode/.claude
-```
-
-- `/workspace` — bind mount target for the host project
-- `/home/vscode/.claude` — Claude Code config and auth (backed by a named volume)
-
-Both are created with `vscode` ownership so the non-root user can write to them
-immediately.
-
-### Claude Code Install
-
-Claude Code is installed via `npm install -g @anthropic-ai/claude-code` (see
-[Global npm Packages](#global-npm-packages) above). This places the `claude`
-binary at `/usr/bin/claude` — a system path not affected by any volume mount.
-The npm approach replaced the previous `curl | bash` install script, which
-required a `sudo cp` workaround to move the binary out of the volume-shadowed
-`~/.local/bin/` path.
+container rebuilds.
 
 ### Shell and Editor
 
@@ -529,7 +573,7 @@ ENV VISUAL=nano
 ### zsh-in-docker
 
 ```dockerfile
-RUN sh -c "$(wget -O- .../zsh-in-docker.sh)" -- \
+RUN sh -c "$(curl -4 -fsSL --retry 5 --retry-all-errors .../zsh-in-docker.sh)" -- \
   -p git \
   -p fzf \
   -a 'eval "$(pixi completion -s zsh)"' \
@@ -547,16 +591,9 @@ RUN sh -c "$(wget -O- .../zsh-in-docker.sh)" -- \
 
 ### Powerlevel10k Color Customization
 
-```dockerfile
-RUN python3 -c "..."
-```
-
 Injects `POWERLEVEL9K_*` color variables into `.zshrc` **before** the
-`source $ZSH/oh-my-zsh.sh` line. This uses Python instead of sed because:
-
-1. Shell `sed` has notorious issues with newline escaping across platforms
-2. Python's `pathlib` handles file I/O cleanly
-3. Each variable gets its own line, making the result easy to read
+`source $ZSH/oh-my-zsh.sh` line. Uses Python instead of sed to avoid
+shell newline-escaping issues across platforms.
 
 **Color codes** (256-color palette):
 
@@ -700,22 +737,6 @@ an IP was already added (e.g., two domains resolving to the same CDN IP).
 Each IP is validated against a regex to guard against DNS poisoning or
 malformed responses.
 
-**Allowed domains:**
-
-| Domain | Purpose |
-|--------|---------|
-| `registry.npmjs.org` | npm package downloads |
-| `api.anthropic.com` | Claude API |
-| `sentry.io` | Error reporting |
-| `statsig.anthropic.com` / `statsig.com` | Feature flags and analytics |
-| `marketplace.visualstudio.com` | VS Code extension marketplace |
-| `vscode.blob.core.windows.net` | VS Code extension downloads |
-| `update.code.visualstudio.com` | VS Code update checks |
-| `conda.anaconda.org` | Conda package channel |
-| `pypi.org` / `files.pythonhosted.org` | PyPI package index and downloads |
-| `prefix.dev` / `repo.prefix.dev` / `conda-mapping.prefix.dev` | Pixi package manager backends |
-| `claude.ai` | Claude Code authentication |
-
 ### Step 8: Detect Host Network
 
 ```bash
@@ -731,7 +752,23 @@ entire `/24` subnet. This is necessary for:
 - Docker port forwarding
 - Host ↔ container file sync
 
-### Step 9: Default DROP Policy
+### Step 9: Allow host.docker.internal
+
+```bash
+DOCKER_HOST_IP=$(getent hosts host.docker.internal 2>/dev/null | awk '{print $1}' || true)
+if [ -n "$DOCKER_HOST_IP" ]; then
+    iptables -A INPUT -s "$DOCKER_HOST_IP" -j ACCEPT
+    iptables -A OUTPUT -d "$DOCKER_HOST_IP" -j ACCEPT
+fi
+```
+
+On OrbStack, `host.docker.internal` resolves to an IP (e.g., `0.250.250.254`)
+outside the default gateway's `/24` subnet, so Step 8's rule doesn't cover it.
+This step dynamically resolves the IP and adds it. Needed for CDP browser
+automation and any other container-to-host communication. Re-resolved at every
+container start, so no rebuild is needed when the host IP changes.
+
+### Step 10: Default DROP Policy
 
 ```bash
 iptables -P INPUT DROP
@@ -744,7 +781,7 @@ policy to DROP on all chains. Any packet that doesn't match an allow rule is
 silently dropped. This is set after the allow rules (not before) to avoid
 locking the script out of the network mid-execution.
 
-### Step 10: Stateful Connection Tracking
+### Step 11: Stateful Connection Tracking
 
 ```bash
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
@@ -755,7 +792,7 @@ Allows return traffic for already-established connections. Without this, even
 allowed connections would fail because the response packets wouldn't be
 permitted.
 
-### Step 11: ipset Match Rule
+### Step 12: ipset Match Rule
 
 ```bash
 iptables -A OUTPUT -m set --match-set allowed-domains dst -j ACCEPT
@@ -765,7 +802,7 @@ The actual allow rule: any outbound packet whose destination IP is in the
 `allowed-domains` ipset is accepted. This single rule replaces what would
 otherwise be dozens of individual iptables rules.
 
-### Step 12: REJECT Catch-All
+### Step 13: REJECT Catch-All
 
 ```bash
 iptables -A OUTPUT -j REJECT --reject-with icmp-admin-prohibited
@@ -779,7 +816,7 @@ Explicitly **REJECT** (not DROP) all remaining outbound traffic. The difference:
 REJECT is used here because immediate feedback is better for developer
 experience — you instantly know a connection was blocked rather than waiting.
 
-### Step 13: Verification
+### Step 14: Verification
 
 ```bash
 curl --connect-timeout 5 https://example.com      # Should fail (blocked)

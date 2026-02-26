@@ -8,10 +8,6 @@ from playwright.sync_api import Page, expect
 APP_URL = "http://localhost:5006/app"
 
 
-@pytest.fixture(scope="session")
-def browser_context_args():
-    return {"base_url": APP_URL}
-
 
 def test_page_title(page: Page):
     """Verify the page title contains the app name."""

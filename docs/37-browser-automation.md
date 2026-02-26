@@ -2,6 +2,18 @@
 
 **Only Playwright MCP offers first-class Docker support for containerized development; Claude Code's built-in Chrome integration fundamentally cannot work in devcontainers, and Chrome DevTools MCP requires manual workarounds.** This gap matters because devcontainers are increasingly the standard for reproducible development environments, yet browser automation—critical for AI-assisted web development—remains a pain point inside them. The broader ecosystem offers over a dozen alternative MCP servers and tools, with Playwright MCP and Browser-Use emerging as the most actively maintained options for both Claude Code and OpenCode.
 
+**Contents:**
+- [At a glance](#at-a-glance) — comparison table of all tools and a "start here" guide
+- [Timeline](#how-we-got-here-a-timeline-of-browser-automation) — Puppeteer (2017) → Playwright (2020) → MCP explosion (2025) → CDP boomerang
+- [Protocol landscape](#protocol-landscape-cdp-playwright-bidi-and-custom) — CDP, Playwright protocol, WebDriver BiDi, and custom/hybrid
+- [Playwright MCP in Docker](#playwright-mcp-is-the-only-tool-with-real-docker-support) — setup, CLI+Skills mode (4x token reduction), container flags
+- [Claude Code Chrome](#claude-codes-chrome-integration-hits-a-hard-architectural-wall) — why it can't work in containers
+- [Chrome DevTools MCP in Docker](#chrome-devtools-mcp-works-in-containers-with-effort) — three container patterns
+- [Devcontainer comparison](#summary-comparison-for-devcontainer-support) — side-by-side capability matrix
+- [Broader landscape](#the-broader-landscape-of-browser-automation-mcp-tools) — secondary tools, cloud options, existing-browser tools, OpenCode
+- [Browser pools](#running-a-browser-pool-for-parallel-testing) — Playwright workers/sharding, Selenium Grid, Moon, browserless, MCP patterns
+- [Conclusion](#conclusion)
+
 ## At a glance
 
 | Tool | Repo | Stars | Commits/mo | Browsers | Protocol(s) | Container? | Key limitations |
@@ -16,6 +28,19 @@
 | **Claude Code Chrome** | Built-in | N/A | N/A | Chrome | Chrome Native Messaging | No (arch. blocker) | Host-only; can't cross containers |
 
 > **TL;DR for devcontainer users:** Use Playwright MCP with `--headless --browser chromium --no-sandbox --isolated`. It's the only option with production-ready container support out of the box.
+
+### Start here: what are you trying to do?
+
+| Your situation | Go to |
+|---|---|
+| Set up browser automation in a **devcontainer** | [Playwright MCP in Docker](#playwright-mcp-is-the-only-tool-with-real-docker-support) |
+| Choose between **Playwright MCP vs Chrome DevTools MCP** | [Devcontainer comparison](#summary-comparison-for-devcontainer-support) |
+| Understand **Browser-Use** and how it differs from MCP tools | [38-browser-use.md](38-browser-use.md) |
+| Automate your **existing logged-in browser** | [Tools that use your existing browser](#tools-that-use-your-existing-browser) |
+| Run **parallel browser tests** (replace Selenium Grid / Selenoid) | [Browser pools](#running-a-browser-pool-for-parallel-testing) |
+| Understand **why CDP, Playwright, and BiDi all exist** | [Protocol landscape](#protocol-landscape-cdp-playwright-bidi-and-custom) |
+| Use browser automation with **OpenCode** | [OpenCode-specific options](#opencode-specific-options) |
+| Reduce **token usage** for browser tasks | [CLI+Skills mode](#cliskills-mode-4x-token-reduction) |
 
 ---
 
