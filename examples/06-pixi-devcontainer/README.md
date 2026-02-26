@@ -78,10 +78,14 @@ docker stop $(docker ps --filter label=devcontainer.local_folder=$(pwd) -q)
 
 ## Browser Automation
 
-The container includes [Playwright MCP](https://github.com/microsoft/playwright-mcp),
-which gives Claude Code browser access via tools like `browser_navigate`,
-`browser_snapshot`, `browser_click`, and `browser_fill_form`. Two modes are
-available.
+The container supports three browser automation regimes, each working in two
+modes (container or host). All six combinations are tested and supported:
+
+| | **Container** (headless Chromium) | **Host** (Chrome on host via CDP) |
+|---|---|---|
+| **MCP** — `@playwright/mcp` tools (`browser_navigate`, `browser_snapshot`, etc.) | Headless Chromium inside the container, sandboxed by the firewall | Connects to Chrome on your machine via CDP relay |
+| **playwright-cli skills** — CLI commands via Bash (`playwright-cli goto`, `playwright-cli snapshot`, etc.) | Same headless Chromium, but invoked through token-efficient CLI skills | Same CDP connection, driven by CLI skills |
+| **pytest** — `pytest-playwright` browser tests in `tests/` | Launches Chromium via pixi-managed Playwright | Connects to host Chrome via CDP for visual test runs |
 
 ### Container mode (default) — headless Chromium
 
@@ -89,31 +93,38 @@ The container ships with Chromium baked into the Docker image. Claude controls a
 headless browser inside the container — no host setup needed. The browser is
 sandboxed by the firewall (it can only reach whitelisted domains).
 
-The `.mcp.json` config for this mode:
+The `.mcp.json` uses a unified launcher that auto-detects the mode:
 
 ```json
 {
   "mcpServers": {
     "playwright": {
-      "command": "npx",
-      "args": ["@playwright/mcp", "--headless", "--no-sandbox", "--isolated", "--browser", "chromium"]
+      "command": "bash",
+      "args": [".devcontainer/playwright-launcher.sh"]
     }
   }
 }
 ```
 
-### playwright-cli skills (optional)
+In container mode, the launcher runs:
+`npx @playwright/mcp --headless --no-sandbox --isolated --browser chromium`
+
+### playwright-cli skills
 
 [`playwright-cli`](https://github.com/microsoft/playwright-cli) provides
 CLI-based browser automation as "skills" — more token-efficient than MCP tool
-schemas. To install the skills:
+schemas because Claude uses simple Bash commands instead of JSON tool calls.
+
+**Install the skills** (once per container):
 
 ```bash
 playwright-cli install --skills
 ```
 
 This generates skill files in `.claude/skills/playwright-cli/` (gitignored).
-Claude Code discovers them automatically on next start.
+Claude Code discovers them automatically on next start. When both MCP and
+skills are available, Claude may use either; to force skills-only, temporarily
+rename `.mcp.json`.
 
 ### Host browser mode — Chrome on your machine via CDP
 
@@ -145,7 +156,7 @@ refuses to start without it.
 .devcontainer/toggle-browser.sh host
 ```
 
-**Step 3:** Restart Claude Code to pick up the new MCP config.
+**Step 3:** Restart Claude Code to pick up the mode change.
 
 **How it works:** Chrome's CDP endpoint returns WebSocket URLs pointing to
 `ws://localhost/...`, but from inside the container `localhost` is the
@@ -175,6 +186,119 @@ The script writes `container` or `host` to the `.devcontainer/.browser-mode`
 dotfile. The launcher (`playwright-launcher.sh`) reads this at startup.
 You can also override the mode with `BROWSER_MODE=host` (env var wins over
 the dotfile). Restart Claude Code after switching.
+
+### Running each regime
+
+All commands below are run **inside the container** (via `devcontainer exec`
+or the VS Code integrated terminal).
+
+#### MCP — container mode
+
+No setup needed. Start Claude Code and ask it to use browser tools:
+
+```bash
+claude
+# > Navigate to https://example.com and take a snapshot
+```
+
+Or non-interactively:
+
+```bash
+claude -p "Use the playwright MCP tool to navigate to https://api.github.com/zen \
+  and tell me what the page says." --permission-mode bypassPermissions
+```
+
+#### MCP — host mode
+
+Start Chrome with remote debugging on your host (see [Host browser mode](#host-browser-mode--chrome-on-your-machine-via-cdp)), then:
+
+```bash
+.devcontainer/toggle-browser.sh host
+# Restart Claude Code, then:
+claude
+# > Navigate to https://example.com and take a snapshot
+```
+
+Or with a one-shot env var override (no toggle needed):
+
+```bash
+BROWSER_MODE=host claude -p "Use the playwright MCP tool to navigate to \
+  https://api.github.com/zen and tell me what the page says." \
+  --permission-mode bypassPermissions
+```
+
+#### playwright-cli skills — container mode
+
+Install skills first (once), then disable MCP to ensure skills are used:
+
+```bash
+playwright-cli install --skills
+
+# Rename .mcp.json so Claude uses skills instead of MCP tools
+mv .mcp.json .mcp.json.bak
+
+claude -p "Use playwright-cli to open a browser, navigate to \
+  https://api.github.com/zen, take a snapshot, and tell me what the page says." \
+  --allowedTools "Bash(playwright-cli:*)" --permission-mode bypassPermissions
+
+# Restore MCP when done
+mv .mcp.json.bak .mcp.json
+```
+
+#### playwright-cli skills — host mode
+
+Same as above, but with `BROWSER_MODE=host` and Chrome running on the host:
+
+```bash
+mv .mcp.json .mcp.json.bak
+
+BROWSER_MODE=host claude -p "Use playwright-cli to open a browser, navigate to \
+  https://api.github.com/zen, take a snapshot, and tell me what the page says." \
+  --allowedTools "Bash(playwright-cli:*)" --permission-mode bypassPermissions
+
+mv .mcp.json.bak .mcp.json
+```
+
+#### pytest — container mode
+
+The Panel app must be running for the tests to connect to:
+
+```bash
+# Start the Panel app in the background
+pixi run panel serve src/06_pixi_devcontainer/app.py --port 5006 &
+
+# Wait for it to be ready
+for i in $(seq 1 30); do nc -z localhost 5006 2>/dev/null && break; sleep 1; done
+
+# Run tests (container mode is the default)
+pixi run test
+
+# Stop the app
+kill %1
+```
+
+#### pytest — host mode
+
+The Panel app runs inside the container; port 5006 is forwarded to the host
+(via `-p 5006:5006` in `runArgs`) so the host Chrome can reach it. You need
+Chrome running with remote debugging on the host:
+
+```bash
+# Start the Panel app in the background
+pixi run panel serve src/06_pixi_devcontainer/app.py --port 5006 &
+
+# Wait for it to be ready
+for i in $(seq 1 30); do nc -z localhost 5006 2>/dev/null && break; sleep 1; done
+
+# Run tests with host browser
+BROWSER_MODE=host pixi run test
+
+# Stop the app
+kill %1
+```
+
+The host Chrome navigates to `http://localhost:5006/app` — this works because
+Docker forwards port 5006 from the container to the host.
 
 ---
 
