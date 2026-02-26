@@ -481,7 +481,7 @@ commented in-source; this section provides a higher-level walkthrough.
 | `build.args.PIXI_VERSION` | `"v0.63.2"` | Pins pixi version for reproducible builds |
 | `build.args.GIT_DELTA_VERSION` | `"0.18.2"` | Pins git-delta version |
 | `build.args.ZSH_IN_DOCKER_VERSION` | `"1.2.0"` | Pins zsh-in-docker installer version |
-| `build.args.NODE_MAJOR` | `"22"` | Pins Node.js major version for `@playwright/mcp` and `@playwright/cli` |
+| `build.args.NODE_MAJOR` | `"22"` | Pins Node.js major version. Required by `@playwright/mcp` and `@playwright/cli` (pinned to 0.0.61 in the Dockerfile) |
 
 ### Features
 
@@ -650,30 +650,39 @@ RUN curl -4 -fsSL --retry 5 --retry-all-errors \
 
 Node.js is installed from NodeSource for two npm packages:
 `@playwright/mcp` (the MCP server for Claude Code browser automation) and
-`@playwright/cli` (token-efficient browser skills). The Python `playwright-mcp`
-package (v0.1.0) hardcodes `headless=False`, so we use the mature npm version.
+`@playwright/cli` (token-efficient browser skills), both pinned to **0.0.61**
+so they use **chromium-1208** — the same revision as pixi's stable playwright
+1.58.0. This lets all three share a single Chromium binary. The Python
+`playwright-mcp` package (v0.1.0) hardcodes `headless=False`, so we use the
+mature npm version.
 
-### Playwright + Chromium (pixi-managed)
+### Playwright + Chromium
 
 ```dockerfile
 COPY pyproject.toml pixi.lock* /workspace/
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/vscode/.cache/ms-playwright
 RUN cd /workspace && pixi install && \
-    .pixi/envs/default/bin/playwright install --with-deps chromium && \
-    chown -R vscode:vscode /home/vscode/.cache /workspace/.pixi
+    chown -R vscode:vscode /workspace/.pixi
+
+RUN npm install -g @playwright/mcp@0.0.61 @playwright/cli@0.0.61
+
+RUN .pixi/envs/default/bin/playwright install --with-deps chromium && \
+    chown -R vscode:vscode /home/vscode/.cache
 ```
 
 Pixi manages the Python environment including `pytest-playwright` (which pulls in
 the `playwright` Python library). `pixi install` reads `pyproject.toml` and
-creates the environment at `/workspace/.pixi`. The pixi-installed Playwright
-installs Chromium and system dependencies in one step. `--with-deps` runs
-`apt-get` internally to install Chromium's ~30 shared libraries, fonts, and xvfb.
+creates the environment at `/workspace/.pixi`.
 
-The npm `@playwright/mcp` also installs its own Chromium revision via its bundled
-Playwright. Both coexist in `~/.cache/ms-playwright/` — each version auto-detects
-the revision it needs. The `conftest.py` browser fixture uses
-`playwright.chromium.launch(headless=True)` which auto-resolves the matching
-Chromium for the pixi-installed version.
+All three Playwright consumers — pixi's `playwright` 1.58.0, `@playwright/mcp`
+0.0.61, and `@playwright/cli` 0.0.61 — use the same **chromium-1208** revision.
+By pinning the npm packages to 0.0.61, a single `playwright install --with-deps
+chromium` satisfies all of them. This downloads one Chromium binary (~300 MB)
+and runs `apt-get` once for system dependencies (fonts, shared libs, xvfb),
+instead of the two separate installs that unpinned versions would require.
+
+The `conftest.py` browser fixture uses `playwright.chromium.launch(headless=True)`
+which auto-resolves the matching Chromium for the pixi-installed version.
 
 The `chown` fixes ownership of `.cache` and `.pixi` (created as root during
 build) so the `vscode` user owns them when Docker copies to empty volumes on

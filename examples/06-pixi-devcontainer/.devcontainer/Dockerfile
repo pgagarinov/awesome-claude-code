@@ -87,27 +87,27 @@ RUN mkdir -p /workspace /home/vscode/.claude && \
 
 WORKDIR /workspace
 
-# Install pixi environment and Playwright Chromium at build time.
+# Install pixi environment at build time.
 # pixi install reads pyproject.toml and creates .pixi/envs/default/.
-# playwright install --with-deps chromium installs the browser binary +
-# all system dependencies (fonts, shared libraries, xvfb) via apt-get.
-# chown ensures the vscode user owns both directories when Docker copies
-# them to empty volumes on first mount.
 COPY pyproject.toml pixi.lock* /workspace/
 COPY src/ /workspace/src/
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/vscode/.cache/ms-playwright
 RUN cd /workspace && pixi install && \
-    .pixi/envs/default/bin/playwright install --with-deps chromium && \
-    chown -R vscode:vscode /home/vscode/.cache /workspace/.pixi
+    chown -R vscode:vscode /workspace/.pixi
 
 # Install Playwright MCP server and CLI globally.
 # @playwright/mcp  — MCP server for Claude Code browser automation (npx @playwright/mcp)
 # @playwright/cli  — token-efficient browser skills (playwright-cli install --skills)
-# The MCP package bundles its own Playwright; we use that to install Chromium so the
-# browser revision matches what the MCP server expects at runtime.
-RUN npm install -g @playwright/mcp @playwright/cli \
-  && /usr/lib/node_modules/@playwright/mcp/node_modules/.bin/playwright install --with-deps chromium \
-  && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Both pinned to 0.0.61 which uses chromium-1208 — the same revision as pixi's
+# stable playwright 1.58.0, so all three share a single Chromium binary.
+RUN npm install -g @playwright/mcp@0.0.61 @playwright/cli@0.0.61
+
+# Install Chromium and its system dependencies (fonts, shared libs, xvfb) once.
+# All three Playwright installations (pixi, @playwright/mcp, @playwright/cli)
+# use chromium-1208, so a single install satisfies all of them.
+# chown ensures the vscode user owns .cache when Docker copies to empty volumes.
+RUN .pixi/envs/default/bin/playwright install --with-deps chromium && \
+    chown -R vscode:vscode /home/vscode/.cache
 
 # Switch to non-root user for all subsequent commands
 USER vscode
